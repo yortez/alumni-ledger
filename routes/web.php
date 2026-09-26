@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\GraduateController;
+use App\Http\Controllers\Admin\SurveyController as AdminSurveyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,9 +25,14 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+    Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
+    Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
+    Route::post('/surveys/{survey}/responses', [SurveyController::class, 'storeResponse'])->name('surveys.responses.store');
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
+    Route::resource('announcements', AnnouncementController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('surveys', AdminSurveyController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::get('/graduates', [GraduateController::class, 'index'])->name('graduates.index');
     Route::post('/graduates', [GraduateController::class, 'store'])->name('graduates.store');
     Route::post('/graduates/import', [GraduateController::class, 'import'])->name('graduates.import');
