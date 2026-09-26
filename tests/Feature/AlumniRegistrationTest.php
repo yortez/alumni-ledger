@@ -174,6 +174,38 @@ it('allows administrators to view applicant details', function () {
         ->assertSee('Northline Group');
 });
 
+it('lets administrators edit graduate records in the master list', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+    $graduate = Graduate::query()->create([
+        'student_number' => '2021-1987',
+        'name' => 'Avery Chen',
+        'program' => 'Biology',
+        'graduation_year' => 2021,
+    ]);
+
+    $this->actingAs($admin)
+        ->get("/admin/graduates/{$graduate->id}/edit")
+        ->assertOk()
+        ->assertSee('Edit graduate');
+
+    $this->actingAs($admin)
+        ->patch("/admin/graduates/{$graduate->id}", [
+            'student_number' => '2021-1987',
+            'name' => 'Avery Chen Jr.',
+            'program' => 'Environmental Science',
+            'graduation_year' => 2022,
+        ])
+        ->assertRedirectToRoute('admin.graduates.index');
+
+    $this->assertDatabaseHas('graduates', [
+        'id' => $graduate->id,
+        'name' => 'Avery Chen Jr.',
+        'program' => 'Environmental Science',
+        'graduation_year' => 2022,
+    ]);
+});
+
 it('imports valid graduate records from a CSV for an administrator', function () {
     $admin = User::factory()->create();
     $admin->forceFill(['is_admin' => true])->save();

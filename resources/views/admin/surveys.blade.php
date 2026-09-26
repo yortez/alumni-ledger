@@ -60,6 +60,7 @@
                         </div>
                         <p class="mt-3 text-xs text-muted">{{ count($survey->questions) }} questions{{ $survey->closes_at ? ' · Closes '.$survey->closes_at->format('M j, Y g:i A') : '' }}</p>
                         <div class="mt-5 flex flex-wrap gap-4 border-t border-line pt-4">
+                            <a class="text-sm font-semibold text-forest underline underline-offset-4" href="{{ route('admin.surveys.edit', $survey) }}">Edit</a>
                             <a class="text-sm font-semibold text-forest underline underline-offset-4" href="{{ route('admin.surveys.show', $survey) }}">View responses ({{ $survey->responses_count }})</a>
                             <form method="POST" action="{{ route('admin.surveys.update', $survey) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="{{ $survey->is_active ? 'draft' : 'active' }}"><button class="text-sm font-semibold text-forest underline underline-offset-4" type="submit">{{ $survey->is_active ? 'Close survey' : 'Reopen survey' }}</button></form>
                             <form method="POST" action="{{ route('admin.surveys.destroy', $survey) }}">@csrf @method('DELETE')<button class="text-sm font-medium text-terracotta underline underline-offset-4" type="submit">Delete</button></form>

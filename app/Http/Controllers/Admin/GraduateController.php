@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class GraduateController extends Controller
@@ -49,6 +50,13 @@ class GraduateController extends Controller
         ]);
     }
 
+    public function edit(Graduate $graduate): View
+    {
+        return view('admin.graduate-edit', [
+            'graduate' => $graduate,
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -61,6 +69,20 @@ class GraduateController extends Controller
         Graduate::query()->create($validated);
 
         return back()->with('status', 'Graduate added to the master list.');
+    }
+
+    public function update(Request $request, Graduate $graduate): RedirectResponse
+    {
+        $validated = $request->validate([
+            'student_number' => ['required', 'string', 'max:64', Rule::unique('graduates', 'student_number')->ignore($graduate->id)],
+            'name' => ['required', 'string', 'max:255'],
+            'program' => ['nullable', 'string', 'max:255'],
+            'graduation_year' => ['nullable', 'integer', 'between:1900,2100'],
+        ]);
+
+        $graduate->update($validated);
+
+        return redirect()->route('admin.graduates.index')->with('status', 'Graduate record updated.');
     }
 
     public function import(Request $request): RedirectResponse

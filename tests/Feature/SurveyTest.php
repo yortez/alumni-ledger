@@ -131,6 +131,40 @@ it('forbids alumni from creating surveys', function () {
     $this->assertDatabaseCount('surveys', 0);
 });
 
+it('lets administrators edit a survey', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+    $survey = Survey::query()->create([
+        'title' => 'Community priorities',
+        'description' => 'Old description.',
+        'questions' => ['What should we improve?'],
+        'target_programs' => [],
+        'target_graduation_years' => [],
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($admin)
+        ->get("/admin/surveys/{$survey->id}/edit")
+        ->assertOk()
+        ->assertSee('Edit survey');
+
+    $this->actingAs($admin)
+        ->patch("/admin/surveys/{$survey->id}", [
+            'title' => 'Updated community priorities',
+            'description' => 'New description.',
+            'questions_text' => "What should we improve?\nAnything else?",
+            'status' => 'active',
+        ])
+        ->assertRedirectToRoute('admin.surveys.index');
+
+    $this->assertDatabaseHas('surveys', [
+        'id' => $survey->id,
+        'title' => 'Updated community priorities',
+        'description' => 'New description.',
+    ]);
+    expect($survey->fresh()->questions)->toBe(['What should we improve?', 'Anything else?']);
+});
+
 it('lets administrators review responses with respondent identity', function () {
     $admin = User::factory()->create();
     $admin->forceFill(['is_admin' => true])->save();

@@ -19,6 +19,13 @@ class JobController extends Controller
         ]);
     }
 
+    public function edit(Job $job): View
+    {
+        return view('admin.job-edit', [
+            'job' => $job,
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -42,12 +49,33 @@ class JobController extends Controller
     public function update(Request $request, Job $job): RedirectResponse
     {
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['draft', 'published'])],
+            'title' => ['sometimes', 'required', 'string', 'max:180'],
+            'company' => ['sometimes', 'required', 'string', 'max:180'],
+            'location' => ['sometimes', 'required', 'string', 'max:180'],
+            'employment_type' => ['sometimes', 'required', 'string', 'max:80'],
+            'description' => ['sometimes', 'required', 'string', 'max:10000'],
+            'requirements' => ['nullable', 'string', 'max:10000'],
+            'application_deadline' => ['nullable', 'date', 'after_or_equal:today'],
+            'status' => ['sometimes', 'required', Rule::in(['draft', 'published'])],
         ]);
 
-        $job->update(['status' => $validated['status']]);
+        $job->fill([
+            'title' => $validated['title'] ?? $job->title,
+            'company' => $validated['company'] ?? $job->company,
+            'location' => $validated['location'] ?? $job->location,
+            'employment_type' => $validated['employment_type'] ?? $job->employment_type,
+            'description' => $validated['description'] ?? $job->description,
+            'requirements' => $validated['requirements'] ?? $job->requirements,
+            'application_deadline' => $validated['application_deadline'] ?? $job->application_deadline,
+        ]);
 
-        return back()->with('status', 'Job posting status updated.');
+        if (array_key_exists('status', $validated)) {
+            $job->status = $validated['status'];
+        }
+
+        $job->save();
+
+        return redirect()->route('admin.jobs.index')->with('status', 'Job posting updated.');
     }
 
     public function destroy(Job $job): RedirectResponse

@@ -24,6 +24,13 @@ class AnnouncementController extends Controller
         ]);
     }
 
+    public function edit(Announcement $announcement): View
+    {
+        return view('admin.announcement-edit', [
+            'announcement' => $announcement,
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -53,15 +60,27 @@ class AnnouncementController extends Controller
     public function update(Request $request, Announcement $announcement): RedirectResponse
     {
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['draft', 'published'])],
+            'title' => ['sometimes', 'required', 'string', 'max:180'],
+            'body' => ['sometimes', 'required', 'string', 'max:10000'],
+            'status' => ['sometimes', 'required', Rule::in(['draft', 'published'])],
         ]);
 
-        $announcement->published_at = $validated['status'] === 'published'
-            ? ($announcement->published_at ?? now())
-            : null;
+        if (array_key_exists('title', $validated) || array_key_exists('body', $validated)) {
+            $announcement->fill([
+                'title' => $validated['title'] ?? $announcement->title,
+                'body' => $validated['body'] ?? $announcement->body,
+            ]);
+        }
+
+        if (array_key_exists('status', $validated)) {
+            $announcement->published_at = $validated['status'] === 'published'
+                ? ($announcement->published_at ?? now())
+                : null;
+        }
+
         $announcement->save();
 
-        return back()->with('status', 'Announcement status updated.');
+        return redirect()->route('admin.announcements.index')->with('status', 'Announcement updated.');
     }
 
     public function destroy(Announcement $announcement): RedirectResponse

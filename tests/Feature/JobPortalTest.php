@@ -30,6 +30,45 @@ it('allows an administrator to create and publish a job', function () {
     ]);
 });
 
+it('lets administrators edit a published job posting', function () {
+    $admin = User::factory()->create(['is_admin' => true]);
+    $job = Job::factory()->for($admin, 'creator')->create([
+        'title' => 'Program Coordinator',
+        'company' => 'Former Org',
+        'location' => 'Remote',
+        'employment_type' => 'Contract',
+        'description' => 'Old description.',
+        'requirements' => 'Old requirements.',
+        'status' => 'draft',
+    ]);
+
+    $this->actingAs($admin)
+        ->get("/admin/jobs/{$job->id}/edit")
+        ->assertOk()
+        ->assertSee('Edit job posting');
+
+    $this->actingAs($admin)
+        ->patch("/admin/jobs/{$job->id}", [
+            'title' => 'Senior Program Coordinator',
+            'company' => 'Updated Org',
+            'location' => 'Boston, MA',
+            'employment_type' => 'Full-time',
+            'description' => 'Updated description.',
+            'requirements' => 'Updated requirements.',
+            'application_deadline' => now()->addWeek()->toDateString(),
+            'status' => 'published',
+        ])
+        ->assertRedirectToRoute('admin.jobs.index');
+
+    $this->assertDatabaseHas('job_postings', [
+        'id' => $job->id,
+        'title' => 'Senior Program Coordinator',
+        'company' => 'Updated Org',
+        'location' => 'Boston, MA',
+        'status' => 'published',
+    ]);
+});
+
 it('only shows published and current jobs to alumni', function () {
     $user = User::factory()->create();
     Job::factory()->for($user, 'creator')->create(['title' => 'Open role', 'status' => 'published']);

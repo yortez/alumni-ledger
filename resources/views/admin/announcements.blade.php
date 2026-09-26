@@ -33,6 +33,7 @@
                         </div>
                         <p class="mt-4 whitespace-pre-line break-words text-sm leading-6 text-muted">{{ $announcement->body }}</p>
                         <div class="mt-5 flex flex-wrap items-center gap-3 border-t border-line pt-4">
+                            <a href="{{ route('admin.announcements.edit', $announcement) }}" class="text-sm font-semibold text-forest underline underline-offset-4">Edit</a>
                             <form method="POST" action="{{ route('admin.announcements.update', $announcement) }}">
                                 @csrf
                                 @method('PATCH')

@@ -91,6 +91,34 @@ it('escapes announcement markup when displaying it on the alumni dashboard', fun
         ->assertDontSee('<script>alert("x")</script>', false);
 });
 
+it('lets administrators edit an announcement', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+    $announcement = Announcement::query()->create([
+        'title' => 'Career fair',
+        'body' => 'Registration opens Monday.',
+    ]);
+
+    $this->actingAs($admin)
+        ->get("/admin/announcements/{$announcement->id}/edit")
+        ->assertOk()
+        ->assertSee('Edit announcement');
+
+    $this->actingAs($admin)
+        ->patch("/admin/announcements/{$announcement->id}", [
+            'title' => 'Career fair updated',
+            'body' => 'Registration opens Tuesday morning.',
+            'status' => 'published',
+        ])
+        ->assertRedirectToRoute('admin.announcements.index');
+
+    $this->assertDatabaseHas('announcements', [
+        'id' => $announcement->id,
+        'title' => 'Career fair updated',
+        'body' => 'Registration opens Tuesday morning.',
+    ]);
+});
+
 it('publishes drafts when an administrator changes their status', function () {
     $admin = User::factory()->create();
     $admin->forceFill(['is_admin' => true])->save();
