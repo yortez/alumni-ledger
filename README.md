@@ -78,3 +78,6 @@ Do not commit `.env`, credentials, generated secrets, or other environment-speci
 ## License
 
 This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Create admin
+php artisan alumni:make-admin admin@example.edu
