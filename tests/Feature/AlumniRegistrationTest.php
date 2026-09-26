@@ -137,6 +137,43 @@ it('shows profile completion and employment details to administrators', function
         ->assertSee('Civic Lab');
 });
 
+it('allows administrators to view applicant details', function () {
+    $graduate = Graduate::query()->create([
+        'student_number' => '2012-7654',
+        'name' => 'Jordan Smith',
+        'program' => 'Business Administration',
+        'graduation_year' => 2012,
+    ]);
+    $applicant = User::factory()->create([
+        'name' => 'Jordan Smith',
+        'student_number' => '2012-7654',
+        'username' => 'jordansmith',
+        'email' => 'jordan@example.com',
+    ]);
+    $applicant->profile()->create([
+        'phone' => '+1 555 0102',
+        'job_title' => 'Operations Manager',
+        'employer' => 'Northline Group',
+        'industry' => 'Logistics',
+        'employment_status' => 'employed',
+        'city' => 'Seattle',
+        'country' => 'United States',
+        'linkedin_url' => 'https://www.linkedin.com/in/jordan-smith',
+        'bio' => 'Focused on operational growth.',
+        'completed_at' => now(),
+    ]);
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)
+        ->get('/admin/graduates/'.$graduate->getKey())
+        ->assertOk()
+        ->assertSee('Applicant details')
+        ->assertSee('Jordan Smith')
+        ->assertSee('Operations Manager')
+        ->assertSee('Northline Group');
+});
+
 it('imports valid graduate records from a CSV for an administrator', function () {
     $admin = User::factory()->create();
     $admin->forceFill(['is_admin' => true])->save();

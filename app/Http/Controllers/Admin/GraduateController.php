@@ -38,6 +38,17 @@ class GraduateController extends Controller
         ]);
     }
 
+    public function show(Graduate $graduate): View
+    {
+        $graduate->load(['user', 'user.profile']);
+
+        return view('admin.graduate-detail', [
+            'graduate' => $graduate,
+            'applicant' => $graduate->user,
+            'profile' => $graduate->user?->profile,
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([

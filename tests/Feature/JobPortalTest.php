@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Graduate;
 use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\User;
@@ -90,4 +91,56 @@ it('allows a profiled alumni to apply once per job', function () {
 
     $duplicateResponse->assertSessionHasErrors('application');
     expect(JobApplication::query()->whereBelongsTo($job)->whereBelongsTo($user)->count())->toBe(1);
+});
+
+it('lets administrators review a candidate profile and update the application status', function () {
+    $admin = User::factory()->create(['is_admin' => true]);
+    $applicant = User::factory()->create([
+        'name' => 'Jamie Patel',
+        'student_number' => '2019-2210',
+        'username' => 'jamiepatel',
+        'email' => 'jamie@example.com',
+    ]);
+    $applicant->profile()->create([
+        'phone' => '+1 555 0107',
+        'job_title' => 'Research Associate',
+        'employer' => 'Civic Lab',
+        'industry' => 'Public policy',
+        'employment_status' => 'employed',
+        'city' => 'Boston',
+        'country' => 'United States',
+        'completed_at' => now(),
+    ]);
+    Graduate::query()->create([
+        'student_number' => '2019-2210',
+        'name' => 'Jamie Patel',
+    ]);
+    $job = Job::factory()->for($admin, 'creator')->create(['title' => 'Program Coordinator', 'status' => 'published']);
+    $application = JobApplication::factory()->for($job, 'job')->for($applicant, 'user')->create([
+        'status' => 'submitted',
+        'cover_letter' => 'I am excited to contribute to your program team.',
+    ]);
+
+    $indexResponse = $this->actingAs($admin)->get(route('admin.jobs.applications.index', $job));
+
+    $indexResponse->assertOk()
+        ->assertSee('View profile');
+
+    $detailResponse = $this->actingAs($admin)->get(route('admin.jobs.applications.show', [$job, $application]));
+
+    $detailResponse->assertOk()
+        ->assertSee('Applicant profile')
+        ->assertSee('Research Associate')
+        ->assertSee('Civic Lab');
+
+    $updateResponse = $this->actingAs($admin)->patch(route('admin.jobs.applications.update', [$job, $application]), [
+        'status' => 'interview_scheduled',
+    ]);
+
+    $updateResponse->assertRedirect(route('admin.jobs.applications.index', $job))
+        ->assertSessionHas('status', 'Application status updated to Interview scheduled.');
+    $this->assertDatabaseHas('job_applications', [
+        'id' => $application->id,
+        'status' => 'interview_scheduled',
+    ]);
 });

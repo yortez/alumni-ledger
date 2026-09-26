@@ -39,6 +39,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('announcements', AnnouncementController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('surveys', AdminSurveyController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::get('/graduates', [GraduateController::class, 'index'])->name('graduates.index');
+    Route::get('/graduates/{graduate}', [GraduateController::class, 'show'])->name('graduates.show');
     Route::post('/graduates', [GraduateController::class, 'store'])->name('graduates.store');
     Route::post('/graduates/import', [GraduateController::class, 'import'])->name('graduates.import');
     Route::get('/jobs', [App\Http\Controllers\Admin\JobController::class, 'index'])->name('jobs.index');
@@ -46,4 +47,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('/jobs/{job}', [App\Http\Controllers\Admin\JobController::class, 'update'])->name('jobs.update');
     Route::delete('/jobs/{job}', [App\Http\Controllers\Admin\JobController::class, 'destroy'])->name('jobs.destroy');
     Route::get('/jobs/{job}/applications', [App\Http\Controllers\Admin\JobApplicationController::class, 'index'])->name('jobs.applications.index');
+    Route::get('/jobs/{job}/applications/{application}', [App\Http\Controllers\Admin\JobApplicationController::class, 'show'])->name('jobs.applications.show');
+    Route::patch('/jobs/{job}/applications/{application}', [App\Http\Controllers\Admin\JobApplicationController::class, 'update'])->name('jobs.applications.update');
 });
