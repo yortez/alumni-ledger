@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Graduate;
 use App\Models\Job;
 use App\Models\JobApplication;
+use App\Notifications\JobApplicationStatusUpdated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -60,6 +61,8 @@ class JobApplicationController extends Controller
         ]);
 
         $application->update(['status' => $validated['status']]);
+
+        $application->user->notify(new JobApplicationStatusUpdated($job, $application));
 
         return redirect()->route('admin.jobs.applications.index', $job)
             ->with('status', 'Application status updated to '.self::STATUS_LABELS[$validated['status']].'.');

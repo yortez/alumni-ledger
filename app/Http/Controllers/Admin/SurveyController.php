@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Graduate;
 use App\Models\Survey;
+use App\Models\User;
+use App\Notifications\SurveyPublished;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -73,6 +75,14 @@ class SurveyController extends Controller
         $survey->creator()->associate($request->user());
         $survey->save();
 
+        if ($validated['status'] === 'active') {
+            User::query()->where('is_admin', false)->each(function (User $user) use ($survey): void {
+                if ($survey->availableTo($user)->whereKey($survey->id)->exists()) {
+                    $user->notify(new SurveyPublished($survey));
+                }
+            });
+        }
+
         return redirect()->route('admin.surveys.index')->with('status', 'Survey created.');
     }
 
@@ -83,6 +93,14 @@ class SurveyController extends Controller
         ]);
 
         $survey->update(['is_active' => $validated['status'] === 'active']);
+
+        if ($validated['status'] === 'active') {
+            User::query()->where('is_admin', false)->each(function (User $user) use ($survey): void {
+                if ($survey->availableTo($user)->whereKey($survey->id)->exists()) {
+                    $user->notify(new SurveyPublished($survey));
+                }
+            });
+        }
 
         return back()->with('status', 'Survey status updated.');
     }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\User;
+use App\Notifications\AnnouncementPublished;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -37,6 +39,13 @@ class AnnouncementController extends Controller
         $announcement->creator()->associate($request->user());
         $announcement->published_at = $validated['status'] === 'published' ? now() : null;
         $announcement->save();
+
+        if ($validated['status'] === 'published') {
+            User::query()->where('id', '!=', $request->user()->id)
+                ->each(function (User $user) use ($announcement): void {
+                    $user->notify(new AnnouncementPublished($announcement));
+                });
+        }
 
         return redirect()->route('admin.announcements.index')->with('status', 'Announcement created.');
     }

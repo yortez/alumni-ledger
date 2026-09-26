@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
     Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
