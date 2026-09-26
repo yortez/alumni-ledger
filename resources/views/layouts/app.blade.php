@@ -17,6 +17,7 @@
             @auth
                 <nav class="flex items-center gap-2 sm:gap-5">
                     @if (auth()->user()->is_admin)
+                        <a href="{{ route('dashboard') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Overview</a>
                         @if (auth()->user()->hasAdminRole(\App\Enums\AdminRole::RecordsAdmin))<a href="{{ route('admin.graduates.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Graduate list</a>@endif
                         @if (auth()->user()->hasAdminRole(\App\Enums\AdminRole::ContentAdmin))<a href="{{ route('admin.announcements.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Announcements</a><a href="{{ route('admin.surveys.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Surveys</a><a href="{{ route('admin.jobs.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Jobs</a>@endif
                         @if (auth()->user()->hasAdminRole(\App\Enums\AdminRole::SuperAdmin))<a href="{{ route('admin.users.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Administrators</a>@endif
