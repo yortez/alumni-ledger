@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use App\Enums\AdminRole;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -35,22 +35,46 @@ class User extends Authenticatable
         return $this->hasMany(JobApplication::class);
     }
 
+    public function assignedAdminRole(): BelongsTo
+    {
+        return $this->belongsTo(AdminRole::class, 'role_id');
+    }
+
     public function adminRole(): ?AdminRole
     {
         if (! $this->is_admin) {
             return null;
         }
 
-        return $this->admin_role === null
-            ? AdminRole::SuperAdmin
-            : AdminRole::tryFrom($this->admin_role);
+        if ($this->role_id !== null) {
+            return $this->relationLoaded('assignedAdminRole')
+                ? $this->getRelation('assignedAdminRole')
+                : $this->assignedAdminRole()->first();
+        }
+
+        return AdminRole::query()
+            ->where('type', $this->admin_role ?? 'super_admin')
+            ->first();
     }
 
-    public function hasAdminRole(AdminRole ...$roles): bool
+    public function hasAdminPermission(string ...$permissions): bool
     {
-        $adminRole = $this->adminRole();
+        if (! $this->is_admin) {
+            return false;
+        }
 
-        return $adminRole === AdminRole::SuperAdmin || in_array($adminRole, $roles, true);
+        return $this->adminRole()?->hasPermission(...$permissions) ?? false;
+    }
+
+    /**
+     * @param  list<string>  $permissions
+     */
+    public function canDelegateAdminPermissions(array $permissions): bool
+    {
+        $assignedPermissions = $this->adminRole()?->permissions ?? [];
+
+        return in_array('*', $assignedPermissions, true)
+            || array_diff($permissions, $assignedPermissions) === [];
     }
 
     /**

@@ -9,6 +9,7 @@
             <p class="eyebrow">Administration</p>
             <h1 class="font-display mt-3 text-4xl sm:text-5xl">Administrator access</h1>
         </div>
+        <a href="{{ route('admin.roles.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Role definitions</a>
     </div>
 
     <div class="mt-8 grid items-start gap-8 lg:grid-cols-[0.8fr_1.2fr]">
@@ -42,13 +43,13 @@
                     <input id="password_confirmation" name="password_confirmation" type="password" required>
                 </div>
                 <div class="field">
-                    <label for="role">Role</label>
-                    <select id="role" name="role" required>
+                    <label for="role_id">Role</label>
+                    <select id="role_id" name="role_id" required>
                         @foreach ($roles as $role)
-                            <option value="{{ $role->value }}" @selected(old('role', 'content_admin') === $role->value)>{{ $role->label() }}</option>
+                            <option value="{{ $role->id }}" @selected((int) old('role_id', $roles->firstWhere('type', 'content_admin')?->id) === $role->id)>{{ $role->name }}</option>
                         @endforeach
                     </select>
-                    @error('role')<p class="field-error">{{ $message }}</p>@enderror
+                    @error('role_id')<p class="field-error">{{ $message }}</p>@enderror
                 </div>
                 <button type="submit" class="bg-forest px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-forest-dark">Create administrator</button>
             </form>
@@ -67,7 +68,7 @@
                                 <h3 class="break-words font-display text-xl">{{ $admin->name }}</h3>
                                 <p class="mt-1 break-all text-sm text-muted">{{ $admin->username }} · {{ $admin->email }}</p>
                             </div>
-                            <span class="text-xs font-semibold uppercase tracking-wider text-forest">{{ $admin->adminRole()?->label() ?? 'Unassigned' }}</span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-forest">{{ $admin->adminRole()?->name ?? 'Unassigned' }}</span>
                         </div>
                         @if ($admin->id !== auth()->id())
                             <form method="POST" action="{{ route('admin.users.update', $admin) }}" class="mt-5 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-end">
@@ -75,19 +76,19 @@
                                 @method('PATCH')
                                 <div class="field flex-1">
                                     <label for="role-{{ $admin->id }}">Assign role</label>
-                                    <select id="role-{{ $admin->id }}" name="role" required>
+                                    <select id="role-{{ $admin->id }}" name="role_id" required>
                                         @foreach ($roles as $role)
-                                            <option value="{{ $role->value }}" @selected($admin->adminRole() === $role)>{{ $role->label() }}</option>
+                                            <option value="{{ $role->id }}" @selected($admin->adminRole()?->id === $role->id)>{{ $role->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <button type="submit" class="border border-forest px-4 py-3 text-sm font-semibold text-forest transition hover:bg-mint">Save role</button>
                             </form>
-                            @error('role')<p class="field-error mt-2">{{ $message }}</p>@enderror
+                            @error('role_id')<p class="field-error mt-2">{{ $message }}</p>@enderror
                         @else
                             <p class="mt-4 border-t border-line pt-4 text-xs text-muted">Your own role cannot be changed here.</p>
                         @endif
-                        <p class="mt-3 text-xs leading-5 text-muted">{{ $admin->adminRole()?->description() ?? 'No module access is assigned.' }}</p>
+                        <p class="mt-3 text-xs leading-5 text-muted">{{ $admin->adminRole()?->description ?? 'No module access is assigned.' }}</p>
                     </article>
                 @empty
                     <p class="border border-dashed border-line px-5 py-12 text-center text-sm text-muted">No administrator accounts found.</p>

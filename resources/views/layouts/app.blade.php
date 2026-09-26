@@ -13,14 +13,17 @@
 <body class="min-h-screen bg-paper text-ink">
     <header class="border-b border-line bg-paper/95">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-            <a href="{{ route('home') }}" class="flex items-center gap-3" aria-label="Alumni Ledger home"><span class="grid size-9 place-items-center bg-forest text-base font-semibold text-white">A</span><span class="font-display text-lg">Alumni Ledger</span></a>
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-3" aria-label="Alumni Ledger home"><span class="grid size-9 place-items-center bg-forest text-base font-semibold text-white">A</span><span class="font-display text-lg">Alumni Ledger</span></a>
             @auth
                 <nav class="flex items-center gap-2 sm:gap-5">
                     @if (auth()->user()->is_admin)
                         <a href="{{ route('dashboard') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Overview</a>
-                        @if (auth()->user()->hasAdminRole(\App\Enums\AdminRole::RecordsAdmin))<a href="{{ route('admin.graduates.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Graduate list</a>@endif
-                        @if (auth()->user()->hasAdminRole(\App\Enums\AdminRole::ContentAdmin))<a href="{{ route('admin.announcements.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Announcements</a><a href="{{ route('admin.surveys.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Surveys</a><a href="{{ route('admin.jobs.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Jobs</a>@endif
-                        @if (auth()->user()->hasAdminRole(\App\Enums\AdminRole::SuperAdmin))<a href="{{ route('admin.users.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Administrators</a>@endif
+                        @if (auth()->user()->hasAdminPermission('graduates'))<a href="{{ route('admin.graduates.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Graduate list</a>@endif
+                        @if (auth()->user()->hasAdminPermission('announcements'))<a href="{{ route('admin.announcements.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Announcements</a>@endif
+                        @if (auth()->user()->hasAdminPermission('surveys'))<a href="{{ route('admin.surveys.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Surveys</a>@endif
+                        @if (auth()->user()->hasAdminPermission('jobs'))<a href="{{ route('admin.jobs.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Jobs</a>@endif
+                        @if (auth()->user()->hasAdminPermission('manage_admins'))<a href="{{ route('admin.users.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Administrators</a>@endif
+                        @if (auth()->user()->hasAdminPermission('manage_roles'))<a href="{{ route('admin.roles.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Roles</a>@endif
                     @else
                         <a href="{{ route('dashboard') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">My dashboard</a><a href="{{ route('profile.edit') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">My profile</a><a href="{{ route('notifications.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Notifications @if (auth()->user()->unreadNotifications->count() > 0)<span class="ml-1 rounded-full bg-forest px-1.5 py-0.5 text-[10px] font-bold text-white">{{ auth()->user()->unreadNotifications->count() }}</span>@endif</a><a href="{{ route('surveys.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Surveys</a><a href="{{ route('jobs.index') }}" class="hidden text-sm font-medium text-muted hover:text-ink sm:block">Jobs</a>
                     @endif

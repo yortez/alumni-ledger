@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AdminRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -9,6 +10,7 @@ uses(RefreshDatabase::class);
 it('lets a super admin create an administrator account with a role', function () {
     $superAdmin = User::factory()->create();
     $superAdmin->forceFill(['is_admin' => true])->save();
+    $recordsRole = AdminRole::query()->where('type', 'records_admin')->firstOrFail();
 
     $this->actingAs($superAdmin)
         ->get('/admin/users')
@@ -23,7 +25,7 @@ it('lets a super admin create an administrator account with a role', function ()
             'email' => 'casey.admin@example.com',
             'password' => 'a-secure-password',
             'password_confirmation' => 'a-secure-password',
-            'role' => 'records_admin',
+            'role_id' => $recordsRole->id,
         ])
         ->assertRedirectToRoute('admin.users.index');
 
@@ -33,6 +35,7 @@ it('lets a super admin create an administrator account with a role', function ()
         'email' => 'casey.admin@example.com',
         'is_admin' => true,
         'admin_role' => 'records_admin',
+        'role_id' => $recordsRole->id,
     ]);
     expect(Hash::check('a-secure-password', User::query()->where('email', 'casey.admin@example.com')->value('password')))->toBeTrue();
 });
@@ -85,7 +88,7 @@ it('lets a super admin change another administrator role but not their own', fun
     $recordsAdmin->forceFill(['is_admin' => true, 'admin_role' => 'records_admin'])->save();
 
     $this->actingAs($superAdmin)
-        ->patch("/admin/users/{$recordsAdmin->id}", ['role' => 'content_admin'])
+        ->patch("/admin/users/{$recordsAdmin->id}", ['role_id' => AdminRole::query()->where('type', 'content_admin')->value('id')])
         ->assertRedirectToRoute('admin.users.index');
 
     expect($recordsAdmin->fresh()->admin_role)->toBe('content_admin');
@@ -103,7 +106,7 @@ it('keeps the acting super administrator in place when another super administrat
     $otherSuperAdmin->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
 
     $this->actingAs($superAdmin)
-        ->patch("/admin/users/{$otherSuperAdmin->id}", ['role' => 'records_admin'])
+        ->patch("/admin/users/{$otherSuperAdmin->id}", ['role_id' => AdminRole::query()->where('type', 'records_admin')->value('id')])
         ->assertRedirectToRoute('admin.users.index');
 
     expect($otherSuperAdmin->fresh()->admin_role)->toBe('records_admin');

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AdminRole;
 use App\Models\User;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -14,9 +15,10 @@ class MakeUserAdmin extends Command
     public function handle(): int
     {
         $user = User::query()->where('email', $this->argument('email'))->first();
+        $superAdminRole = AdminRole::query()->where('type', 'super_admin')->firstOrFail();
 
         if ($user !== null) {
-            $user->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
+            $user->forceFill(['is_admin' => true, 'admin_role' => 'super_admin', 'role_id' => $superAdminRole->id])->save();
             $this->info("{$user->email} can now manage the graduate master list.");
 
             return self::SUCCESS;
@@ -52,7 +54,7 @@ class MakeUserAdmin extends Command
             'password' => $password,
         ]);
 
-        $user->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
+        $user->forceFill(['is_admin' => true, 'admin_role' => 'super_admin', 'role_id' => $superAdminRole->id])->save();
         $this->info("Administrator account created for {$user->email}.");
 
         return self::SUCCESS;

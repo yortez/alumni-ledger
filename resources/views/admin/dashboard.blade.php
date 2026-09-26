@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', $adminRole->label().' dashboard')
+@section('title', $adminRole->name.' dashboard')
 
 @section('content')
 <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:py-14">
     <div class="flex flex-col justify-between gap-6 border-b border-line pb-8 sm:flex-row sm:items-end">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="font-display mt-3 text-4xl sm:text-5xl">{{ $adminRole->label() }} dashboard</h1>
-            <p class="mt-3 max-w-2xl text-sm leading-6 text-muted">{{ $adminRole->description() }}</p>
+            <h1 class="font-display mt-3 text-4xl sm:text-5xl">{{ $adminRole->name }} dashboard</h1>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-muted">{{ $adminRole->description }}</p>
         </div>
         <p class="text-sm text-muted">Signed in as <span class="font-semibold text-ink">{{ auth()->user()->username }}</span></p>
     </div>

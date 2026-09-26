@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\AdminRole;
 use App\Http\Controllers\Controller;
+use App\Models\AdminRole;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdminUserController extends Controller
@@ -16,8 +14,8 @@ class AdminUserController extends Controller
     public function index(): View
     {
         return view('admin.users', [
-            'admins' => User::query()->where('is_admin', true)->orderBy('name')->paginate(20),
-            'roles' => AdminRole::cases(),
+            'admins' => User::query()->where('is_admin', true)->with('assignedAdminRole')->orderBy('name')->paginate(20),
+            'roles' => AdminRole::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -28,8 +26,11 @@ class AdminUserController extends Controller
             'username' => ['required', 'string', 'max:40', 'alpha_dash', 'unique:users,username'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', Rule::in(array_column(AdminRole::cases(), 'value'))],
+            'role_id' => ['required', 'integer', 'exists:admin_roles,id'],
         ]);
+
+        $role = AdminRole::query()->findOrFail($validated['role_id']);
+        abort_unless($request->user()->canDelegateAdminPermissions($role->permissions ?? []), 403);
 
         $admin = User::query()->create([
             'name' => $validated['name'],
@@ -39,7 +40,8 @@ class AdminUserController extends Controller
         ]);
         $admin->forceFill([
             'is_admin' => true,
-            'admin_role' => $validated['role'],
+            'admin_role' => $role->type,
+            'role_id' => $role->id,
         ])->save();
 
         return redirect()->route('admin.users.index')->with('status', 'Administrator account created.');
@@ -51,31 +53,27 @@ class AdminUserController extends Controller
         abort_if($user->is($request->user()), 403);
 
         $validated = $request->validate([
-            'role' => ['required', Rule::in(array_column(AdminRole::cases(), 'value'))],
+            'role_id' => ['required', 'integer', 'exists:admin_roles,id'],
         ]);
-        $newRole = AdminRole::from($validated['role']);
+        $role = AdminRole::query()->findOrFail($validated['role_id']);
+        abort_unless($request->user()->canDelegateAdminPermissions($role->permissions ?? []), 403);
 
-        $updated = DB::transaction(function () use ($newRole, $user): bool {
-            $administrators = User::query()
+        if ($user->hasAdminPermission('manage_roles') && ! $role->hasPermission('manage_roles')) {
+            $anotherRoleManagerExists = User::query()
                 ->where('is_admin', true)
-                ->lockForUpdate()
-                ->get(['id', 'is_admin', 'admin_role']);
-            $superAdminCount = $administrators
-                ->filter(fn (User $administrator): bool => $administrator->adminRole() === AdminRole::SuperAdmin)
-                ->count();
+                ->whereKeyNot($user->id)
+                ->get()
+                ->contains(fn (User $administrator): bool => $administrator->hasAdminPermission('manage_roles'));
 
-            if ($user->adminRole() === AdminRole::SuperAdmin && $newRole !== AdminRole::SuperAdmin && $superAdminCount <= 1) {
-                return false;
+            if (! $anotherRoleManagerExists) {
+                return back()->withErrors(['role_id' => 'At least one administrator with role-management access must remain.']);
             }
-
-            $user->forceFill(['admin_role' => $newRole->value])->save();
-
-            return true;
-        });
-
-        if (! $updated) {
-            return back()->withErrors(['role' => 'At least one super administrator must remain.']);
         }
+
+        $user->forceFill([
+            'admin_role' => $role->type,
+            'role_id' => $role->id,
+        ])->save();
 
         return redirect()->route('admin.users.index')->with('status', 'Administrator role updated.');
     }

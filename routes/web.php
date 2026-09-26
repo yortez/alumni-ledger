@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\GraduateController;
@@ -39,13 +40,20 @@ Route::middleware('auth')->group(function (): void {
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
-    Route::middleware('admin.role:super_admin')->group(function (): void {
+    Route::middleware('admin.permission:manage_admins')->group(function (): void {
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
         Route::patch('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     });
 
-    Route::middleware('admin.role:records_admin')->group(function (): void {
+    Route::middleware('admin.permission:manage_roles')->group(function (): void {
+        Route::get('/roles', [AdminRoleController::class, 'index'])->name('roles.index');
+        Route::post('/roles', [AdminRoleController::class, 'store'])->name('roles.store');
+        Route::patch('/roles/{role}', [AdminRoleController::class, 'update'])->name('roles.update');
+        Route::delete('/roles/{role}', [AdminRoleController::class, 'destroy'])->name('roles.destroy');
+    });
+
+    Route::middleware('admin.permission:graduates')->group(function (): void {
         Route::get('/graduates', [GraduateController::class, 'index'])->name('graduates.index');
         Route::get('/graduates/{graduate}/edit', [GraduateController::class, 'edit'])->name('graduates.edit');
         Route::get('/graduates/{graduate}', [GraduateController::class, 'show'])->name('graduates.show');
@@ -54,11 +62,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         Route::patch('/graduates/{graduate}', [GraduateController::class, 'update'])->name('graduates.update');
     });
 
-    Route::middleware('admin.role:content_admin')->group(function (): void {
+    Route::middleware('admin.permission:announcements')->group(function (): void {
         Route::get('/announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
         Route::resource('announcements', AnnouncementController::class)->only(['index', 'store', 'update', 'destroy']);
+    });
+
+    Route::middleware('admin.permission:surveys')->group(function (): void {
         Route::get('/surveys/{survey}/edit', [AdminSurveyController::class, 'edit'])->name('surveys.edit');
         Route::resource('surveys', AdminSurveyController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+    });
+
+    Route::middleware('admin.permission:jobs')->group(function (): void {
         Route::get('/jobs', [App\Http\Controllers\Admin\JobController::class, 'index'])->name('jobs.index');
         Route::get('/jobs/{job}/edit', [App\Http\Controllers\Admin\JobController::class, 'edit'])->name('jobs.edit');
         Route::post('/jobs', [App\Http\Controllers\Admin\JobController::class, 'store'])->name('jobs.store');
