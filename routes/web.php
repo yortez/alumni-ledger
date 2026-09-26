@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\GraduateController;
 use App\Http\Controllers\Admin\SurveyController as AdminSurveyController;
@@ -38,22 +39,33 @@ Route::middleware('auth')->group(function (): void {
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
-    Route::get('/announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
-    Route::resource('announcements', AnnouncementController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::get('/surveys/{survey}/edit', [AdminSurveyController::class, 'edit'])->name('surveys.edit');
-    Route::resource('surveys', AdminSurveyController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
-    Route::get('/graduates', [GraduateController::class, 'index'])->name('graduates.index');
-    Route::get('/graduates/{graduate}/edit', [GraduateController::class, 'edit'])->name('graduates.edit');
-    Route::get('/graduates/{graduate}', [GraduateController::class, 'show'])->name('graduates.show');
-    Route::post('/graduates', [GraduateController::class, 'store'])->name('graduates.store');
-    Route::post('/graduates/import', [GraduateController::class, 'import'])->name('graduates.import');
-    Route::patch('/graduates/{graduate}', [GraduateController::class, 'update'])->name('graduates.update');
-    Route::get('/jobs', [App\Http\Controllers\Admin\JobController::class, 'index'])->name('jobs.index');
-    Route::get('/jobs/{job}/edit', [App\Http\Controllers\Admin\JobController::class, 'edit'])->name('jobs.edit');
-    Route::post('/jobs', [App\Http\Controllers\Admin\JobController::class, 'store'])->name('jobs.store');
-    Route::patch('/jobs/{job}', [App\Http\Controllers\Admin\JobController::class, 'update'])->name('jobs.update');
-    Route::delete('/jobs/{job}', [App\Http\Controllers\Admin\JobController::class, 'destroy'])->name('jobs.destroy');
-    Route::get('/jobs/{job}/applications', [App\Http\Controllers\Admin\JobApplicationController::class, 'index'])->name('jobs.applications.index');
-    Route::get('/jobs/{job}/applications/{application}', [App\Http\Controllers\Admin\JobApplicationController::class, 'show'])->name('jobs.applications.show');
-    Route::patch('/jobs/{job}/applications/{application}', [App\Http\Controllers\Admin\JobApplicationController::class, 'update'])->name('jobs.applications.update');
+    Route::middleware('admin.role:super_admin')->group(function (): void {
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+        Route::patch('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+    });
+
+    Route::middleware('admin.role:records_admin')->group(function (): void {
+        Route::get('/graduates', [GraduateController::class, 'index'])->name('graduates.index');
+        Route::get('/graduates/{graduate}/edit', [GraduateController::class, 'edit'])->name('graduates.edit');
+        Route::get('/graduates/{graduate}', [GraduateController::class, 'show'])->name('graduates.show');
+        Route::post('/graduates', [GraduateController::class, 'store'])->name('graduates.store');
+        Route::post('/graduates/import', [GraduateController::class, 'import'])->name('graduates.import');
+        Route::patch('/graduates/{graduate}', [GraduateController::class, 'update'])->name('graduates.update');
+    });
+
+    Route::middleware('admin.role:content_admin')->group(function (): void {
+        Route::get('/announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
+        Route::resource('announcements', AnnouncementController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::get('/surveys/{survey}/edit', [AdminSurveyController::class, 'edit'])->name('surveys.edit');
+        Route::resource('surveys', AdminSurveyController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+        Route::get('/jobs', [App\Http\Controllers\Admin\JobController::class, 'index'])->name('jobs.index');
+        Route::get('/jobs/{job}/edit', [App\Http\Controllers\Admin\JobController::class, 'edit'])->name('jobs.edit');
+        Route::post('/jobs', [App\Http\Controllers\Admin\JobController::class, 'store'])->name('jobs.store');
+        Route::patch('/jobs/{job}', [App\Http\Controllers\Admin\JobController::class, 'update'])->name('jobs.update');
+        Route::delete('/jobs/{job}', [App\Http\Controllers\Admin\JobController::class, 'destroy'])->name('jobs.destroy');
+        Route::get('/jobs/{job}/applications', [App\Http\Controllers\Admin\JobApplicationController::class, 'index'])->name('jobs.applications.index');
+        Route::get('/jobs/{job}/applications/{application}', [App\Http\Controllers\Admin\JobApplicationController::class, 'show'])->name('jobs.applications.show');
+        Route::patch('/jobs/{job}/applications/{application}', [App\Http\Controllers\Admin\JobApplicationController::class, 'update'])->name('jobs.applications.update');
+    });
 });

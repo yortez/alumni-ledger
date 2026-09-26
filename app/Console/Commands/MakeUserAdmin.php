@@ -16,7 +16,7 @@ class MakeUserAdmin extends Command
         $user = User::query()->where('email', $this->argument('email'))->first();
 
         if ($user !== null) {
-            $user->forceFill(['is_admin' => true])->save();
+            $user->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
             $this->info("{$user->email} can now manage the graduate master list.");
 
             return self::SUCCESS;
@@ -52,7 +52,7 @@ class MakeUserAdmin extends Command
             'password' => $password,
         ]);
 
-        $user->forceFill(['is_admin' => true])->save();
+        $user->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
         $this->info("Administrator account created for {$user->email}.");
 
         return self::SUCCESS;

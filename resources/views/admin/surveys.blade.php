@@ -8,7 +8,6 @@
 <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:py-14">
     <div class="flex flex-col justify-between gap-6 border-b border-line pb-8 sm:flex-row sm:items-end">
         <div><p class="eyebrow">Administration</p><h1 class="font-display mt-3 text-4xl sm:text-5xl">Survey manager</h1></div>
-        <div class="flex flex-wrap gap-4 text-sm"><a href="{{ route('admin.graduates.index') }}" class="font-semibold text-forest underline underline-offset-4">Graduate list</a><a href="{{ route('admin.announcements.index') }}" class="font-semibold text-forest underline underline-offset-4">Announcements</a></div>
     </div>
 
     <div class="mt-8 grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr]">

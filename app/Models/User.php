@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AdminRole;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -32,6 +33,24 @@ class User extends Authenticatable
     public function jobApplications(): HasMany
     {
         return $this->hasMany(JobApplication::class);
+    }
+
+    public function adminRole(): ?AdminRole
+    {
+        if (! $this->is_admin) {
+            return null;
+        }
+
+        return $this->admin_role === null
+            ? AdminRole::SuperAdmin
+            : AdminRole::tryFrom($this->admin_role);
+    }
+
+    public function hasAdminRole(AdminRole ...$roles): bool
+    {
+        $adminRole = $this->adminRole();
+
+        return $adminRole === AdminRole::SuperAdmin || in_array($adminRole, $roles, true);
     }
 
     /**
