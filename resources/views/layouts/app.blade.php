@@ -25,7 +25,7 @@
         </div>
         @auth
             <div class="border-t border-line">
-                <nav aria-label="Main navigation" class="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-1.5 sm:px-7">
+                <nav aria-label="Main navigation" class="mx-auto flex max-w-7xl justify-start gap-1 overflow-x-auto px-4 py-1.5 sm:px-7 md:justify-center">
                     @if (auth()->user()->is_admin)
                         <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'nav-link-active' : '' }}" @if (request()->routeIs('dashboard')) aria-current="page" @endif>Overview</a>
                         @if (auth()->user()->hasAdminPermission('graduates'))<a href="{{ route('admin.graduates.index') }}" class="nav-link {{ request()->routeIs('admin.graduates.*') ? 'nav-link-active' : '' }}" @if (request()->routeIs('admin.graduates.*')) aria-current="page" @endif>Graduates</a>@endif
