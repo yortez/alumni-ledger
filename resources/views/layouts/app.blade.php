@@ -7,20 +7,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>@yield('title', 'Alumni Ledger') · Alumni Ledger</title>
+    <title>@yield('title', 'Alumni Tracer Management System') · Alumni Tracer Management System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-paper text-ink">
     <header class="border-b border-line bg-white">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-3 sm:px-8">
-            <a href="{{ route('dashboard') }}" class="flex shrink-0 items-center gap-3" aria-label="Alumni Ledger home"><span class="grid size-9 place-items-center rounded-sm bg-forest text-sm font-bold text-white">A</span><span class="font-semibold tracking-tight">Alumni Ledger</span></a>
+            <a href="{{ route('dashboard') }}" class="flex shrink-0 items-center gap-3" aria-label="Alumni Tracer Management System home"><span class="grid size-9 place-items-center rounded-sm bg-forest text-xs font-bold text-white">AT</span><span class="text-sm font-semibold leading-tight tracking-tight sm:hidden">Alumni Tracer</span><span class="hidden font-semibold tracking-tight sm:inline">Alumni Tracer Management System</span></a>
             @auth
                 <div class="flex shrink-0 items-center gap-3">
                     <span class="hidden max-w-40 truncate text-sm text-muted sm:block">{{ auth()->user()->username }}</span>
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="rounded-md border border-line px-3 py-2 text-sm font-medium text-ink transition hover:border-ink hover:bg-paper" type="submit">Sign out</button></form>
                 </div>
             @else
-                <nav class="flex items-center gap-2 text-sm font-medium"><a href="{{ route('login') }}" class="rounded-md px-3 py-2 text-muted transition hover:bg-paper hover:text-ink">Sign in</a><a href="{{ route('register') }}" class="rounded-md bg-forest px-4 py-2.5 text-white transition hover:bg-forest-dark">Join</a></nav>
+                <nav class="flex items-center gap-2 text-sm font-medium"><a href="{{ route('home') }}" class="rounded-md px-3 py-2 text-muted transition hover:bg-paper hover:text-ink">Sign in</a><a href="{{ route('register') }}" class="rounded-md bg-forest px-4 py-2.5 text-white transition hover:bg-forest-dark">Join</a></nav>
             @endauth
         </div>
         @auth
@@ -45,6 +45,6 @@
         <div class="mx-auto mt-5 max-w-7xl px-5 sm:px-8" role="status"><p class="rounded-md border border-forest/15 bg-mint px-4 py-3 text-sm font-medium text-forest">{{ session('status') }}</p></div>
     @endif
     <main>@yield('content')</main>
-    <footer class="mx-auto mt-16 flex max-w-7xl justify-between gap-4 border-t border-line px-5 py-5 text-xs text-muted sm:px-8"><span>Alumni Ledger</span><span>Classmates for life.</span></footer>
+    <footer class="mx-auto mt-16 flex max-w-7xl flex-col justify-between gap-2 border-t border-line px-5 py-5 text-xs text-muted sm:flex-row sm:gap-4 sm:px-8"><span>Alumni Tracer Management System</span><span>Classmates for life.</span></footer>
 </body>
 </html>

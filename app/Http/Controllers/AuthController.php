@@ -50,11 +50,6 @@ class AuthController extends Controller
         return redirect()->route('dashboard');
     }
 
-    public function login(): View
-    {
-        return view('auth.login');
-    }
-
     public function authenticate(Request $request): RedirectResponse
     {
         $credentials = $request->validate([

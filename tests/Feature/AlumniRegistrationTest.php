@@ -17,6 +17,32 @@ it('renders the alumni registration form', function () {
         ->assertSee('Create account');
 });
 
+it('removes the separate login URL while keeping sign-in on the homepage', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Welcome back')
+        ->assertSee(route('login.store'), false);
+
+    $this->get('/login')->assertNotFound();
+    $this->post('/login')->assertNotFound();
+});
+
+it('authenticates credentials posted from the homepage', function () {
+    $user = User::factory()->create(['email' => 'alumni@example.com']);
+
+    $response = $this->post('/', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $response->assertRedirectToRoute('dashboard');
+    $this->assertAuthenticatedAs($user);
+});
+
+it('redirects unauthenticated visitors to the homepage', function () {
+    $this->get('/dashboard')->assertRedirectToRoute('home');
+});
+
 it('rejects registration when the student number is not in the master list', function () {
     $response = $this->post('/register', [
         'student_number' => 'NO-SUCH-GRADUATE',

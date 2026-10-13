@@ -21,8 +21,7 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function (): void {
     Route::get('/register', [AuthController::class, 'create'])->name('register');
     Route::post('/register', [AuthController::class, 'store'])->middleware('throttle:5,1')->name('register.store');
-    Route::get('/login', [AuthController::class, 'login'])->name('login');
-    Route::post('/login', [AuthController::class, 'authenticate'])->middleware('throttle:5,1')->name('login.store');
+    Route::post('/', [AuthController::class, 'authenticate'])->middleware('throttle:5,1')->name('login.store');
 });
 
 Route::middleware('auth')->group(function (): void {

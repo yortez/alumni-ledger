@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureUserIsAdmin::class,
             'admin.permission' => EnsureAdminHasPermission::class,
         ]);
+        $middleware->redirectGuestsTo(fn (Request $request) => route('home'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
