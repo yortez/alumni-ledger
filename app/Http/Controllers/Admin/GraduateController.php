@@ -44,7 +44,7 @@ class GraduateController extends Controller
 
     public function show(Graduate $graduate): View
     {
-        $graduate->load(['user', 'user.profile']);
+        $graduate->load(['user', 'user.profile.employments']);
 
         return view('admin.graduate-detail', [
             'graduate' => $graduate,

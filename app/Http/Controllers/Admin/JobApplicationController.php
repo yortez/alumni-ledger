@@ -38,7 +38,7 @@ class JobApplicationController extends Controller
     {
         abort_unless($application->job_id === $job->id, 404);
 
-        $application->load(['user.profile']);
+        $application->load(['user.profile.employments']);
         $graduate = $application->user?->student_number
             ? Graduate::query()->where('student_number', $application->user->student_number)->first()
             : null;

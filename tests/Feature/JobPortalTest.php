@@ -140,7 +140,7 @@ it('lets administrators review a candidate profile and update the application st
         'username' => 'jamiepatel',
         'email' => 'jamie@example.com',
     ]);
-    $applicant->profile()->create([
+    $profile = $applicant->profile()->create([
         'phone' => '+1 555 0107',
         'job_title' => 'Research Associate',
         'employer' => 'Civic Lab',
@@ -149,6 +149,13 @@ it('lets administrators review a candidate profile and update the application st
         'city' => 'Boston',
         'country' => 'United States',
         'completed_at' => now(),
+    ]);
+    $profile->employments()->create([
+        'job_title' => 'Policy Intern',
+        'employer' => 'City Office',
+        'start_date' => '2017-06-01',
+        'end_date' => '2019-05-31',
+        'is_current' => false,
     ]);
     Graduate::query()->create([
         'student_number' => '2019-2210',
@@ -171,7 +178,10 @@ it('lets administrators review a candidate profile and update the application st
     $detailResponse->assertOk()
         ->assertSee('Applicant profile')
         ->assertSee('Research Associate')
-        ->assertSee('Civic Lab');
+        ->assertSee('Civic Lab')
+        ->assertSee('Employment history')
+        ->assertSee('Policy Intern')
+        ->assertSee('City Office');
 
     $updateResponse = $this->actingAs($admin)->patch(route('admin.jobs.applications.update', [$job, $application]), [
         'status' => 'interview_scheduled',

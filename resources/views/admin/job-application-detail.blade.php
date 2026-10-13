@@ -87,6 +87,26 @@
                         <div><dt class="text-xs uppercase tracking-wider text-muted">Location</dt><dd class="mt-1 font-medium text-ink">{{ $profile->city ?: 'Not provided' }}{{ $profile->city && $profile->country ? ', ' : '' }}{{ $profile->country ?: '' }}</dd></div>
                         <div><dt class="text-xs uppercase tracking-wider text-muted">Employment status</dt><dd class="mt-1 font-medium text-ink">{{ ucfirst((string) ($profile->employment_status ?? 'not provided')) }}</dd></div>
                     </dl>
+                    <div class="mt-6 border-t border-line pt-4">
+                        <h4 class="font-display text-lg">Employment history</h4>
+                        @forelse ($profile->employments as $employment)
+                            <article class="border-b border-line py-3 last:border-b-0">
+                                <div class="flex flex-col justify-between gap-1 sm:flex-row sm:items-start">
+                                    <div>
+                                        <p class="font-semibold text-ink">{{ $employment->job_title }}</p>
+                                        <p class="mt-1 text-sm text-muted">{{ $employment->employer }}{{ $employment->location ? ' · '.$employment->location : '' }}</p>
+                                    </div>
+                                    <p class="text-sm text-muted">{{ $employment->start_date->format('M Y') }} – {{ $employment->is_current ? 'Present' : ($employment->end_date?->format('M Y') ?? 'Date not provided') }}</p>
+                                </div>
+                                @if ($employment->description)
+                                    <p class="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{{ $employment->description }}</p>
+                                @endif
+                                <p class="mt-2 text-xs font-semibold uppercase tracking-wide text-forest">{{ $employment->is_current ? 'Current role' : 'Past role' }}</p>
+                            </article>
+                        @empty
+                            <p class="mt-3 text-sm text-muted">No employment history has been added.</p>
+                        @endforelse
+                    </div>
                 @else
                     <p class="mt-4 text-sm text-muted">This applicant has not completed a profile yet.</p>
                 @endif

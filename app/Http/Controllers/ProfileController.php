@@ -10,8 +10,12 @@ class ProfileController extends Controller
 {
     public function edit(Request $request): View
     {
+        $profile = $request->user()->profile;
+        $profile?->load('employments');
+
         return view('alumni.profile', [
-            'profile' => $request->user()->profile,
+            'profile' => $profile,
+            'employmentRecords' => $profile?->employments ?? collect(),
         ]);
     }
 

@@ -96,6 +96,26 @@
                         <dd class="mt-2 whitespace-pre-line text-sm leading-6 text-ink">{{ $profile->bio ?: 'No bio added yet.' }}</dd>
                     </div>
                 </dl>
+                <div class="mt-7 border-t border-line pt-5">
+                    <h3 class="font-display text-xl">Employment history</h3>
+                    @forelse ($profile->employments as $employment)
+                        <article class="border-b border-line py-4 last:border-b-0">
+                            <div class="flex flex-col justify-between gap-1 sm:flex-row sm:items-start">
+                                <div>
+                                    <h4 class="font-semibold text-ink">{{ $employment->job_title }}</h4>
+                                    <p class="mt-1 text-sm text-muted">{{ $employment->employer }}{{ $employment->location ? ' · '.$employment->location : '' }}</p>
+                                </div>
+                                <p class="text-sm text-muted">{{ $employment->start_date->format('M Y') }} – {{ $employment->is_current ? 'Present' : ($employment->end_date?->format('M Y') ?? 'Date not provided') }}</p>
+                            </div>
+                            @if ($employment->description)
+                                <p class="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{{ $employment->description }}</p>
+                            @endif
+                            <p class="mt-2 text-xs font-semibold uppercase tracking-wide text-forest">{{ $employment->is_current ? 'Current role' : 'Past role' }}</p>
+                        </article>
+                    @empty
+                        <p class="mt-3 text-sm text-muted">No employment history has been added.</p>
+                    @endforelse
+                </div>
             @else
                 <div class="mt-6 rounded-lg border border-dashed border-line bg-paper p-5 text-sm text-muted">
                     This applicant has not completed their alumni profile yet.

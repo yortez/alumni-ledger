@@ -180,7 +180,7 @@ it('allows administrators to view applicant details', function () {
         'username' => 'jordansmith',
         'email' => 'jordan@example.com',
     ]);
-    $applicant->profile()->create([
+    $profile = $applicant->profile()->create([
         'phone' => '+1 555 0102',
         'job_title' => 'Operations Manager',
         'employer' => 'Northline Group',
@@ -192,6 +192,13 @@ it('allows administrators to view applicant details', function () {
         'bio' => 'Focused on operational growth.',
         'completed_at' => now(),
     ]);
+    $profile->employments()->create([
+        'job_title' => 'Program Assistant',
+        'employer' => 'Community Works',
+        'start_date' => '2017-06-01',
+        'end_date' => '2020-05-31',
+        'is_current' => false,
+    ]);
     $admin = User::factory()->create();
     $admin->forceFill(['is_admin' => true])->save();
 
@@ -201,7 +208,10 @@ it('allows administrators to view applicant details', function () {
         ->assertSee('Applicant details')
         ->assertSee('Jordan Smith')
         ->assertSee('Operations Manager')
-        ->assertSee('Northline Group');
+        ->assertSee('Northline Group')
+        ->assertSee('Employment history')
+        ->assertSee('Program Assistant')
+        ->assertSee('Community Works');
 });
 
 it('lets administrators edit graduate records in the master list', function () {

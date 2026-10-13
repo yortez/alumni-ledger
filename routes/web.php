@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\GraduateController;
 use App\Http\Controllers\Admin\SurveyController as AdminSurveyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmploymentController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\NotificationController;
@@ -28,6 +29,9 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/employments', [EmploymentController::class, 'store'])->name('profile.employments.store');
+    Route::patch('/profile/employments/{employment}', [EmploymentController::class, 'update'])->name('profile.employments.update');
+    Route::delete('/profile/employments/{employment}', [EmploymentController::class, 'destroy'])->name('profile.employments.destroy');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
