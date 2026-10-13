@@ -3,7 +3,6 @@
 use App\Models\Graduate;
 use App\Models\Job;
 use App\Models\JobApplication;
-use App\Models\Survey;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -37,9 +36,10 @@ it('notifies eligible alumni when a survey is published', function () {
     $admin = User::factory()->create(['is_admin' => true]);
     Graduate::query()->create([
         'student_number' => '2022-1101',
-        'name' => 'Jordan Lee',
-        'program' => 'Computer Science',
-        'graduation_year' => 2022,
+        'first_name' => 'Jordan',
+        'last_name' => 'Lee',
+        'program_code' => 'CS',
+        'batch_year' => 2022,
     ]);
     $eligibleAlumni = User::factory()->create([
         'student_number' => '2022-1101',
@@ -50,8 +50,8 @@ it('notifies eligible alumni when a survey is published', function () {
         ->post('/admin/surveys', [
             'title' => 'Graduate outcomes survey',
             'description' => 'Tell us about your post-grad path.',
-            'questions_text' => "What is your current role?",
-            'target_programs' => ['Computer Science'],
+            'questions_text' => 'What is your current role?',
+            'target_programs' => ['CS'],
             'target_graduation_years' => ['2022'],
             'status' => 'active',
         ])

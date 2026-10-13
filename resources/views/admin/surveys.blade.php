@@ -21,7 +21,7 @@
                 <div class="field"><label for="questions_text">Questions</label><textarea id="questions_text" name="questions_text" rows="5" placeholder="One question per line" required>{{ old('questions_text') }}</textarea><p class="text-xs text-muted">Each line becomes a required long-answer question. Maximum 20.</p>@error('questions')<p class="field-error">{{ $message }}</p>@enderror</div>
                 <fieldset class="grid gap-3">
                     <legend class="text-sm font-semibold">Who should respond?</legend>
-                    <p class="text-xs leading-5 text-muted">Choose no programs or years to include all graduates. If you choose both, respondents must match both.</p>
+                    <p class="text-xs leading-5 text-muted">Choose no program codes or batch years to include all graduates. If you choose both, respondents must match both.</p>
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div><p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Programs</p><div class="max-h-44 overflow-y-auto border border-line p-3">
                             @forelse ($programs as $program)
@@ -30,7 +30,7 @@
                                 <p class="text-xs text-muted">No programs in the master list.</p>
                             @endforelse
                         </div>@error('target_programs.*')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <div><p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Graduation years</p><div class="max-h-44 overflow-y-auto border border-line p-3">
+                        <div><p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Batch years</p><div class="max-h-44 overflow-y-auto border border-line p-3">
                             @forelse ($graduationYears as $year)
                                 <label class="flex items-start gap-2 py-1.5 text-sm"><input class="mt-1 accent-[#245b49]" type="checkbox" name="target_graduation_years[]" value="{{ $year }}" @checked(in_array($year, old('target_graduation_years', [])))><span>{{ $year }}</span></label>
                             @empty

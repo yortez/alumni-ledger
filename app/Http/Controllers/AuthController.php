@@ -36,7 +36,7 @@ class AuthController extends Controller
                 ->firstOrFail();
 
             return User::query()->create([
-                'name' => $graduate->name,
+                'name' => $graduate->fullName(),
                 'student_number' => $graduate->student_number,
                 'username' => $validated['username'],
                 'email' => $validated['email'],

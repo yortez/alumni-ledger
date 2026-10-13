@@ -39,19 +39,19 @@ class Survey extends Model
             })
             ->whereDoesntHave('responses', fn (Builder $responses): Builder => $responses->where('user_id', $user->id));
 
-        if ($graduate->program !== null && $graduate->program !== '') {
+        if ($graduate->program_code !== null && $graduate->program_code !== '') {
             $query->where(function (Builder $query) use ($graduate): void {
                 $query->whereJsonLength('target_programs', 0)
-                    ->orWhereJsonContains('target_programs', $graduate->program);
+                    ->orWhereJsonContains('target_programs', $graduate->program_code);
             });
         } else {
             $query->whereJsonLength('target_programs', 0);
         }
 
-        if ($graduate->graduation_year !== null) {
+        if ($graduate->batch_year !== null) {
             $query->where(function (Builder $query) use ($graduate): void {
                 $query->whereJsonLength('target_graduation_years', 0)
-                    ->orWhereJsonContains('target_graduation_years', $graduate->graduation_year);
+                    ->orWhereJsonContains('target_graduation_years', $graduate->batch_year);
             });
         } else {
             $query->whereJsonLength('target_graduation_years', 0);

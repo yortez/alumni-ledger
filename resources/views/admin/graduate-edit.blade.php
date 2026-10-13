@@ -24,21 +24,43 @@
             </div>
 
             <div class="field">
-                <label for="name">Full name</label>
-                <input id="name" name="name" value="{{ old('name', $graduate->name) }}" required>
-                @error('name')<p class="field-error">{{ $message }}</p>@enderror
+                <label for="first_name">First name</label>
+                <input id="first_name" name="first_name" value="{{ old('first_name', $graduate->first_name) }}" required>
+                @error('first_name')<p class="field-error">{{ $message }}</p>@enderror
             </div>
 
             <div class="field">
-                <label for="program">Program</label>
-                <input id="program" name="program" value="{{ old('program', $graduate->program) }}">
-                @error('program')<p class="field-error">{{ $message }}</p>@enderror
+                <label for="middle_name">Middle name</label>
+                <input id="middle_name" name="middle_name" value="{{ old('middle_name', $graduate->middle_name) }}">
+                @error('middle_name')<p class="field-error">{{ $message }}</p>@enderror
             </div>
 
             <div class="field">
-                <label for="graduation_year">Graduation year</label>
-                <input id="graduation_year" type="number" min="1900" max="2100" name="graduation_year" value="{{ old('graduation_year', $graduate->graduation_year) }}">
-                @error('graduation_year')<p class="field-error">{{ $message }}</p>@enderror
+                <label for="last_name">Last name</label>
+                <input id="last_name" name="last_name" value="{{ old('last_name', $graduate->last_name) }}" required>
+                @error('last_name')<p class="field-error">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="field">
+                <label for="program_code">Program code</label>
+                <input id="program_code" name="program_code" value="{{ old('program_code', $graduate->program_code) }}">
+                @error('program_code')<p class="field-error">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="field">
+                <label for="batch_year">Batch year</label>
+                <input id="batch_year" type="number" min="1900" max="2100" name="batch_year" value="{{ old('batch_year', $graduate->batch_year) }}">
+                @error('batch_year')<p class="field-error">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="field">
+                <label for="latin_honor">Latin honor</label>
+                <select id="latin_honor" name="latin_honor" required>
+                    @foreach (\App\Models\Graduate::LATIN_HONORS as $honor)
+                        <option value="{{ $honor }}" @selected(old('latin_honor', $graduate->latin_honor) === $honor)>{{ ucwords(str_replace('_', ' ', $honor)) }}</option>
+                    @endforeach
+                </select>
+                @error('latin_honor')<p class="field-error">{{ $message }}</p>@enderror
             </div>
 
             <button type="submit" class="bg-forest px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-forest-dark">Save changes</button>

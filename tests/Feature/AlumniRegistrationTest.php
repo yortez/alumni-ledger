@@ -61,9 +61,10 @@ it('rejects registration when the student number is not in the master list', fun
 it('creates an alumni account from a matching graduate record', function () {
     Graduate::query()->create([
         'student_number' => '2020-0042',
-        'name' => 'Morgan Lee',
-        'program' => 'Environmental Science',
-        'graduation_year' => 2020,
+        'first_name' => 'Morgan',
+        'last_name' => 'Lee',
+        'program_code' => 'ENVS',
+        'batch_year' => 2020,
     ]);
 
     $response = $this->post('/register', [
@@ -88,7 +89,8 @@ it('creates an alumni account from a matching graduate record', function () {
 it('prevents a graduate record from being claimed twice', function () {
     Graduate::query()->create([
         'student_number' => '2020-0042',
-        'name' => 'Morgan Lee',
+        'first_name' => 'Morgan',
+        'last_name' => 'Lee',
     ]);
     User::factory()->create(['student_number' => '2020-0042']);
 
@@ -142,7 +144,8 @@ it('forbids non-admin users from viewing the graduate master list', function () 
 it('shows profile completion and employment details to administrators', function () {
     Graduate::query()->create([
         'student_number' => '2018-0099',
-        'name' => 'Taylor Rivera',
+        'first_name' => 'Taylor',
+        'last_name' => 'Rivera',
     ]);
     $admin = User::factory()->create(['student_number' => '2018-0099']);
     $admin->forceFill(['is_admin' => true])->save();
@@ -166,9 +169,10 @@ it('shows profile completion and employment details to administrators', function
 it('allows administrators to view applicant details', function () {
     $graduate = Graduate::query()->create([
         'student_number' => '2012-7654',
-        'name' => 'Jordan Smith',
-        'program' => 'Business Administration',
-        'graduation_year' => 2012,
+        'first_name' => 'Jordan',
+        'last_name' => 'Smith',
+        'program_code' => 'BUS',
+        'batch_year' => 2012,
     ]);
     $applicant = User::factory()->create([
         'name' => 'Jordan Smith',
@@ -205,9 +209,10 @@ it('lets administrators edit graduate records in the master list', function () {
     $admin->forceFill(['is_admin' => true])->save();
     $graduate = Graduate::query()->create([
         'student_number' => '2021-1987',
-        'name' => 'Avery Chen',
-        'program' => 'Biology',
-        'graduation_year' => 2021,
+        'first_name' => 'Avery',
+        'last_name' => 'Chen',
+        'program_code' => 'BIO',
+        'batch_year' => 2021,
     ]);
 
     $this->actingAs($admin)
@@ -218,18 +223,60 @@ it('lets administrators edit graduate records in the master list', function () {
     $this->actingAs($admin)
         ->patch("/admin/graduates/{$graduate->id}", [
             'student_number' => '2021-1987',
-            'name' => 'Avery Chen Jr.',
-            'program' => 'Environmental Science',
-            'graduation_year' => 2022,
+            'first_name' => 'Avery',
+            'middle_name' => 'Jr.',
+            'last_name' => 'Chen',
+            'program_code' => 'ENVS',
+            'batch_year' => 2022,
+            'latin_honor' => 'cum_laude',
         ])
         ->assertRedirectToRoute('admin.graduates.index');
 
     $this->assertDatabaseHas('graduates', [
         'id' => $graduate->id,
-        'name' => 'Avery Chen Jr.',
-        'program' => 'Environmental Science',
-        'graduation_year' => 2022,
+        'first_name' => 'Avery',
+        'middle_name' => 'Jr.',
+        'last_name' => 'Chen',
+        'program_code' => 'ENVS',
+        'batch_year' => 2022,
+        'latin_honor' => 'cum_laude',
     ]);
+});
+
+it('accepts each supported Latin honor', function (string $latinHonor) {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)->post('/admin/graduates', [
+        'student_number' => '2024-2001',
+        'first_name' => 'Alex',
+        'last_name' => 'Rivera',
+        'latin_honor' => $latinHonor,
+    ])->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('graduates', [
+        'student_number' => '2024-2001',
+        'latin_honor' => $latinHonor,
+    ]);
+})->with([
+    'no honor' => 'none',
+    'cum laude' => 'cum_laude',
+    'magna cum laude' => 'magna_cum_laude',
+    'summa cum laude' => 'summa_cum_laude',
+]);
+
+it('rejects unsupported Latin honor values', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)->post('/admin/graduates', [
+        'student_number' => '2024-2002',
+        'first_name' => 'Alex',
+        'last_name' => 'Rivera',
+        'latin_honor' => 'honorary',
+    ])->assertSessionHasErrors('latin_honor');
+
+    $this->assertDatabaseMissing('graduates', ['student_number' => '2024-2002']);
 });
 
 it('imports valid graduate records from a CSV for an administrator', function () {
@@ -239,15 +286,17 @@ it('imports valid graduate records from a CSV for an administrator', function ()
     $response = $this->actingAs($admin)->post('/admin/graduates/import', [
         'file' => UploadedFile::fake()->createWithContent(
             'graduates.csv',
-            "student_number,name,program,graduation_year\n2022-0101,Avery Chen,Computer Science,2022\n",
+            "student_number,first_name,last_name,middle_name,program_code,batch_year,latin_honor\n2022-0101,Avery,Chen,,CS,2022,magna_cum_laude\n",
         ),
     ]);
 
     $response->assertSessionHas('status', '1 graduate records imported.');
     $this->assertDatabaseHas('graduates', [
         'student_number' => '2022-0101',
-        'name' => 'Avery Chen',
-        'program' => 'Computer Science',
-        'graduation_year' => 2022,
+        'first_name' => 'Avery',
+        'last_name' => 'Chen',
+        'program_code' => 'CS',
+        'batch_year' => 2022,
+        'latin_honor' => 'magna_cum_laude',
     ]);
 });

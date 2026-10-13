@@ -23,16 +23,17 @@ it('creates a survey with selected programs and graduation years', function () {
     $admin->forceFill(['is_admin' => true])->save();
     Graduate::query()->create([
         'student_number' => '2022-1001',
-        'name' => 'Alex Chen',
-        'program' => 'Computer Science',
-        'graduation_year' => 2022,
+        'first_name' => 'Alex',
+        'last_name' => 'Chen',
+        'program_code' => 'CS',
+        'batch_year' => 2022,
     ]);
 
     $response = $this->actingAs($admin)->post('/admin/surveys', [
         'title' => 'Career pathways',
         'description' => 'Tell us about your first role after college.',
         'questions_text' => "What was your first role?\nHow did you find it?",
-        'target_programs' => ['Computer Science'],
+        'target_programs' => ['CS'],
         'target_graduation_years' => ['2022'],
         'status' => 'active',
     ]);
@@ -40,7 +41,7 @@ it('creates a survey with selected programs and graduation years', function () {
     $response->assertRedirectToRoute('admin.surveys.index');
     $survey = Survey::query()->firstOrFail();
     expect($survey->questions)->toBe(['What was your first role?', 'How did you find it?'])
-        ->and($survey->target_programs)->toBe(['Computer Science'])
+        ->and($survey->target_programs)->toBe(['CS'])
         ->and($survey->target_graduation_years)->toBe([2022])
         ->and($survey->is_active)->toBeTrue();
 });
@@ -48,26 +49,29 @@ it('creates a survey with selected programs and graduation years', function () {
 it('only offers a targeted survey to alumni matching its program and graduation year', function () {
     Graduate::query()->create([
         'student_number' => '2022-1001',
-        'name' => 'Alex Chen',
-        'program' => 'Computer Science',
-        'graduation_year' => 2022,
+        'first_name' => 'Alex',
+        'last_name' => 'Chen',
+        'program_code' => 'CS',
+        'batch_year' => 2022,
     ]);
     Graduate::query()->create([
         'student_number' => '2021-1002',
-        'name' => 'Blair Kim',
-        'program' => 'Computer Science',
-        'graduation_year' => 2021,
+        'first_name' => 'Blair',
+        'last_name' => 'Kim',
+        'program_code' => 'CS',
+        'batch_year' => 2021,
     ]);
     Graduate::query()->create([
         'student_number' => '2022-1003',
-        'name' => 'Casey Brown',
-        'program' => 'History',
-        'graduation_year' => 2022,
+        'first_name' => 'Casey',
+        'last_name' => 'Brown',
+        'program_code' => 'HIST',
+        'batch_year' => 2022,
     ]);
     $survey = Survey::query()->create([
         'title' => 'Career pathways',
         'questions' => ['What was your first role?'],
-        'target_programs' => ['Computer Science'],
+        'target_programs' => ['CS'],
         'target_graduation_years' => [2022],
         'is_active' => true,
     ]);
@@ -87,9 +91,10 @@ it('only offers a targeted survey to alumni matching its program and graduation 
 it('stores one response from an eligible alumnus and prevents a second response', function () {
     Graduate::query()->create([
         'student_number' => '2023-0091',
-        'name' => 'Drew Patel',
-        'program' => 'Biology',
-        'graduation_year' => 2023,
+        'first_name' => 'Drew',
+        'last_name' => 'Patel',
+        'program_code' => 'BIO',
+        'batch_year' => 2023,
     ]);
     $alumnus = User::factory()->create(['student_number' => '2023-0091']);
     $survey = Survey::query()->create([

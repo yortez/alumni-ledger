@@ -152,7 +152,8 @@ it('lets administrators review a candidate profile and update the application st
     ]);
     Graduate::query()->create([
         'student_number' => '2019-2210',
-        'name' => 'Jamie Patel',
+        'first_name' => 'Jamie',
+        'last_name' => 'Patel',
     ]);
     $job = Job::factory()->for($admin, 'creator')->create(['title' => 'Program Coordinator', 'status' => 'published']);
     $application = JobApplication::factory()->for($job, 'job')->for($applicant, 'user')->create([

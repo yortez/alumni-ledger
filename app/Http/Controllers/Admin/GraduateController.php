@@ -23,10 +23,13 @@ class GraduateController extends Controller
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('student_number', 'like', "%{$search}%")
-                        ->orWhere('name', 'like', "%{$search}%");
+                        ->orWhere('first_name', 'like', "%{$search}%")
+                        ->orWhere('middle_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%");
                 });
             })
-            ->orderBy('name')
+            ->orderBy('last_name')
+            ->orderBy('first_name')
             ->paginate(20)
             ->withQueryString();
 
@@ -61,9 +64,12 @@ class GraduateController extends Controller
     {
         $validated = $request->validate([
             'student_number' => ['required', 'string', 'max:64', 'unique:graduates,student_number'],
-            'name' => ['required', 'string', 'max:255'],
-            'program' => ['nullable', 'string', 'max:255'],
-            'graduation_year' => ['nullable', 'integer', 'between:1900,2100'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'middle_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'program_code' => ['nullable', 'string', 'max:64'],
+            'batch_year' => ['nullable', 'integer', 'between:1900,2100'],
+            'latin_honor' => ['required', Rule::in(Graduate::LATIN_HONORS)],
         ]);
 
         Graduate::query()->create($validated);
@@ -75,9 +81,12 @@ class GraduateController extends Controller
     {
         $validated = $request->validate([
             'student_number' => ['required', 'string', 'max:64', Rule::unique('graduates', 'student_number')->ignore($graduate->id)],
-            'name' => ['required', 'string', 'max:255'],
-            'program' => ['nullable', 'string', 'max:255'],
-            'graduation_year' => ['nullable', 'integer', 'between:1900,2100'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'middle_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'program_code' => ['nullable', 'string', 'max:64'],
+            'batch_year' => ['nullable', 'integer', 'between:1900,2100'],
+            'latin_honor' => ['required', Rule::in(Graduate::LATIN_HONORS)],
         ]);
 
         $graduate->update($validated);
@@ -102,8 +111,8 @@ class GraduateController extends Controller
         $headers[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $headers[0]);
         $headers = array_map(fn ($header) => strtolower(trim((string) $header)), $headers);
 
-        if (! in_array('student_number', $headers, true) || ! in_array('name', $headers, true)) {
-            return back()->withErrors(['file' => 'CSV headers must include student_number and name.']);
+        if (! in_array('student_number', $headers, true) || ! in_array('first_name', $headers, true) || ! in_array('last_name', $headers, true)) {
+            return back()->withErrors(['file' => 'CSV headers must include student_number, first_name, and last_name.']);
         }
 
         $rows = [];
@@ -119,21 +128,27 @@ class GraduateController extends Controller
             $row = array_combine($headers, array_pad(array_slice($values, 0, count($headers)), count($headers), null));
             $row = [
                 'student_number' => trim((string) ($row['student_number'] ?? '')),
-                'name' => trim((string) ($row['name'] ?? '')),
-                'program' => trim((string) ($row['program'] ?? '')) ?: null,
-                'graduation_year' => trim((string) ($row['graduation_year'] ?? '')) ?: null,
+                'first_name' => trim((string) ($row['first_name'] ?? '')),
+                'middle_name' => trim((string) ($row['middle_name'] ?? '')) ?: null,
+                'last_name' => trim((string) ($row['last_name'] ?? '')),
+                'program_code' => trim((string) ($row['program_code'] ?? '')) ?: null,
+                'batch_year' => trim((string) ($row['batch_year'] ?? '')) ?: null,
+                'latin_honor' => trim((string) ($row['latin_honor'] ?? '')) ?: 'none',
             ];
 
             $validator = Validator::make($row, [
                 'student_number' => ['required', 'string', 'max:64'],
-                'name' => ['required', 'string', 'max:255'],
-                'program' => ['nullable', 'string', 'max:255'],
-                'graduation_year' => ['nullable', 'integer', 'between:1900,2100'],
+                'first_name' => ['required', 'string', 'max:255'],
+                'middle_name' => ['nullable', 'string', 'max:255'],
+                'last_name' => ['required', 'string', 'max:255'],
+                'program_code' => ['nullable', 'string', 'max:64'],
+                'batch_year' => ['nullable', 'integer', 'between:1900,2100'],
+                'latin_honor' => ['required', Rule::in(Graduate::LATIN_HONORS)],
             ]);
 
             if ($validator->fails()) {
                 return back()->withErrors([
-                    'file' => "CSV row {$rowNumber} is invalid. Check the student number, name, and graduation year.",
+                    'file' => "CSV row {$rowNumber} is invalid. Check the student number, name fields, batch year, and Latin honor.",
                 ]);
             }
 
@@ -152,7 +167,7 @@ class GraduateController extends Controller
             Graduate::query()->upsert(
                 array_values($rows),
                 ['student_number'],
-                ['name', 'program', 'graduation_year', 'updated_at'],
+                ['first_name', 'middle_name', 'last_name', 'program_code', 'batch_year', 'latin_honor', 'updated_at'],
             );
         });
 

@@ -51,7 +51,7 @@
                         </div>
                     </div>
                     <div>
-                        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Graduation years</p>
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Batch years</p>
                         <div class="max-h-44 overflow-y-auto border border-line p-3">
                             @foreach ($graduationYears as $year)
                                 <label class="flex items-start gap-2 py-1.5 text-sm">

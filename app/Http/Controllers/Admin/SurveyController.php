@@ -22,10 +22,10 @@ class SurveyController extends Controller
                 ->withCount('responses')
                 ->latest()
                 ->paginate(15),
-            'programs' => Graduate::query()->whereNotNull('program')->where('program', '<>', '')
-                ->distinct()->orderBy('program')->pluck('program'),
-            'graduationYears' => Graduate::query()->whereNotNull('graduation_year')
-                ->distinct()->orderByDesc('graduation_year')->pluck('graduation_year'),
+            'programs' => Graduate::query()->whereNotNull('program_code')->where('program_code', '<>', '')
+                ->distinct()->orderBy('program_code')->pluck('program_code'),
+            'graduationYears' => Graduate::query()->whereNotNull('batch_year')
+                ->distinct()->orderByDesc('batch_year')->pluck('batch_year'),
         ]);
     }
 
@@ -44,10 +44,10 @@ class SurveyController extends Controller
     {
         return view('admin.survey-edit', [
             'survey' => $survey,
-            'programs' => Graduate::query()->whereNotNull('program')->where('program', '<>', '')
-                ->distinct()->orderBy('program')->pluck('program'),
-            'graduationYears' => Graduate::query()->whereNotNull('graduation_year')
-                ->distinct()->orderByDesc('graduation_year')->pluck('graduation_year'),
+            'programs' => Graduate::query()->whereNotNull('program_code')->where('program_code', '<>', '')
+                ->distinct()->orderBy('program_code')->pluck('program_code'),
+            'graduationYears' => Graduate::query()->whereNotNull('batch_year')
+                ->distinct()->orderByDesc('batch_year')->pluck('batch_year'),
         ]);
     }
 
@@ -58,8 +58,8 @@ class SurveyController extends Controller
             'questions' => array_values(array_filter(array_map('trim', $questionLines), fn (string $question): bool => $question !== '')),
         ]);
 
-        $programs = Graduate::query()->whereNotNull('program')->pluck('program')->unique()->values()->all();
-        $graduationYears = Graduate::query()->whereNotNull('graduation_year')->pluck('graduation_year')->unique()->values()->all();
+        $programs = Graduate::query()->whereNotNull('program_code')->pluck('program_code')->unique()->values()->all();
+        $graduationYears = Graduate::query()->whereNotNull('batch_year')->pluck('batch_year')->unique()->values()->all();
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:180'],
@@ -104,8 +104,8 @@ class SurveyController extends Controller
             'questions' => array_values(array_filter(array_map('trim', $questionLines ?: []), fn (string $question): bool => $question !== '')),
         ]);
 
-        $programs = Graduate::query()->whereNotNull('program')->pluck('program')->unique()->values()->all();
-        $graduationYears = Graduate::query()->whereNotNull('graduation_year')->pluck('graduation_year')->unique()->values()->all();
+        $programs = Graduate::query()->whereNotNull('program_code')->pluck('program_code')->unique()->values()->all();
+        $graduationYears = Graduate::query()->whereNotNull('batch_year')->pluck('batch_year')->unique()->values()->all();
 
         $validated = $request->validate([
             'title' => ['sometimes', 'required', 'string', 'max:180'],

@@ -17,7 +17,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <p class="text-xs uppercase tracking-wider text-muted">Applicant</p>
-                    <h2 class="mt-2 font-display text-3xl">{{ $graduate->name }}</h2>
+                    <h2 class="mt-2 font-display text-3xl">{{ $graduate->fullName() }}</h2>
                 </div>
                 @if ($profile?->completed_at)
                     <span class="rounded-full border border-forest bg-mint px-3 py-1 text-xs font-semibold uppercase tracking-wide text-forest">Profile complete</span>
@@ -44,12 +44,16 @@
                     <dd class="mt-2 font-medium text-ink">{{ $applicant ? 'Claimed' : 'Not registered' }}</dd>
                 </div>
                 <div class="rounded-lg border border-line bg-paper p-4">
-                    <dt class="text-xs uppercase tracking-wider text-muted">Program</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ $graduate->program ?: 'Not listed' }}</dd>
+                    <dt class="text-xs uppercase tracking-wider text-muted">Program code</dt>
+                    <dd class="mt-2 font-medium text-ink">{{ $graduate->program_code ?: 'Not listed' }}</dd>
                 </div>
                 <div class="rounded-lg border border-line bg-paper p-4">
                     <dt class="text-xs uppercase tracking-wider text-muted">Graduation year</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ $graduate->graduation_year ?: 'Not listed' }}</dd>
+                    <dd class="mt-2 font-medium text-ink">{{ $graduate->batch_year ?: 'Not listed' }}</dd>
+                </div>
+                <div class="rounded-lg border border-line bg-paper p-4">
+                    <dt class="text-xs uppercase tracking-wider text-muted">Latin honor</dt>
+                    <dd class="mt-2 font-medium text-ink">{{ ucwords(str_replace('_', ' ', $graduate->latin_honor)) }}</dd>
                 </div>
             </dl>
         </section>
