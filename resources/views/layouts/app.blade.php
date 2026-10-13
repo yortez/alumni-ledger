@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f6f8f7">
+    <meta name="theme-color" content="#141a32">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>@yield('title', 'Alumni Tracer Management System') · Alumni Tracer Management System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-paper text-ink">
+<body class="app-shell min-h-screen bg-paper text-ink">
     <header class="border-b border-line bg-white">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-3 sm:px-8">
             <a href="{{ route('dashboard') }}" class="flex shrink-0 items-center gap-3" aria-label="Alumni Tracer Management System home"><span class="grid size-9 place-items-center rounded-sm bg-forest text-xs font-bold text-white">AT</span><span class="text-sm font-semibold leading-tight tracking-tight sm:hidden">Alumni Tracer</span><span class="hidden font-semibold tracking-tight sm:inline">Alumni Tracer Management System</span></a>
