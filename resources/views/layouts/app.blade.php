@@ -25,7 +25,14 @@
         </div>
         @auth
             <div class="border-t border-line">
-                <nav aria-label="Main navigation" class="mx-auto flex max-w-7xl justify-start gap-1 overflow-x-auto px-4 py-1.5 sm:px-7 md:justify-center">
+                <div class="mx-auto max-w-7xl px-4 py-1.5 sm:px-7 md:hidden">
+                    <button type="button" class="ml-auto grid size-10 place-items-center rounded-md text-ink transition hover:bg-paper" aria-label="Toggle navigation" aria-controls="main-navigation" aria-expanded="false" data-navigation-toggle>
+                        <svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+                <nav id="main-navigation" aria-label="Main navigation" class="mx-auto hidden flex max-w-7xl flex-col gap-1 px-4 pb-2 sm:px-7 md:flex md:flex-row md:justify-center md:py-1.5">
                     @if (auth()->user()->is_admin)
                         <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'nav-link-active' : '' }}" @if (request()->routeIs('dashboard')) aria-current="page" @endif>Overview</a>
                         @if (auth()->user()->hasAdminPermission('graduates'))<a href="{{ route('admin.graduates.index') }}" class="nav-link {{ request()->routeIs('admin.graduates.*') ? 'nav-link-active' : '' }}" @if (request()->routeIs('admin.graduates.*')) aria-current="page" @endif>Graduates</a>@endif
