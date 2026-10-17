@@ -79,7 +79,7 @@
         </aside>
     </form>
 
-    <section class="mt-10 border-t border-line pt-8">
+    <section id="employment-history" class="mt-10 border-t border-line pt-8">
         <div class="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div><p class="eyebrow">Career timeline</p><h2 class="font-display mt-2 text-3xl">Employment history</h2></div>
             <p class="text-sm text-muted">Add current and previous roles to your profile.</p>

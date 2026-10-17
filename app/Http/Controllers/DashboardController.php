@@ -24,6 +24,9 @@ class DashboardController extends Controller
 
         return view('alumni.dashboard', [
             'profile' => $user->profile,
+            'graduate' => Graduate::query()
+                ->where('student_number', $user->student_number)
+                ->first(),
             'announcements' => Announcement::published()
                 ->latest('published_at')
                 ->get(),

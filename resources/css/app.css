@@ -58,6 +58,11 @@
     font-family: var(--font-display);
 }
 
+.dashboard-welcome {
+    border-color: #4a168b;
+    background: linear-gradient(108deg, #4f00bd 0%, #4f00bd 56%, #202741 100%);
+}
+
 .eyebrow {
     color: var(--color-terracotta);
     font-size: 0.7rem;

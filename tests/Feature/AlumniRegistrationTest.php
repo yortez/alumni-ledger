@@ -289,6 +289,31 @@ it('shows account and graduate information in the alumni profile form', function
         ->assertSee('Cum Laude');
 });
 
+it('shows the alumni welcome banner and career action on the dashboard', function () {
+    Graduate::query()->create([
+        'student_number' => '2020-0042',
+        'first_name' => 'Morgan',
+        'last_name' => 'Lee',
+        'program_code' => 'BSIT',
+        'batch_year' => 2020,
+    ]);
+    $user = User::factory()->create([
+        'name' => 'Morgan Lee',
+        'student_number' => '2020-0042',
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSee('Welcome back, MORGAN LEE!')
+        ->assertSee('BSIT')
+        ->assertSee('Batch 2020')
+        ->assertSee('Verified')
+        ->assertSee('My Profile')
+        ->assertSee('Update Career')
+        ->assertSee('href="'.route('profile.edit').'#employment-history"', false);
+});
+
 it('forbids non-admin users from viewing the graduate master list', function () {
     $user = User::factory()->create();
 

@@ -4,7 +4,28 @@
 
 @section('content')
 <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:py-14">
-    <div class="flex flex-col justify-between gap-6 border-b border-line pb-8 sm:flex-row sm:items-end"><div><p class="eyebrow">Alumni directory</p><h1 class="font-display mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Welcome, {{ auth()->user()->name }}.</h1></div><a href="{{ route('profile.edit') }}" class="inline-flex items-center justify-between gap-8 rounded-md bg-forest px-5 py-3 text-sm font-semibold text-white transition hover:bg-forest-dark">{{ $profile?->completed_at ? 'Update profile' : 'Complete profile' }} <span aria-hidden="true">&#8599;</span></a></div>
+    <section class="dashboard-welcome flex flex-col justify-between gap-5 rounded-md border px-5 py-4 sm:flex-row sm:items-center sm:px-6" aria-label="Alumni welcome">
+        <div class="min-w-0">
+            <h1 class="font-display text-lg font-bold sm:text-xl">Welcome back, {{ strtoupper(auth()->user()->name) }}! <span aria-hidden="true">&#128075;</span></h1>
+            <p class="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs leading-5 text-white/75 sm:text-sm">
+                <span>{{ $graduate?->program_code ?: 'Program not listed' }}</span>
+                <span aria-hidden="true">&bull;</span>
+                <span>Batch {{ $graduate?->batch_year ?: 'not listed' }}</span>
+                <span aria-hidden="true">&bull;</span>
+                <span class="font-semibold text-emerald-300">{{ $graduate ? 'Verified' : 'Verification pending' }}</span>
+            </p>
+        </div>
+        <nav aria-label="Profile actions" class="flex shrink-0 flex-wrap gap-2">
+            <a href="{{ route('profile.edit') }}" class="inline-flex min-h-9 items-center gap-2 rounded-md border border-white/30 px-3 py-2 text-xs font-medium text-white transition hover:bg-white/10">
+                <svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4" /><path d="M5 21a7 7 0 0 1 14 0" /></svg>
+                My Profile
+            </a>
+            <a href="{{ route('profile.edit') }}#employment-history" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-3 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark">
+                <svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2" /></svg>
+                Update Career
+            </a>
+        </nav>
+    </section>
     @if ($announcements->isNotEmpty())
         <section class="mt-8" aria-labelledby="announcements-heading">
             <div class="mb-4 flex items-end justify-between gap-4"><div><p class="eyebrow">From the college</p><h2 id="announcements-heading" class="font-display mt-2 text-3xl">Announcements</h2></div><span class="text-xs uppercase tracking-wider text-muted">{{ $announcements->count() }} new</span></div>
