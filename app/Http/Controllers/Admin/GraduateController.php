@@ -19,7 +19,10 @@ class GraduateController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
         $graduates = Graduate::query()
-            ->with(['user:id,student_number', 'user.profile'])
+            ->with([
+                'user:id,student_number',
+                'user.profile.employments' => fn ($query) => $query->orderByDesc('is_current')->orderByDesc('start_date'),
+            ])
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('student_number', 'like', "%{$search}%")

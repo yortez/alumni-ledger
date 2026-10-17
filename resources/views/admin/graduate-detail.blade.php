@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Applicant details')
+@section('title', 'Alumni profile')
 
 @section('content')
 <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 lg:py-14">
     <div class="mb-8 flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="mt-3 font-display text-4xl sm:text-5xl">Applicant details</h1>
+            <h1 class="mt-3 font-display text-4xl sm:text-5xl">Alumni profile</h1>
         </div>
         <a href="{{ route('admin.graduates.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Back to roster</a>
     </div>
@@ -16,7 +16,7 @@
         <section class="border border-line bg-white p-6">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <p class="text-xs uppercase tracking-wider text-muted">Applicant</p>
+                    <p class="text-xs uppercase tracking-wider text-muted">Graduate record</p>
                     <h2 class="mt-2 font-display text-3xl">{{ $graduate->fullName() }}</h2>
                 </div>
                 @if ($profile?->completed_at)
@@ -59,26 +59,10 @@
         </section>
 
         <section class="border border-line bg-white p-6">
-            <h2 class="font-display text-2xl">Professional profile</h2>
+            <h2 class="font-display text-2xl">Personal Information</h2>
 
             @if ($profile)
                 <dl class="mt-6 grid gap-4">
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Job title</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->job_title ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Employer</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->employer ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Industry</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->industry ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Employment status</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ ucfirst((string) ($profile->employment_status ?? 'not provided')) }}</dd>
-                    </div>
                     <div>
                         <dt class="text-xs uppercase tracking-wider text-muted">Location</dt>
                         <dd class="mt-2 font-medium text-ink">{{ $profile->city ?: 'Not provided' }}{{ $profile->city && $profile->country ? ', ' : '' }}{{ $profile->country ?: '' }}</dd>
@@ -86,14 +70,6 @@
                     <div>
                         <dt class="text-xs uppercase tracking-wider text-muted">Phone</dt>
                         <dd class="mt-2 font-medium text-ink">{{ $profile->phone ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">LinkedIn</dt>
-                        <dd class="mt-2 break-all font-medium text-ink">{{ $profile->linkedin_url ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Bio</dt>
-                        <dd class="mt-2 whitespace-pre-line text-sm leading-6 text-ink">{{ $profile->bio ?: 'No bio added yet.' }}</dd>
                     </div>
                 </dl>
                 <div class="mt-7 border-t border-line pt-5">

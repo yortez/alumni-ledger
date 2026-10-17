@@ -3,24 +3,60 @@
 @section('title', 'Alumni profile')
 
 @section('content')
-<div class="mx-auto max-w-5xl px-5 py-10 sm:px-8 lg:py-14">
-    <div class="mb-8 border-b border-line pb-7"><p class="eyebrow">Your details</p><h1 class="font-display mt-3 text-4xl">Alumni profile</h1><p class="mt-3 text-sm text-muted">{{ auth()->user()->name }} · {{ auth()->user()->student_number }}</p></div>
-    <form method="POST" action="{{ route('profile.update') }}" class="form-surface">@csrf @method('PUT')
-        <div class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-            <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" value="{{ old('phone', $profile?->phone) }}" autocomplete="tel" required>@error('phone')<p class="field-error">{{ $message }}</p>@enderror</div>
-            <div class="field"><label for="employment_status">Employment status</label><select id="employment_status" name="employment_status" required><option value="">Select status</option>@foreach (['employed' => 'Employed', 'self-employed' => 'Self-employed', 'seeking-work' => 'Seeking work', 'studying' => 'Studying', 'other' => 'Other'] as $value => $label)<option value="{{ $value }}" @selected(old('employment_status', $profile?->employment_status) === $value)>{{ $label }}</option>@endforeach</select>@error('employment_status')<p class="field-error">{{ $message }}</p>@enderror</div>
-            <div class="field"><label for="job_title">Job title</label><input id="job_title" name="job_title" value="{{ old('job_title', $profile?->job_title) }}" required>@error('job_title')<p class="field-error">{{ $message }}</p>@enderror</div>
-            <div class="field"><label for="employer">Employer</label><input id="employer" name="employer" value="{{ old('employer', $profile?->employer) }}" required>@error('employer')<p class="field-error">{{ $message }}</p>@enderror</div>
-            <div class="field"><label for="industry">Industry</label><input id="industry" name="industry" value="{{ old('industry', $profile?->industry) }}" required>@error('industry')<p class="field-error">{{ $message }}</p>@enderror</div>
-            <div class="field"><label for="city">City</label><input id="city" name="city" value="{{ old('city', $profile?->city) }}" autocomplete="address-level2" required>@error('city')<p class="field-error">{{ $message }}</p>@enderror</div>
-            <div class="field"><label for="country">Country</label><input id="country" name="country" value="{{ old('country', $profile?->country) }}" autocomplete="country-name" required>@error('country')<p class="field-error">{{ $message }}</p>@enderror</div>
-            <div class="field"><label for="linkedin_url">LinkedIn URL <span class="font-normal text-muted">Optional</span></label><input id="linkedin_url" type="url" name="linkedin_url" value="{{ old('linkedin_url', $profile?->linkedin_url) }}" autocomplete="url">@error('linkedin_url')<p class="field-error">{{ $message }}</p>@enderror</div>
-            <div class="field sm:col-span-2"><label for="bio">A little about you <span class="font-normal text-muted">Optional</span></label><textarea id="bio" name="bio" rows="4" maxlength="2000">{{ old('bio', $profile?->bio) }}</textarea>@error('bio')<p class="field-error">{{ $message }}</p>@enderror</div>
+<div class="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-10">
+    <div class="mb-6 border-b border-line pb-5">
+        <p class="eyebrow">Your details</p>
+        <h1 class="font-display mt-2 text-3xl font-semibold sm:text-4xl">Edit profile</h1>
+        <p class="mt-2 text-sm text-muted">{{ auth()->user()->name }} · {{ auth()->user()->student_number }}</p>
+    </div>
+
+    <form method="POST" action="{{ route('profile.update') }}" class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
+        @csrf
+        @method('PUT')
+
+        <div class="grid gap-5">
+            <section class="border border-line bg-white">
+                <div class="border-b border-line px-4 py-3 sm:px-5">
+                    <h2 class="text-sm font-semibold">Personal Information</h2>
+                </div>
+                <div class="grid gap-x-5 gap-y-4 p-4 sm:grid-cols-2 sm:p-5">
+                    <div class="field"><label for="name">Full name</label><input id="name" value="{{ auth()->user()->name }}" readonly></div>
+                    <div class="field"><label for="email">Email address</label><input id="email" type="email" value="{{ auth()->user()->email }}" readonly></div>
+                    <div class="field"><label for="phone">Contact number</label><input id="phone" name="phone" value="{{ old('phone', $profile?->phone) }}" autocomplete="tel" required>@error('phone')<p class="field-error">{{ $message }}</p>@enderror</div>
+                    <div class="field"><label for="city">City</label><input id="city" name="city" value="{{ old('city', $profile?->city) }}" autocomplete="address-level2" required>@error('city')<p class="field-error">{{ $message }}</p>@enderror</div>
+                    <div class="field"><label for="country">Country</label><input id="country" name="country" value="{{ old('country', $profile?->country) }}" autocomplete="country-name" required>@error('country')<p class="field-error">{{ $message }}</p>@enderror</div>
+                </div>
+            </section>
+
+            <section class="border border-line bg-white">
+                <div class="border-b border-line px-4 py-3 sm:px-5">
+                    <h2 class="text-sm font-semibold">Academic Information</h2>
+                </div>
+                <div class="grid gap-x-5 gap-y-4 p-4 sm:grid-cols-2 sm:p-5">
+                    <div class="field"><label for="student_number">Student number</label><input id="student_number" value="{{ auth()->user()->student_number }}" readonly></div>
+                    <div class="field"><label for="program_code">Program</label><input id="program_code" value="{{ $graduate?->program_code ?? 'Not available' }}" readonly></div>
+                    <div class="field"><label for="batch_year">Batch year</label><input id="batch_year" value="{{ $graduate?->batch_year ?? 'Not available' }}" readonly></div>
+                    <div class="field"><label for="latin_honor">Latin honor</label><input id="latin_honor" value="{{ $graduate ? ucwords(str_replace('_', ' ', $graduate->latin_honor)) : 'Not available' }}" readonly></div>
+                </div>
+            </section>
+
         </div>
-        <div class="mt-8 flex flex-col-reverse justify-between gap-4 border-t border-line pt-6 sm:flex-row sm:items-center"><a href="{{ route('dashboard') }}" class="text-sm font-medium text-muted hover:text-ink">Back to dashboard</a><button type="submit" class="inline-flex items-center justify-between gap-10 bg-forest px-5 py-3.5 text-sm font-semibold text-white hover:bg-forest-dark">Save profile <span aria-hidden="true">&#8599;</span></button></div>
+
+        <aside class="grid gap-5 lg:sticky lg:top-4">
+            <section class="border border-line bg-white p-4 text-center">
+                <h2 class="text-left text-sm font-semibold">Profile</h2>
+                <div class="mx-auto mt-5 grid size-14 place-items-center rounded-full bg-forest text-lg font-semibold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                <p class="mt-3 truncate text-sm font-semibold">{{ auth()->user()->name }}</p>
+                <p class="mt-1 text-xs text-muted">{{ auth()->user()->student_number }}</p>
+            </section>
+            <section class="grid gap-3 border border-line bg-white p-4">
+                <button type="submit" class="w-full bg-forest px-4 py-3 text-sm font-semibold text-white transition hover:bg-forest-dark">Save profile</button>
+                <a href="{{ route('dashboard') }}" class="w-full border border-line px-4 py-2.5 text-center text-sm font-medium text-muted transition hover:bg-paper hover:text-ink">Cancel</a>
+            </section>
+        </aside>
     </form>
 
-    <section class="mt-12 border-t border-line pt-9">
+    <section class="mt-10 border-t border-line pt-8">
         <div class="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div><p class="eyebrow">Career timeline</p><h2 class="font-display mt-2 text-3xl">Employment history</h2></div>
             <p class="text-sm text-muted">Add current and previous roles to your profile.</p>

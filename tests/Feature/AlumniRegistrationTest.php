@@ -108,29 +108,52 @@ it('prevents a graduate record from being claimed twice', function () {
     $this->assertDatabaseCount('users', 1);
 });
 
-it('saves a complete alumni profile for the signed-in account', function () {
+it('saves profile details without requiring career information', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->put('/profile', [
         'phone' => '+1 555 0100',
-        'job_title' => 'Research Associate',
-        'employer' => 'Field Lab',
-        'industry' => 'Research',
-        'employment_status' => 'employed',
         'city' => 'Portland',
         'country' => 'United States',
-        'linkedin_url' => 'https://www.linkedin.com/in/morgan-lee',
-        'bio' => 'Working on urban ecology.',
     ]);
 
     $response->assertRedirectToRoute('dashboard');
     $this->assertDatabaseHas('alumni_profiles', [
         'user_id' => $user->id,
-        'job_title' => 'Research Associate',
-        'employer' => 'Field Lab',
+        'phone' => '+1 555 0100',
+        'city' => 'Portland',
+        'country' => 'United States',
         'completed_at' => AlumniProfile::query()->where('user_id', $user->id)->value('completed_at'),
     ]);
     expect(AlumniProfile::query()->where('user_id', $user->id)->firstOrFail()->completed_at)->not->toBeNull();
+});
+
+it('shows account and graduate information in the alumni profile form', function () {
+    Graduate::query()->create([
+        'student_number' => '2020-0042',
+        'first_name' => 'Morgan',
+        'last_name' => 'Lee',
+        'program_code' => 'ENVS',
+        'batch_year' => 2020,
+        'latin_honor' => 'cum_laude',
+    ]);
+    $user = User::factory()->create([
+        'name' => 'Morgan Lee',
+        'student_number' => '2020-0042',
+        'email' => 'morgan@example.com',
+    ]);
+
+    $this->actingAs($user)
+        ->get('/profile')
+        ->assertOk()
+        ->assertSee('Personal Information')
+        ->assertSee('Academic Information')
+        ->assertDontSee('Career Information')
+        ->assertSee('Employment history')
+        ->assertSee('morgan@example.com')
+        ->assertSee('ENVS')
+        ->assertSee('2020')
+        ->assertSee('Cum Laude');
 });
 
 it('forbids non-admin users from viewing the graduate master list', function () {
@@ -149,13 +172,17 @@ it('shows profile completion and employment details to administrators', function
     ]);
     $admin = User::factory()->create(['student_number' => '2018-0099']);
     $admin->forceFill(['is_admin' => true])->save();
-    $admin->profile()->create([
-        'job_title' => 'Senior Analyst',
-        'employer' => 'Civic Lab',
-        'industry' => 'Public policy',
+    $profile = $admin->profile()->create([
         'city' => 'Boston',
         'country' => 'United States',
         'completed_at' => now(),
+    ]);
+    $profile->employments()->create([
+        'job_title' => 'Senior Analyst',
+        'employer' => 'Civic Lab',
+        'location' => 'Boston',
+        'start_date' => '2022-01-01',
+        'is_current' => true,
     ]);
 
     $this->actingAs($admin)
@@ -163,7 +190,8 @@ it('shows profile completion and employment details to administrators', function
         ->assertOk()
         ->assertSee('Profiles complete')
         ->assertSee('Senior Analyst')
-        ->assertSee('Civic Lab');
+        ->assertSee('Civic Lab')
+        ->assertSee('Current role');
 });
 
 it('allows administrators to view applicant details', function () {
@@ -205,10 +233,13 @@ it('allows administrators to view applicant details', function () {
     $this->actingAs($admin)
         ->get('/admin/graduates/'.$graduate->getKey())
         ->assertOk()
-        ->assertSee('Applicant details')
+        ->assertSee('Alumni profile')
         ->assertSee('Jordan Smith')
-        ->assertSee('Operations Manager')
-        ->assertSee('Northline Group')
+        ->assertSee('Personal Information')
+        ->assertSee('+1 555 0102')
+        ->assertSee('Seattle')
+        ->assertDontSee('Operations Manager')
+        ->assertDontSee('Northline Group')
         ->assertSee('Employment history')
         ->assertSee('Program Assistant')
         ->assertSee('Community Works');

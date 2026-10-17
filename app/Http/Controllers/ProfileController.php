@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Graduate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,9 +13,13 @@ class ProfileController extends Controller
     {
         $profile = $request->user()->profile;
         $profile?->load('employments');
+        $graduate = Graduate::query()
+            ->where('student_number', $request->user()->student_number)
+            ->first();
 
         return view('alumni.profile', [
             'profile' => $profile,
+            'graduate' => $graduate,
             'employmentRecords' => $profile?->employments ?? collect(),
         ]);
     }
@@ -23,14 +28,8 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'phone' => ['required', 'string', 'max:40'],
-            'job_title' => ['required', 'string', 'max:255'],
-            'employer' => ['required', 'string', 'max:255'],
-            'industry' => ['required', 'string', 'max:255'],
-            'employment_status' => ['required', 'in:employed,self-employed,seeking-work,studying,other'],
             'city' => ['required', 'string', 'max:120'],
             'country' => ['required', 'string', 'max:120'],
-            'linkedin_url' => ['nullable', 'url', 'max:255'],
-            'bio' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $request->user()->profile()->updateOrCreate([], [
