@@ -30,6 +30,7 @@
                         <form method="POST" action="{{ route('admin.graduates.import') }}" enctype="multipart/form-data" class="mt-4 grid gap-3">@csrf
                             <div class="field"><label for="file">CSV file</label><input id="file" type="file" name="file" accept=".csv,text/csv" required>@error('file')<p class="field-error">{{ $message }}</p>@enderror</div>
                             <p class="text-xs leading-5 text-muted">Headers: student_number, first_name, last_name, middle_name, program_code, batch_year, latin_honor</p>
+                            <a href="{{ route('admin.graduates.import-template') }}" class="text-xs font-medium text-forest underline underline-offset-4">Download sample CSV template</a>
                             <button class="border border-forest px-4 py-2.5 text-sm font-semibold text-forest transition hover:bg-mint" type="submit">Import CSV</button>
                         </form>
                     </details>

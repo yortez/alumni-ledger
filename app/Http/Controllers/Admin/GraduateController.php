@@ -78,6 +78,29 @@ class GraduateController extends Controller
         }, 'alumni-records.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
+    public function downloadImportTemplate(): StreamedResponse
+    {
+        return response()->streamDownload(function (): void {
+            $stream = fopen('php://output', 'w');
+
+            if (! is_resource($stream)) {
+                return;
+            }
+
+            fputcsv($stream, [
+                'student_number',
+                'first_name',
+                'last_name',
+                'middle_name',
+                'program_code',
+                'batch_year',
+                'latin_honor',
+            ], ',', '"', '');
+
+            fclose($stream);
+        }, 'alumni-import-template.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     /**
      * @return array{search: string, program: string, batch: string, status: string}
      */

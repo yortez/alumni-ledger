@@ -58,6 +58,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     });
 
     Route::middleware('admin.permission:graduates')->group(function (): void {
+        Route::get('/graduates/import-template', [GraduateController::class, 'downloadImportTemplate'])->name('graduates.import-template');
         Route::get('/graduates/export', [GraduateController::class, 'export'])->name('graduates.export');
         Route::get('/graduates', [GraduateController::class, 'index'])->name('graduates.index');
         Route::get('/graduates/{graduate}/files/{file}', [GraduateController::class, 'file'])->name('graduates.files');

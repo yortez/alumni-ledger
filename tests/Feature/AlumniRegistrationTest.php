@@ -576,3 +576,12 @@ it('imports valid graduate records from a CSV for an administrator', function ()
         'latin_honor' => 'magna_cum_laude',
     ]);
 });
+
+it('downloads a CSV template with the supported import headers', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)
+        ->get(route('admin.graduates.import-template'))
+        ->assertDownload('alumni-import-template.csv');
+});
