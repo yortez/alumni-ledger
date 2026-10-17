@@ -32,6 +32,27 @@ it('lets a role manager create a role with a custom type and module permissions'
     expect(AdminRole::query()->where('type', 'survey_coordinator')->value('permissions'))->toBe(['surveys']);
 });
 
+it('filters role definitions by name and type', function () {
+    $superAdmin = User::factory()->create();
+    $superAdmin->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
+    AdminRole::query()->create([
+        'name' => 'Analytics coordinator',
+        'type' => 'analytics_coordinator',
+        'permissions' => ['surveys'],
+    ]);
+    AdminRole::query()->create([
+        'name' => 'Records coordinator',
+        'type' => 'records_coordinator',
+        'permissions' => ['graduates'],
+    ]);
+
+    $this->actingAs($superAdmin)
+        ->get('/admin/roles?search=analytics')
+        ->assertOk()
+        ->assertSee('Analytics coordinator')
+        ->assertDontSee('Records coordinator');
+});
+
 it('lets a role manager edit a role definition and its permissions', function () {
     $superAdmin = User::factory()->create();
     $superAdmin->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();

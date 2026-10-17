@@ -3,117 +3,55 @@
 @section('title', 'Role definitions')
 
 @section('content')
-<div class="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:py-14">
-    <div class="flex flex-col justify-between gap-6 border-b border-line pb-8 sm:flex-row sm:items-end">
-        <div>
-            <p class="eyebrow">Administration</p>
-            <h1 class="font-display mt-3 text-4xl sm:text-5xl">Role definitions</h1>
+<div class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
+    <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div><h1 class="text-xl font-semibold">Role Definitions</h1><p class="mt-1 text-xs text-muted">{{ $roleCount }} roles</p></div>
+        <div class="flex flex-wrap gap-2"><a href="{{ route('admin.users.index') }}" class="inline-flex min-h-9 items-center rounded-md border border-line bg-surface px-3 py-2 text-xs font-medium text-muted transition hover:text-ink">Administrator Accounts</a>
+            <details class="relative">
+                <summary class="inline-flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Add Role</summary>
+                <div class="absolute right-0 z-20 mt-2 max-h-[82vh] w-[min(92vw,34rem)] overflow-y-auto rounded-md border border-line bg-surface p-5 shadow-xl">
+                    <h2 class="text-sm font-semibold">Create a role</h2>
+                    <form method="POST" action="{{ route('admin.roles.store') }}" class="mt-4 grid gap-4">@csrf
+                        <div class="field"><label for="name">Role name</label><input id="name" name="name" maxlength="120" value="{{ old('name') }}" required>@error('name')<p class="field-error">{{ $message }}</p>@enderror</div>
+                        <div class="field"><label for="type">Role type</label><input id="type" name="type" maxlength="60" pattern="[A-Za-z0-9_-]+" value="{{ old('type') }}" required><p class="mt-1 text-xs text-muted">Use letters, numbers, hyphens, or underscores.</p>@error('type')<p class="field-error">{{ $message }}</p>@enderror</div>
+                        <div class="field"><label for="description">Description <span class="font-normal text-muted">Optional</span></label><textarea id="description" name="description" rows="3" maxlength="1000">{{ old('description') }}</textarea>@error('description')<p class="field-error">{{ $message }}</p>@enderror</div>
+                        <fieldset class="grid gap-2"><legend class="text-sm font-semibold">Module permissions</legend>@foreach ($permissions as $permission => $label)<label class="flex items-start gap-2 py-1 text-sm"><input class="mt-1" type="checkbox" name="permissions[]" value="{{ $permission }}" @checked(in_array($permission, old('permissions', [])))><span>{{ $label }}</span></label>@endforeach @error('permissions')<p class="field-error">{{ $message }}</p>@enderror @error('permissions.*')<p class="field-error">{{ $message }}</p>@enderror</fieldset>
+                        <button type="submit" class="bg-forest px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-forest-dark">Create role</button>
+                    </form>
+                </div>
+            </details>
         </div>
-        <a href="{{ route('admin.users.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Administrator accounts</a>
-    </div>
+    </header>
 
-    <div class="mt-8 grid items-start gap-8 lg:grid-cols-[0.75fr_1.25fr]">
-        <section class="border border-line bg-white p-5 sm:p-6">
-            <p class="eyebrow">New role</p>
-            <h2 class="font-display mt-2 text-2xl">Create a role</h2>
-            <form method="POST" action="{{ route('admin.roles.store') }}" class="mt-5 grid gap-5">
-                @csrf
-                <div class="field">
-                    <label for="name">Role name</label>
-                    <input id="name" name="name" maxlength="120" value="{{ old('name') }}" required>
-                    @error('name')<p class="field-error">{{ $message }}</p>@enderror
-                </div>
-                <div class="field">
-                    <label for="type">Role type</label>
-                    <input id="type" name="type" maxlength="60" pattern="[A-Za-z0-9_-]+" value="{{ old('type') }}" required>
-                    <p class="mt-1 text-xs text-muted">Use letters, numbers, hyphens, or underscores.</p>
-                    @error('type')<p class="field-error">{{ $message }}</p>@enderror
-                </div>
-                <div class="field">
-                    <label for="description">Description <span class="font-normal text-muted">Optional</span></label>
-                    <textarea id="description" name="description" rows="3" maxlength="1000">{{ old('description') }}</textarea>
-                    @error('description')<p class="field-error">{{ $message }}</p>@enderror
-                </div>
-                <fieldset class="grid gap-2">
-                    <legend class="text-sm font-semibold">Module permissions</legend>
-                    @foreach ($permissions as $permission => $label)
-                        <label class="flex items-start gap-2 py-1 text-sm">
-                            <input class="mt-1 accent-[#245b49]" type="checkbox" name="permissions[]" value="{{ $permission }}" @checked(in_array($permission, old('permissions', [])))>
-                            <span>{{ $label }}</span>
-                        </label>
-                    @endforeach
-                    @error('permissions')<p class="field-error">{{ $message }}</p>@enderror
-                    @error('permissions.*')<p class="field-error">{{ $message }}</p>@enderror
-                </fieldset>
-                <button type="submit" class="bg-forest px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-forest-dark">Create role</button>
-            </form>
-        </section>
+    <form method="GET" action="{{ route('admin.roles.index') }}" class="mb-4 flex flex-wrap items-center gap-2 rounded-md border border-line bg-surface p-3 sm:p-4">
+        <label class="relative block w-full sm:max-w-72"><span class="sr-only">Search roles</span><svg aria-hidden="true" class="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg><input type="search" name="search" value="{{ $search }}" placeholder="Search role name or type..." class="w-full rounded-md border border-line bg-surface-raised py-2 pl-9 pr-3 text-xs text-ink placeholder:text-muted focus:border-forest focus:outline-none"></label>
+        <button type="submit" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark">Filter</button><a href="{{ route('admin.roles.index') }}" class="inline-flex min-h-9 items-center rounded-md border border-line bg-surface-raised px-4 py-2 text-xs font-medium text-muted transition hover:text-ink">Reset</a>
+    </form>
 
-        <section class="min-w-0">
-            <div class="mb-4 flex items-end justify-between gap-4">
-                <h2 class="font-display text-2xl">Existing roles</h2>
-                <span class="text-xs uppercase tracking-wider text-muted">{{ $roles->total() }} roles</span>
-            </div>
-            <div class="grid gap-3">
-                @forelse ($roles as $role)
-                    <article class="border border-line bg-white p-5 sm:p-6">
-                        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                <h3 class="font-display text-xl">{{ $role->name }}</h3>
-                                <p class="mt-1 text-xs text-muted">{{ $role->type }} · {{ $role->users_count }} assigned administrators{{ $role->is_system ? ' · System role' : '' }}</p>
-                            </div>
-                            @if ($role->is_system)<span class="text-xs font-semibold uppercase tracking-wider text-forest">Protected</span>@endif
+    <section class="grid gap-3">
+        @forelse ($roles as $role)
+            <article class="overflow-hidden rounded-md border border-line bg-surface">
+                <div class="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center sm:px-5">
+                    <div class="flex min-w-0 items-center gap-3"><span class="grid size-9 shrink-0 place-items-center rounded-full bg-forest/15 text-xs font-bold text-forest">{{ strtoupper(substr($role->name, 0, 1)) }}</span><div class="min-w-0"><h2 class="truncate text-sm font-semibold">{{ $role->name }}</h2><p class="mt-1 text-[10px] text-muted">{{ $role->type }} · {{ $role->users_count }} assigned administrators</p></div>@if ($role->is_system)<span class="rounded-full bg-warning/15 px-2.5 py-1 text-[10px] font-semibold text-warning">Protected</span>@endif</div>
+                    <div class="flex shrink-0 items-center gap-2"><details class="relative"><summary class="inline-flex min-h-8 cursor-pointer list-none items-center gap-2 rounded-md border border-line px-3 py-2 text-[10px] font-medium text-muted hover:text-ink"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 4 4 4L9 19l-5 1 1-5L16 4zM14 6l4 4" /></svg>Edit</summary>
+                        <div class="absolute right-0 z-20 mt-2 max-h-[75vh] w-[min(92vw,32rem)] overflow-y-auto rounded-md border border-line bg-surface p-4 shadow-xl">
+                            <form method="POST" action="{{ route('admin.roles.update', $role) }}" class="grid gap-4">@csrf @method('PATCH')
+                                <div class="field"><label for="name-{{ $role->id }}">Role name</label><input id="name-{{ $role->id }}" name="name" maxlength="120" value="{{ old('name', $role->name) }}" required>@error('name')<p class="field-error">{{ $message }}</p>@enderror</div>
+                                @unless ($role->is_system)<div class="field"><label for="type-{{ $role->id }}">Role type</label><input id="type-{{ $role->id }}" name="type" maxlength="60" pattern="[A-Za-z0-9_-]+" value="{{ old('type', $role->type) }}" required>@error('type')<p class="field-error">{{ $message }}</p>@enderror</div>@endunless
+                                <div class="field"><label for="description-{{ $role->id }}">Description</label><textarea id="description-{{ $role->id }}" name="description" rows="2" maxlength="1000">{{ old('description', $role->description) }}</textarea>@error('description')<p class="field-error">{{ $message }}</p>@enderror</div>
+                                @if ($role->is_system)<p class="text-xs leading-5 text-muted">This protected system role has access to all modules and role-management controls.</p>@else<fieldset class="grid gap-2"><legend class="text-sm font-semibold">Module permissions</legend>@foreach ($permissions as $permission => $label)<label class="flex items-start gap-2 py-1 text-xs"><input class="mt-1" type="checkbox" name="permissions[]" value="{{ $permission }}" @checked(in_array($permission, $role->permissions ?? []))><span>{{ $label }}</span></label>@endforeach @error('permissions')<p class="field-error">{{ $message }}</p>@enderror @error('permissions.*')<p class="field-error">{{ $message }}</p>@enderror</fieldset>@endif
+                                <button type="submit" class="bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-dark">Save role</button>
+                            </form>
+                            @unless ($role->is_system)<form method="POST" action="{{ route('admin.roles.destroy', $role) }}" class="mt-3">@csrf @method('DELETE')<button type="submit" class="text-xs font-medium text-danger underline underline-offset-4">Delete role</button></form>@endunless
+                            @error('role')<p class="field-error mt-3">{{ $message }}</p>@enderror
                         </div>
-                        <form method="POST" action="{{ route('admin.roles.update', $role) }}" class="grid gap-4 border-t border-line pt-4">
-                            @csrf
-                            @method('PATCH')
-                            <div class="field">
-                                <label for="name-{{ $role->id }}">Role name</label>
-                                <input id="name-{{ $role->id }}" name="name" maxlength="120" value="{{ old('name', $role->name) }}" required>
-                                @error('name')<p class="field-error">{{ $message }}</p>@enderror
-                            </div>
-                            @unless ($role->is_system)
-                                <div class="field">
-                                    <label for="type-{{ $role->id }}">Role type</label>
-                                    <input id="type-{{ $role->id }}" name="type" maxlength="60" pattern="[A-Za-z0-9_-]+" value="{{ old('type', $role->type) }}" required>
-                                    @error('type')<p class="field-error">{{ $message }}</p>@enderror
-                                </div>
-                            @endunless
-                            <div class="field">
-                                <label for="description-{{ $role->id }}">Description</label>
-                                <textarea id="description-{{ $role->id }}" name="description" rows="2" maxlength="1000">{{ old('description', $role->description) }}</textarea>
-                                @error('description')<p class="field-error">{{ $message }}</p>@enderror
-                            </div>
-                            @if ($role->is_system)
-                                <p class="text-sm leading-6 text-muted">This protected system role has access to all modules and role-management controls.</p>
-                            @else
-                                <fieldset class="grid gap-2">
-                                    <legend class="text-sm font-semibold">Module permissions</legend>
-                                    @foreach ($permissions as $permission => $label)
-                                        <label class="flex items-start gap-2 py-1 text-sm">
-                                            <input class="mt-1 accent-[#245b49]" type="checkbox" name="permissions[]" value="{{ $permission }}" @checked(in_array($permission, $role->permissions ?? []))>
-                                            <span>{{ $label }}</span>
-                                        </label>
-                                    @endforeach
-                                    @error('permissions')<p class="field-error">{{ $message }}</p>@enderror
-                                    @error('permissions.*')<p class="field-error">{{ $message }}</p>@enderror
-                                </fieldset>
-                            @endif
-                            <div class="flex flex-wrap items-center gap-4">
-                                <button type="submit" class="border border-forest px-4 py-3 text-sm font-semibold text-forest transition hover:bg-mint">Save role</button>
-                            </div>
-                        </form>
-                        @unless ($role->is_system)
-                            <form method="POST" action="{{ route('admin.roles.destroy', $role) }}" class="mt-3">@csrf @method('DELETE')<button type="submit" class="text-sm font-medium text-terracotta underline underline-offset-4">Delete role</button></form>
-                        @endunless
-                        @error('role')<p class="field-error mt-3">{{ $message }}</p>@enderror
-                    </article>
-                @empty
-                    <p class="border border-dashed border-line px-5 py-12 text-center text-sm text-muted">No administrator roles configured.</p>
-                @endforelse
-            </div>
-            <div class="mt-5">{{ $roles->links() }}</div>
-        </section>
-    </div>
+                    </details></div>
+                </div>
+            </article>
+        @empty
+            <p class="rounded-md border border-dashed border-line px-5 py-12 text-center text-sm text-muted">No roles match this search.</p>
+        @endforelse
+    </section>
+    <div class="mt-4">{{ $roles->links() }}</div>
 </div>
 @endsection

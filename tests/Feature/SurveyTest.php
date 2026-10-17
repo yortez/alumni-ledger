@@ -15,7 +15,35 @@ it('shows the survey manager to administrators', function () {
     $this->actingAs($admin)
         ->get('/admin/surveys')
         ->assertOk()
-        ->assertSee('Survey manager');
+        ->assertSee('Survey manager')
+        ->assertSee('Questions')
+        ->assertSee('Add Question')
+        ->assertSee('Question type');
+});
+
+it('filters surveys by title and status', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+    Survey::query()->create([
+        'title' => 'Career pathways',
+        'questions' => ['What is your role?'],
+        'target_programs' => [],
+        'target_graduation_years' => [],
+        'is_active' => true,
+    ]);
+    Survey::query()->create([
+        'title' => 'Campus feedback',
+        'questions' => ['What should change?'],
+        'target_programs' => [],
+        'target_graduation_years' => [],
+        'is_active' => false,
+    ]);
+
+    $this->actingAs($admin)
+        ->get('/admin/surveys?search=career&status=open')
+        ->assertOk()
+        ->assertSee('Career pathways')
+        ->assertDontSee('Campus feedback');
 });
 
 it('creates a survey with selected programs and graduation years', function () {
@@ -40,10 +68,35 @@ it('creates a survey with selected programs and graduation years', function () {
 
     $response->assertRedirectToRoute('admin.surveys.index');
     $survey = Survey::query()->firstOrFail();
-    expect($survey->questions)->toBe(['What was your first role?', 'How did you find it?'])
+    expect($survey->normalizedQuestions())->toBe([
+        ['prompt' => 'What was your first role?', 'section_label' => '', 'type' => 'long_text', 'required' => true, 'options' => []],
+        ['prompt' => 'How did you find it?', 'section_label' => '', 'type' => 'long_text', 'required' => true, 'options' => []],
+    ])
         ->and($survey->target_programs)->toBe(['CS'])
         ->and($survey->target_graduation_years)->toBe([2022])
         ->and($survey->is_active)->toBeTrue();
+});
+
+it('creates typed questions with section labels and choice options', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)->post('/admin/surveys', [
+        'title' => 'Employment details',
+        'questions' => [
+            ['prompt' => 'Employer name', 'section_label' => 'Employment Status', 'type' => 'short_text', 'required' => '1'],
+            ['prompt' => 'Which sector?', 'section_label' => 'Employment Status', 'type' => 'radio', 'required' => '0', 'options_text' => "Private\nPublic\nOther"],
+        ],
+        'target_programs' => [],
+        'target_graduation_years' => [],
+        'status' => 'draft',
+    ])->assertRedirectToRoute('admin.surveys.index');
+
+    $survey = Survey::query()->where('title', 'Employment details')->firstOrFail();
+    expect($survey->normalizedQuestions())->toBe([
+        ['prompt' => 'Employer name', 'section_label' => 'Employment Status', 'type' => 'short_text', 'required' => true, 'options' => []],
+        ['prompt' => 'Which sector?', 'section_label' => 'Employment Status', 'type' => 'radio', 'required' => false, 'options' => ['Private', 'Public', 'Other']],
+    ]);
 });
 
 it('only offers a targeted survey to alumni matching its program and graduation year', function () {
@@ -123,6 +176,92 @@ it('stores one response from an eligible alumnus and prevents a second response'
     $this->assertDatabaseCount('survey_responses', 1);
 });
 
+it('renders and stores typed survey answers including multiple selections', function () {
+    Graduate::query()->create([
+        'student_number' => '2024-5510',
+        'first_name' => 'Sam',
+        'last_name' => 'Garcia',
+        'program_code' => 'CS',
+        'batch_year' => 2024,
+    ]);
+    $alumnus = User::factory()->create(['student_number' => '2024-5510']);
+    $survey = Survey::query()->create([
+        'title' => 'Employment profile',
+        'questions' => [
+            ['prompt' => 'Employer name', 'section_label' => 'Employment Status', 'type' => 'short_text', 'required' => true, 'options' => []],
+            ['prompt' => 'Sector', 'section_label' => 'Employment Status', 'type' => 'radio', 'required' => true, 'options' => ['Private', 'Public']],
+            ['prompt' => 'Benefits', 'section_label' => 'Employment Status', 'type' => 'checkbox', 'required' => false, 'options' => ['Insurance', 'Leave', 'Training']],
+            ['prompt' => 'Course relevance', 'section_label' => 'Education', 'type' => 'dropdown', 'required' => false, 'options' => ['Highly relevant', 'Somewhat relevant', 'Not relevant']],
+        ],
+        'target_programs' => [],
+        'target_graduation_years' => [],
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($alumnus)
+        ->get("/surveys/{$survey->id}")
+        ->assertOk()
+        ->assertSee('Employer name')
+        ->assertSee('Employment Status')
+        ->assertSee('type="radio"', false)
+        ->assertSee('type="checkbox"', false)
+        ->assertSee('Course relevance');
+
+    $this->post("/surveys/{$survey->id}/responses", [
+        'answers' => [
+            'Northside Health',
+            'Private',
+            ['Insurance', 'Training'],
+            'Somewhat relevant',
+        ],
+    ])->assertRedirectToRoute('surveys.index');
+
+    expect(SurveyResponse::query()->firstOrFail()->answers)->toBe([
+        'Northside Health',
+        'Private',
+        ['Insurance', 'Training'],
+        'Somewhat relevant',
+    ]);
+
+    $admin = User::factory()->create(['is_admin' => true]);
+    $this->actingAs($admin)
+        ->get("/admin/surveys/{$survey->id}")
+        ->assertOk()
+        ->assertSee('Employer name')
+        ->assertSee('Northside Health')
+        ->assertSee('Insurance, Training');
+});
+
+it('rejects typed choice answers that are not survey options', function () {
+    Graduate::query()->create([
+        'student_number' => '2024-5511',
+        'first_name' => 'Taylor',
+        'last_name' => 'Ng',
+        'program_code' => 'CS',
+        'batch_year' => 2024,
+    ]);
+    $alumnus = User::factory()->create(['student_number' => '2024-5511']);
+    $survey = Survey::query()->create([
+        'title' => 'Employment sector',
+        'questions' => [[
+            'prompt' => 'Choose your sector',
+            'section_label' => 'Employment',
+            'type' => 'radio',
+            'required' => true,
+            'options' => ['Private', 'Public'],
+        ]],
+        'target_programs' => [],
+        'target_graduation_years' => [],
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($alumnus)
+        ->post("/surveys/{$survey->id}/responses", ['answers' => ['Not an option']])
+        ->assertSessionHasErrors('answers.0');
+
+    $this->assertDatabaseCount('survey_responses', 0);
+});
+
 it('forbids alumni from creating surveys', function () {
     $alumnus = User::factory()->create();
 
@@ -151,7 +290,9 @@ it('lets administrators edit a survey', function () {
     $this->actingAs($admin)
         ->get("/admin/surveys/{$survey->id}/edit")
         ->assertOk()
-        ->assertSee('Edit survey');
+        ->assertSee('Edit survey')
+        ->assertSee('Section label')
+        ->assertSee('Required');
 
     $this->actingAs($admin)
         ->patch("/admin/surveys/{$survey->id}", [
@@ -167,7 +308,10 @@ it('lets administrators edit a survey', function () {
         'title' => 'Updated community priorities',
         'description' => 'New description.',
     ]);
-    expect($survey->fresh()->questions)->toBe(['What should we improve?', 'Anything else?']);
+    expect($survey->fresh()->normalizedQuestions())->toBe([
+        ['prompt' => 'What should we improve?', 'section_label' => '', 'type' => 'long_text', 'required' => true, 'options' => []],
+        ['prompt' => 'Anything else?', 'section_label' => '', 'type' => 'long_text', 'required' => true, 'options' => []],
+    ]);
 });
 
 it('lets administrators review responses with respondent identity', function () {

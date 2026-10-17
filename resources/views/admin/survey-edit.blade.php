@@ -29,12 +29,8 @@
                 @error('description')<p class="field-error">{{ $message }}</p>@enderror
             </div>
 
-            <div class="field">
-                <label for="questions_text">Questions</label>
-                <textarea id="questions_text" name="questions_text" rows="6" placeholder="One question per line" required>{{ old('questions_text', implode("\n", $survey->questions)) }}</textarea>
-                <p class="text-xs text-muted">Each line becomes a required long-answer question. Maximum 20.</p>
-                @error('questions')<p class="field-error">{{ $message }}</p>@enderror
-            </div>
+            @php($questionEntries = old('questions', $survey->normalizedQuestions()))
+            @include('admin.partials.survey-question-builder', ['questionEntries' => $questionEntries])
 
             <fieldset class="grid gap-3">
                 <legend class="text-sm font-semibold">Who should respond?</legend>

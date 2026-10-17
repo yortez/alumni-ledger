@@ -11,10 +11,27 @@ use Illuminate\View\View;
 
 class AdminUserController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim((string) $request->query('search', ''));
+        $roleFilter = (string) $request->query('role', '');
+        $role = $roleFilter !== '' ? AdminRole::query()->find($roleFilter) : null;
+        $query = User::query()->where('is_admin', true)
+            ->with('assignedAdminRole')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('username', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when($role !== null, fn ($query) => $query->where(fn ($query) => $query->where('role_id', $role->id)->orWhere('admin_role', $role->type)))
+            ->orderBy('name');
+
         return view('admin.users', [
-            'admins' => User::query()->where('is_admin', true)->with('assignedAdminRole')->orderBy('name')->paginate(20),
+            'admins' => $query->paginate(20)->withQueryString(),
+            'adminCount' => (clone $query)->count(),
+            'filters' => ['search' => $search, 'role' => $roleFilter],
             'roles' => AdminRole::query()->orderBy('name')->get(),
         ]);
     }

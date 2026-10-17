@@ -27,3 +27,58 @@ if (navigationToggle && navigation) {
 		}
 	});
 }
+
+document.querySelectorAll('[data-question-builder]').forEach((builder) => {
+	const questionList = builder.querySelector('[data-question-list]');
+	const questionTemplate = builder.querySelector('[data-question-template]');
+	const addQuestionButton = builder.querySelector('[data-add-question]');
+
+	if (!questionList || !questionTemplate || !addQuestionButton) {
+		return;
+	}
+
+	const updateQuestionNumbers = () => {
+		const questionCards = questionList.querySelectorAll('[data-question-card]');
+
+		questionCards.forEach((card, index) => {
+			card.querySelector('[data-question-number]').textContent = String(index + 1);
+		});
+
+		addQuestionButton.disabled = questionCards.length >= Number(builder.dataset.maxQuestions);
+	};
+
+	builder.addEventListener('click', (event) => {
+		const addButton = event.target.closest('[data-add-question]');
+
+		if (addButton && !addButton.disabled) {
+			const index = Number(builder.dataset.nextIndex);
+			const questionMarkup = questionTemplate.innerHTML.replaceAll('__INDEX__', String(index));
+
+			questionList.insertAdjacentHTML('beforeend', questionMarkup);
+			builder.dataset.nextIndex = String(index + 1);
+			updateQuestionNumbers();
+
+			return;
+		}
+
+		const removeButton = event.target.closest('[data-remove-question]');
+
+		if (removeButton) {
+			removeButton.closest('[data-question-card]').remove();
+			updateQuestionNumbers();
+		}
+	});
+
+	builder.addEventListener('change', (event) => {
+		if (!event.target.matches('[data-question-type]')) {
+			return;
+		}
+
+		const optionsPanel = event.target.closest('[data-question-card]').querySelector('[data-question-options]');
+		const choiceQuestion = ['radio', 'checkbox', 'dropdown'].includes(event.target.value);
+
+		optionsPanel.classList.toggle('hidden', !choiceQuestion);
+	});
+
+	updateQuestionNumbers();
+});

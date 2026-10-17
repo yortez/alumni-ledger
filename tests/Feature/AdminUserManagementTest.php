@@ -40,6 +40,23 @@ it('lets a super admin create an administrator account with a role', function ()
     expect(Hash::check('a-secure-password', User::query()->where('email', 'casey.admin@example.com')->value('password')))->toBeTrue();
 });
 
+it('filters administrator accounts by search and assigned role', function () {
+    $superAdmin = User::factory()->create();
+    $superAdmin->forceFill(['is_admin' => true])->save();
+    $recordsRole = AdminRole::query()->where('type', 'records_admin')->firstOrFail();
+    $contentRole = AdminRole::query()->where('type', 'content_admin')->firstOrFail();
+    $recordsUser = User::factory()->create(['name' => 'Casey Records', 'email' => 'casey@example.com']);
+    $recordsUser->forceFill(['is_admin' => true, 'role_id' => $recordsRole->id])->save();
+    $contentUser = User::factory()->create(['name' => 'Jordan Content', 'email' => 'jordan@example.com']);
+    $contentUser->forceFill(['is_admin' => true, 'role_id' => $contentRole->id])->save();
+
+    $this->actingAs($superAdmin)
+        ->get('/admin/users?search=casey&role='.$recordsRole->id)
+        ->assertOk()
+        ->assertSee('Casey Records')
+        ->assertDontSee('Jordan Content');
+});
+
 it('limits administrators to modules granted by their role', function () {
     $recordsAdmin = User::factory()->create();
     $recordsAdmin->forceFill(['is_admin' => true, 'admin_role' => 'records_admin'])->save();

@@ -11,10 +11,29 @@ use Illuminate\View\View;
 
 class JobController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim((string) $request->query('search', ''));
+        $status = in_array($request->query('status'), ['published', 'draft'], true)
+            ? (string) $request->query('status')
+            : '';
+        $query = Job::query()
+            ->with('creator:id,username')
+            ->withCount('applications')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('title', 'like', "%{$search}%")
+                        ->orWhere('company', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%");
+                });
+            })
+            ->when($status !== '', fn ($query) => $query->where('status', $status))
+            ->latest();
+
         return view('admin.jobs', [
-            'jobs' => Job::query()->with('creator:id,username')->withCount('applications')->latest()->paginate(15),
+            'jobs' => $query->paginate(15)->withQueryString(),
+            'jobCount' => (clone $query)->count(),
+            'filters' => ['search' => $search, 'status' => $status],
             'publishedCount' => Job::query()->where('status', 'published')->count(),
         ]);
     }

@@ -30,6 +30,18 @@ it('allows an administrator to create and publish a job', function () {
     ]);
 });
 
+it('filters admin job postings by search and status', function () {
+    $admin = User::factory()->create(['is_admin' => true]);
+    Job::factory()->create(['title' => 'Research Coordinator', 'company' => 'Civic Lab', 'status' => 'published']);
+    Job::factory()->create(['title' => 'Office Assistant', 'company' => 'North Group', 'status' => 'draft']);
+
+    $this->actingAs($admin)
+        ->get('/admin/jobs?search=Civic&status=published')
+        ->assertOk()
+        ->assertSee('Research Coordinator')
+        ->assertDontSee('Office Assistant');
+});
+
 it('lets administrators edit a published job posting', function () {
     $admin = User::factory()->create(['is_admin' => true]);
     $job = Job::factory()->for($admin, 'creator')->create([

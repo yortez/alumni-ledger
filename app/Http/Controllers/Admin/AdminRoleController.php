@@ -12,10 +12,23 @@ use Illuminate\View\View;
 
 class AdminRoleController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim((string) $request->query('search', ''));
+        $query = AdminRole::query()
+            ->withCount('users')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('type', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name');
+
         return view('admin.roles', [
-            'roles' => AdminRole::query()->withCount('users')->orderBy('name')->paginate(15),
+            'roles' => $query->paginate(15)->withQueryString(),
+            'roleCount' => (clone $query)->count(),
+            'search' => $search,
             'permissions' => AdminRole::PERMISSIONS,
         ]);
     }

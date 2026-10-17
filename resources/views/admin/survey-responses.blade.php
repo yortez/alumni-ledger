@@ -12,7 +12,7 @@
         @forelse ($responses as $response)
             <article class="border border-line bg-white p-5 sm:p-7">
                 <div class="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4"><div><h2 class="font-semibold">{{ $response->user->name }}</h2><p class="mt-1 text-xs text-muted">{{ $response->user->student_number }} · {{ $response->user->username }}</p></div><time class="text-xs text-muted" datetime="{{ $response->submitted_at->toIso8601String() }}">{{ $response->submitted_at->format('M j, Y g:i A') }}</time></div>
-                <dl class="mt-5 grid gap-5">@foreach ($survey->questions as $index => $question)<div><dt class="text-xs font-semibold uppercase tracking-wider text-terracotta">{{ $question }}</dt><dd class="mt-2 whitespace-pre-line break-words text-sm leading-6 text-ink">{{ $response->answers[$index] ?? '' }}</dd></div>@endforeach</dl>
+                <dl class="mt-5 grid gap-5">@foreach ($survey->normalizedQuestions() as $index => $question)@php($answer = $response->answers[$index] ?? '')<div>@if ($question['section_label'])<p class="text-[10px] font-semibold uppercase tracking-wider text-muted">{{ $question['section_label'] }}</p>@endif<dt class="mt-1 text-xs font-semibold uppercase tracking-wider text-terracotta">{{ $question['prompt'] }}</dt><dd class="mt-2 whitespace-pre-line break-words text-sm leading-6 text-ink">{{ is_array($answer) ? implode(', ', $answer) : ($answer !== '' ? $answer : 'No response') }}</dd></div>@endforeach</dl>
             </article>
         @empty
             <p class="border border-dashed border-line px-5 py-12 text-center text-sm text-muted">No responses have been submitted yet.</p>
