@@ -16,7 +16,9 @@ it('sends a published announcement as a notification to each user', function () 
         ->post('/admin/announcements', [
             'title' => 'Spring reunion',
             'body' => 'Join us for the annual alumni dinner.',
+            'category' => 'events',
             'status' => 'published',
+            'is_pinned' => '0',
         ])
         ->assertRedirectToRoute('admin.announcements.index');
 

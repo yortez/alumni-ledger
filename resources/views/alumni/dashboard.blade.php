@@ -32,7 +32,7 @@
             <div class="grid gap-3">
                 @foreach ($announcements as $announcement)
                     <article class="rounded-r-md border-l-4 border-terracotta bg-white px-5 py-5 sm:px-7">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-forest">{{ $announcement->published_at->format('F j, Y') }}</p>
+                        <div class="flex flex-wrap items-center gap-2"><p class="text-xs font-semibold uppercase tracking-wider text-forest">{{ $announcement->published_at->format('F j, Y') }}</p><span class="rounded-full bg-surface-raised px-2 py-0.5 text-[10px] font-medium text-muted">{{ \App\Models\Announcement::CATEGORIES[$announcement->category] ?? ucfirst($announcement->category) }}</span>@if ($announcement->is_pinned)<span class="text-[10px] font-semibold text-forest">Pinned</span>@endif</div>
                         <h3 class="mt-2 text-xl font-semibold tracking-tight">{{ $announcement->title }}</h3>
                         <p class="mt-3 whitespace-pre-line break-words text-sm leading-6 text-muted">{{ $announcement->body }}</p>
                     </article>

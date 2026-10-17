@@ -28,6 +28,7 @@ class DashboardController extends Controller
                 ->where('student_number', $user->student_number)
                 ->first(),
             'announcements' => Announcement::published()
+                ->orderByDesc('is_pinned')
                 ->latest('published_at')
                 ->get(),
             'surveys' => Survey::availableTo($user)
