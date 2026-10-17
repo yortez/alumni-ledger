@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/files/{file}', [ProfileController::class, 'file'])->name('profile.files');
     Route::post('/profile/employments', [EmploymentController::class, 'store'])->name('profile.employments.store');
     Route::patch('/profile/employments/{employment}', [EmploymentController::class, 'update'])->name('profile.employments.update');
     Route::delete('/profile/employments/{employment}', [EmploymentController::class, 'destroy'])->name('profile.employments.destroy');
@@ -58,6 +59,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::middleware('admin.permission:graduates')->group(function (): void {
         Route::get('/graduates', [GraduateController::class, 'index'])->name('graduates.index');
+        Route::get('/graduates/{graduate}/files/{file}', [GraduateController::class, 'file'])->name('graduates.files');
         Route::get('/graduates/{graduate}/edit', [GraduateController::class, 'edit'])->name('graduates.edit');
         Route::get('/graduates/{graduate}', [GraduateController::class, 'show'])->name('graduates.show');
         Route::post('/graduates', [GraduateController::class, 'store'])->name('graduates.store');

@@ -9,9 +9,11 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class GraduateController extends Controller
 {
@@ -54,6 +56,24 @@ class GraduateController extends Controller
             'applicant' => $graduate->user,
             'profile' => $graduate->user?->profile,
         ]);
+    }
+
+    public function file(Graduate $graduate, string $file): Response
+    {
+        $profile = $graduate->user?->profile;
+        $path = match ($file) {
+            'photo' => $profile?->profile_photo_path,
+            'diploma' => $profile?->diploma_document_path,
+            default => null,
+        };
+
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        if ($file === 'photo') {
+            return response()->file(Storage::disk('local')->path($path));
+        }
+
+        return Storage::disk('local')->download($path, 'diploma-tor.'.pathinfo($path, PATHINFO_EXTENSION));
     }
 
     public function edit(Graduate $graduate): View

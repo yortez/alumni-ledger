@@ -10,7 +10,7 @@
         <p class="mt-2 text-sm text-muted">{{ auth()->user()->name }} · {{ auth()->user()->student_number }}</p>
     </div>
 
-    <form method="POST" action="{{ route('profile.update') }}" class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
+    <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
         @csrf
         @method('PUT')
 
@@ -49,11 +49,28 @@
         </div>
 
         <aside class="grid gap-5 lg:sticky lg:top-4">
-            <section class="border border-line bg-white p-4 text-center">
-                <h2 class="text-left text-sm font-semibold">Profile</h2>
-                <div class="mx-auto mt-5 grid size-14 place-items-center rounded-full bg-forest text-lg font-semibold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
-                <p class="mt-3 truncate text-sm font-semibold">{{ auth()->user()->name }}</p>
-                <p class="mt-1 text-xs text-muted">{{ auth()->user()->student_number }}</p>
+            <section class="border border-line bg-white">
+                <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Profile Photo</h2>
+                <div class="grid gap-3 p-4">
+                    @if ($profile?->profile_photo_path)
+                        <img src="{{ route('profile.files', 'photo') }}" alt="Profile photo" class="mx-auto size-16 rounded-full object-cover">
+                    @else
+                        <div class="mx-auto grid size-16 place-items-center rounded-full bg-forest text-lg font-semibold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                    @endif
+                    <div class="field"><label for="profile_photo" class="sr-only">Upload profile photo</label><input id="profile_photo" type="file" name="profile_photo" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">@error('profile_photo')<p class="field-error">{{ $message }}</p>@enderror</div>
+                    <p class="text-[0.65rem] text-muted">JPG, PNG, GIF. Max 5MB</p>
+                </div>
+            </section>
+            <section class="border border-line bg-white">
+                <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Documents</h2>
+                <div class="grid gap-3 p-4">
+                    <label for="diploma_document" class="text-xs uppercase tracking-wide text-muted">Diploma / TOR</label>
+                    @if ($profile?->diploma_document_path)
+                        <a href="{{ route('profile.files', 'diploma') }}" class="text-xs font-medium text-forest underline underline-offset-4">Download uploaded document</a>
+                    @endif
+                    <div class="field"><input id="diploma_document" type="file" name="diploma_document" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">@error('diploma_document')<p class="field-error">{{ $message }}</p>@enderror</div>
+                    <p class="text-[0.65rem] text-muted">PDF, DOC, DOCX. Max 5MB</p>
+                </div>
             </section>
             <section class="grid gap-3 border border-line bg-white p-4">
                 <button type="submit" class="w-full bg-forest px-4 py-3 text-sm font-semibold text-white transition hover:bg-forest-dark">Save profile</button>

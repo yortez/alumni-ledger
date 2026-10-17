@@ -68,6 +68,9 @@
             <h2 class="font-display text-2xl">Personal Information</h2>
 
             @if ($profile)
+                @if ($profile->profile_photo_path)
+                    <img src="{{ route('admin.graduates.files', [$graduate, 'photo']) }}" alt="Alumni profile photo" class="mb-5 size-20 rounded-full object-cover">
+                @endif
                 <dl class="mt-6 grid gap-4">
                     <div>
                         <dt class="text-xs uppercase tracking-wider text-muted">First name</dt>
@@ -110,6 +113,14 @@
                         <dd class="mt-2 whitespace-pre-line text-sm leading-6 text-ink">{{ $profile->permanent_address ?: 'Not provided' }}</dd>
                     </div>
                 </dl>
+                <div class="mt-5">
+                    <h3 class="text-xs uppercase tracking-wider text-muted">Diploma / TOR</h3>
+                    @if ($profile->diploma_document_path)
+                        <a href="{{ route('admin.graduates.files', [$graduate, 'diploma']) }}" class="mt-2 inline-block text-sm font-medium text-forest underline underline-offset-4">Download document</a>
+                    @else
+                        <p class="mt-2 text-sm text-muted">Not provided</p>
+                    @endif
+                </div>
                 <div class="mt-7 border-t border-line pt-5">
                     <h3 class="font-display text-xl">Employment history</h3>
                     @forelse ($profile->employments as $employment)

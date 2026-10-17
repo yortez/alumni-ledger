@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'first_name', 'middle_name', 'last_name', 'suffix', 'birthdate', 'sex',
-    'civil_status', 'phone', 'current_address', 'permanent_address', 'job_title',
+    'civil_status', 'phone', 'current_address', 'permanent_address', 'profile_photo_path',
+    'diploma_document_path', 'job_title',
     'employer', 'industry', 'employment_status', 'city', 'country', 'linkedin_url',
     'bio', 'completed_at',
 ])]

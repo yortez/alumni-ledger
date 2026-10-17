@@ -6,8 +6,12 @@ use App\Models\Graduate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class ProfileController extends Controller
 {
@@ -41,10 +45,12 @@ class ProfileController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
             'current_address' => ['nullable', 'string', 'max:2000'],
             'permanent_address' => ['nullable', 'string', 'max:2000'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'extensions:jpg,jpeg,png,gif', 'max:5120'],
+            'diploma_document' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'extensions:pdf,doc,docx', 'max:5120'],
         ]);
 
         $profileData = $validated;
-        unset($profileData['email']);
+        unset($profileData['email'], $profileData['profile_photo'], $profileData['diploma_document']);
 
         $name = implode(' ', array_filter([
             $validated['first_name'],
@@ -53,21 +59,78 @@ class ProfileController extends Controller
             $validated['suffix'] ?? null,
         ]));
 
-        DB::transaction(function () use ($user, $validated, $profileData, $name): void {
-            if ($user->email !== $validated['email']) {
-                $user->email_verified_at = null;
+        $existingProfile = $user->profile()->first();
+        $storedPaths = [];
+
+        try {
+            foreach ([
+                'profile_photo' => 'profile_photo_path',
+                'diploma_document' => 'diploma_document_path',
+            ] as $inputName => $pathColumn) {
+                if (! $request->hasFile($inputName)) {
+                    continue;
+                }
+
+                $path = $request->file($inputName)->store('alumni-profiles/'.$user->id, 'local');
+
+                if (! is_string($path)) {
+                    throw new RuntimeException('The uploaded file could not be stored.');
+                }
+
+                $storedPaths[$pathColumn] = $path;
             }
 
-            $user->name = $name;
-            $user->email = $validated['email'];
-            $user->save();
+            DB::transaction(function () use ($user, $validated, $profileData, $name, $storedPaths): void {
+                if ($user->email !== $validated['email']) {
+                    $user->email_verified_at = null;
+                }
 
-            $user->profile()->updateOrCreate([], [
-                ...$profileData,
-                'completed_at' => now(),
-            ]);
-        });
+                $user->name = $name;
+                $user->email = $validated['email'];
+                $user->save();
+
+                $user->profile()->updateOrCreate([], [
+                    ...$profileData,
+                    ...$storedPaths,
+                    'completed_at' => now(),
+                ]);
+            });
+        } catch (Throwable $exception) {
+            Storage::disk('local')->delete(array_values($storedPaths));
+
+            throw $exception;
+        }
+
+        $oldPaths = [];
+
+        foreach ($storedPaths as $pathColumn => $newPath) {
+            $oldPath = $existingProfile?->{$pathColumn};
+
+            if ($oldPath && $oldPath !== $newPath) {
+                $oldPaths[] = $oldPath;
+            }
+        }
+
+        Storage::disk('local')->delete($oldPaths);
 
         return redirect()->route('dashboard')->with('status', 'Your alumni profile has been saved.');
+    }
+
+    public function file(Request $request, string $file): Response
+    {
+        $profile = $request->user()->profile()->first();
+        $path = match ($file) {
+            'photo' => $profile?->profile_photo_path,
+            'diploma' => $profile?->diploma_document_path,
+            default => null,
+        };
+
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        if ($file === 'photo') {
+            return response()->file(Storage::disk('local')->path($path));
+        }
+
+        return Storage::disk('local')->download($path, 'diploma-tor.'.pathinfo($path, PATHINFO_EXTENSION));
     }
 }

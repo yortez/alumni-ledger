@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -170,6 +171,88 @@ it('rejects an email address already used by another account', function () {
     $this->assertDatabaseMissing('alumni_profiles', ['user_id' => $user->id]);
 });
 
+it('stores profile photos and Diploma/TOR documents privately', function () {
+    Storage::fake('local');
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->put('/profile', [
+            'first_name' => 'Morgan',
+            'last_name' => 'Lee',
+            'phone' => '+1 555 0100',
+            'email' => $user->email,
+            'profile_photo' => UploadedFile::fake()->image('portrait.png'),
+            'diploma_document' => UploadedFile::fake()->create('diploma.pdf', 100, 'application/pdf'),
+        ])
+        ->assertRedirectToRoute('dashboard');
+
+    $profile = $user->profile()->firstOrFail();
+    Storage::disk('local')->assertExists($profile->profile_photo_path);
+    Storage::disk('local')->assertExists($profile->diploma_document_path);
+
+    $this->get('/profile/files/photo')->assertOk();
+    $this->get('/profile/files/diploma')->assertOk();
+
+    $previousPhotoPath = $profile->profile_photo_path;
+    $this->put('/profile', [
+        'first_name' => 'Morgan',
+        'last_name' => 'Lee',
+        'phone' => '+1 555 0100',
+        'email' => $user->email,
+        'profile_photo' => UploadedFile::fake()->image('replacement.png'),
+    ])->assertRedirectToRoute('dashboard');
+
+    $profile->refresh();
+    Storage::disk('local')->assertMissing($previousPhotoPath);
+    Storage::disk('local')->assertExists($profile->diploma_document_path);
+});
+
+it('rejects unsupported profile upload types', function () {
+    Storage::fake('local');
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->put('/profile', [
+            'first_name' => 'Morgan',
+            'last_name' => 'Lee',
+            'phone' => '+1 555 0100',
+            'email' => $user->email,
+            'profile_photo' => UploadedFile::fake()->create('portrait.svg', 50, 'image/svg+xml'),
+            'diploma_document' => UploadedFile::fake()->create('diploma.exe', 50, 'application/x-msdownload'),
+        ])
+        ->assertSessionHasErrors(['profile_photo', 'diploma_document']);
+
+    $this->assertDatabaseMissing('alumni_profiles', ['user_id' => $user->id]);
+});
+
+it('restricts private profile files to the owner and authorized graduate admins', function () {
+    Storage::fake('local');
+    $graduate = Graduate::query()->create([
+        'student_number' => '2019-0142',
+        'first_name' => 'Casey',
+        'last_name' => 'Nguyen',
+    ]);
+    $user = User::factory()->create(['student_number' => '2019-0142']);
+    $photoPath = UploadedFile::fake()->image('portrait.png')->store('alumni-profiles/'.$user->id, 'local');
+    $documentPath = UploadedFile::fake()->create('diploma.pdf', 100, 'application/pdf')->store('alumni-profiles/'.$user->id, 'local');
+    $user->profile()->create([
+        'profile_photo_path' => $photoPath,
+        'diploma_document_path' => $documentPath,
+    ]);
+
+    $this->actingAs($user)->get('/profile/files/photo')->assertOk();
+
+    $otherUser = User::factory()->create();
+    $this->actingAs($otherUser)->get('/profile/files/diploma')->assertNotFound();
+    $this->get('/admin/graduates/'.$graduate->getKey().'/files/diploma')->assertForbidden();
+
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)->get('/admin/graduates/'.$graduate->getKey().'/files/photo')->assertOk();
+    $this->get('/admin/graduates/'.$graduate->getKey().'/files/diploma')->assertOk();
+});
+
 it('shows account and graduate information in the alumni profile form', function () {
     Graduate::query()->create([
         'student_number' => '2020-0042',
@@ -198,6 +281,8 @@ it('shows account and graduate information in the alumni profile form', function
         ->assertSee('name="civil_status"', false)
         ->assertSee('name="current_address"', false)
         ->assertSee('name="permanent_address"', false)
+        ->assertSee('name="profile_photo"', false)
+        ->assertSee('name="diploma_document"', false)
         ->assertSee('morgan@example.com')
         ->assertSee('ENVS')
         ->assertSee('2020')
