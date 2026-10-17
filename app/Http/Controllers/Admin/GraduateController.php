@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AlumniProfile;
 use App\Models\Graduate;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,25 +15,14 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GraduateController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = trim((string) $request->query('search', ''));
-        $graduates = Graduate::query()
-            ->with([
-                'user:id,student_number',
-                'user.profile.employments' => fn ($query) => $query->orderByDesc('is_current')->orderByDesc('start_date'),
-            ])
-            ->when($search !== '', function ($query) use ($search): void {
-                $query->where(function ($query) use ($search): void {
-                    $query->where('student_number', 'like', "%{$search}%")
-                        ->orWhere('first_name', 'like', "%{$search}%")
-                        ->orWhere('middle_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
-                });
-            })
+        $filters = $this->graduateFilters($request);
+        $graduates = $this->graduateQuery($filters)
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(20)
@@ -40,11 +30,101 @@ class GraduateController extends Controller
 
         return view('admin.graduates', [
             'graduates' => $graduates,
-            'search' => $search,
+            'search' => $filters['search'],
+            'filters' => $filters,
+            'programs' => Graduate::query()->whereNotNull('program_code')->distinct()->orderBy('program_code')->pluck('program_code'),
+            'batches' => Graduate::query()->whereNotNull('batch_year')->distinct()->orderByDesc('batch_year')->pluck('batch_year'),
             'graduateCount' => Graduate::query()->count(),
             'claimedCount' => User::query()->whereNotNull('student_number')->count(),
             'profileCount' => AlumniProfile::query()->whereNotNull('completed_at')->count(),
         ]);
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $filters = $this->graduateFilters($request);
+
+        return response()->streamDownload(function () use ($filters): void {
+            $stream = fopen('php://output', 'w');
+
+            if (! is_resource($stream)) {
+                return;
+            }
+
+            try {
+                fputcsv($stream, ['Alumni', 'Student number', 'Program', 'Batch', 'Contact', 'Employment', 'Verification'], ',', '"', '');
+
+                $this->graduateQuery($filters)
+                    ->orderBy('id')
+                    ->chunk(500, function ($graduates) use ($stream): void {
+                        foreach ($graduates as $graduate) {
+                            $profile = $graduate->user?->profile;
+                            $employment = $profile?->employments->first();
+
+                            fputcsv($stream, [
+                                $this->safeCsvValue($graduate->fullName()),
+                                $this->safeCsvValue($graduate->student_number),
+                                $this->safeCsvValue($graduate->program_code),
+                                $this->safeCsvValue($graduate->batch_year),
+                                $this->safeCsvValue($graduate->user?->email),
+                                $this->safeCsvValue($employment ? $employment->job_title.' · '.$employment->employer : null),
+                                $graduate->user ? 'Verified' : 'Not registered',
+                            ], ',', '"', '');
+                        }
+                    });
+            } finally {
+                fclose($stream);
+            }
+        }, 'alumni-records.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * @return array{search: string, program: string, batch: string, status: string}
+     */
+    private function graduateFilters(Request $request): array
+    {
+        $status = (string) $request->query('status', '');
+
+        return [
+            'search' => trim((string) $request->query('search', '')),
+            'program' => trim((string) $request->query('program', '')),
+            'batch' => trim((string) $request->query('batch', '')),
+            'status' => in_array($status, ['verified', 'unregistered'], true) ? $status : '',
+        ];
+    }
+
+    /**
+     * @param  array{search: string, program: string, batch: string, status: string}  $filters
+     */
+    private function graduateQuery(array $filters): Builder
+    {
+        return Graduate::query()
+            ->with([
+                'user:id,student_number,email',
+                'user.profile:id,user_id,phone,completed_at',
+                'user.profile.employments' => fn ($query) => $query->orderByDesc('is_current')->orderByDesc('start_date'),
+            ])
+            ->when($filters['search'] !== '', function (Builder $query) use ($filters): void {
+                $search = $filters['search'];
+                $query->where(function (Builder $query) use ($search): void {
+                    $query->where('student_number', 'like', "%{$search}%")
+                        ->orWhere('first_name', 'like', "%{$search}%")
+                        ->orWhere('middle_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn (Builder $userQuery) => $userQuery->where('email', 'like', "%{$search}%"));
+                });
+            })
+            ->when($filters['program'] !== '', fn (Builder $query) => $query->where('program_code', $filters['program']))
+            ->when($filters['batch'] !== '', fn (Builder $query) => $query->where('batch_year', $filters['batch']))
+            ->when($filters['status'] === 'verified', fn (Builder $query) => $query->whereHas('user'))
+            ->when($filters['status'] === 'unregistered', fn (Builder $query) => $query->whereDoesntHave('user'));
+    }
+
+    private function safeCsvValue(string|int|null $value): string
+    {
+        $value = (string) ($value ?? '');
+
+        return preg_match('/^[\s\x00-\x1F]*[=+\-@]/u', $value) === 1 ? "'{$value}" : $value;
     }
 
     public function show(Graduate $graduate): View

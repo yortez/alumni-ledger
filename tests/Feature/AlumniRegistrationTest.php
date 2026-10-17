@@ -347,10 +347,43 @@ it('shows profile completion and employment details to administrators', function
     $this->actingAs($admin)
         ->get('/admin/graduates')
         ->assertOk()
-        ->assertSee('Profiles complete')
+        ->assertSee('Alumni Records')
+        ->assertSee('Employed')
         ->assertSee('Senior Analyst')
         ->assertSee('Civic Lab')
-        ->assertSee('Current role');
+        ->assertSee('Verified');
+});
+
+it('filters alumni records and offers a matching CSV export', function () {
+    Graduate::query()->create([
+        'student_number' => '2023-0100',
+        'first_name' => 'Taylor',
+        'last_name' => 'Rivera',
+        'program_code' => 'BSIT',
+        'batch_year' => 2023,
+    ]);
+    User::factory()->create([
+        'student_number' => '2023-0100',
+        'email' => 'taylor@example.com',
+    ]);
+    Graduate::query()->create([
+        'student_number' => '2022-0200',
+        'first_name' => 'Jordan',
+        'last_name' => 'Smith',
+        'program_code' => 'BSCS',
+        'batch_year' => 2022,
+    ]);
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)
+        ->get('/admin/graduates?search=taylor%40example.com&program=BSIT&batch=2023&status=verified')
+        ->assertOk()
+        ->assertSee('RIVERA, TAYLOR')
+        ->assertDontSee('SMITH, JORDAN');
+
+    $this->get('/admin/graduates/export?program=BSIT&batch=2023&status=verified')
+        ->assertDownload('alumni-records.csv');
 });
 
 it('allows administrators to view applicant details', function () {
