@@ -35,6 +35,11 @@ class User extends Authenticatable
         return $this->hasMany(JobApplication::class);
     }
 
+    public function surveyResponses(): HasMany
+    {
+        return $this->hasMany(SurveyResponse::class);
+    }
+
     public function assignedAdminRole(): BelongsTo
     {
         return $this->belongsTo(AdminRole::class, 'role_id');

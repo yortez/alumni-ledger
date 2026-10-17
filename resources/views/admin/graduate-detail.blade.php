@@ -3,150 +3,135 @@
 @section('title', 'Alumni profile')
 
 @section('content')
-<div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 lg:py-14">
-    <div class="mb-8 flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+@php($displayName = implode(' ', array_filter([
+    $profile?->first_name ?: $graduate->first_name,
+    $profile?->middle_name ?: $graduate->middle_name,
+    $profile?->last_name ?: $graduate->last_name,
+    $profile?->suffix,
+])))
+@php($displayName = $displayName ?: $graduate->fullName())
+@php($initial = strtoupper(substr($displayName, 0, 1)))
+<div class="mx-auto max-w-7xl px-4 py-6 sm:px-7 lg:py-8">
+    <div class="mb-4 flex items-center justify-between gap-4">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="mt-3 font-display text-4xl sm:text-5xl">Alumni profile</h1>
+            <h1 class="mt-1 text-lg font-semibold">Alumni profile</h1>
         </div>
-        <a href="{{ route('admin.graduates.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Back to roster</a>
+        <a href="{{ route('admin.graduates.index') }}" class="text-sm font-medium text-forest underline underline-offset-4">Back to roster</a>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section class="border border-line bg-white p-6">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <p class="text-xs uppercase tracking-wider text-muted">Graduate record</p>
-                    @php($displayName = implode(' ', array_filter([
-                        $profile?->first_name ?: $graduate->first_name,
-                        $profile?->middle_name ?: $graduate->middle_name,
-                        $profile?->last_name ?: $graduate->last_name,
-                        $profile?->suffix,
-                    ])))
-                    <h2 class="mt-2 font-display text-3xl">{{ $displayName ?: $graduate->fullName() }}</h2>
+    <div class="grid items-start gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
+        <aside class="grid gap-3">
+            <section class="overflow-hidden rounded-md border border-line bg-surface">
+                <div class="h-16 bg-forest"></div>
+                <div class="px-4 pb-4">
+                    @if ($profile?->profile_photo_path)
+                        <img src="{{ route('admin.graduates.files', [$graduate, 'photo']) }}" alt="Alumni profile photo" class="-mt-8 size-16 rounded-full border-4 border-surface object-cover">
+                    @else
+                        <div class="-mt-8 grid size-16 place-items-center rounded-full border-4 border-surface bg-forest text-lg font-bold text-white">{{ $initial ?: 'A' }}</div>
+                    @endif
+                    <h2 class="mt-3 font-semibold leading-tight">{{ strtoupper($displayName) }}</h2>
+                    <p class="mt-1 text-xs text-muted">{{ $graduate->program_code ?: 'Program not listed' }}</p>
+                    <p class="mt-1 text-xs text-muted">Batch {{ $graduate->batch_year ?: 'not listed' }}</p>
+                    <span class="mt-3 inline-flex rounded-full bg-mint px-2.5 py-1 text-[10px] font-semibold text-forest">{{ $applicant ? 'Verified' : 'Not registered' }}</span>
                 </div>
-                @if ($profile?->completed_at)
-                    <span class="rounded-full border border-forest bg-mint px-3 py-1 text-xs font-semibold uppercase tracking-wide text-forest">Profile complete</span>
-                @else
-                    <span class="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">Profile incomplete</span>
-                @endif
-            </div>
+            </section>
 
-            <dl class="mt-6 grid gap-4 sm:grid-cols-2">
-                <div class="rounded-lg border border-line bg-paper p-4">
-                    <dt class="text-xs uppercase tracking-wider text-muted">Student number</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ $graduate->student_number }}</dd>
-                </div>
-                <div class="rounded-lg border border-line bg-paper p-4">
-                    <dt class="text-xs uppercase tracking-wider text-muted">Username</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ $applicant?->username ?? 'Not available' }}</dd>
-                </div>
-                <div class="rounded-lg border border-line bg-paper p-4">
-                    <dt class="text-xs uppercase tracking-wider text-muted">Email</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ $applicant?->email ?? 'Not available' }}</dd>
-                </div>
-                <div class="rounded-lg border border-line bg-paper p-4">
-                    <dt class="text-xs uppercase tracking-wider text-muted">Account status</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ $applicant ? 'Claimed' : 'Not registered' }}</dd>
-                </div>
-                <div class="rounded-lg border border-line bg-paper p-4">
-                    <dt class="text-xs uppercase tracking-wider text-muted">Program code</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ $graduate->program_code ?: 'Not listed' }}</dd>
-                </div>
-                <div class="rounded-lg border border-line bg-paper p-4">
-                    <dt class="text-xs uppercase tracking-wider text-muted">Graduation year</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ $graduate->batch_year ?: 'Not listed' }}</dd>
-                </div>
-                <div class="rounded-lg border border-line bg-paper p-4">
-                    <dt class="text-xs uppercase tracking-wider text-muted">Latin honor</dt>
-                    <dd class="mt-2 font-medium text-ink">{{ ucwords(str_replace('_', ' ', $graduate->latin_honor)) }}</dd>
-                </div>
-            </dl>
-        </section>
+            <section class="overflow-hidden rounded-md border border-line bg-surface">
+                <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Contact Information</h2>
+                <dl class="grid gap-3 p-4 text-xs">
+                    <div><dt class="uppercase tracking-wide text-muted">Email</dt><dd class="mt-1 break-all text-ink">{{ $applicant?->email ?? 'Not available' }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Phone</dt><dd class="mt-1 text-ink">{{ $profile?->phone ?: 'Not provided' }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Current address</dt><dd class="mt-1 whitespace-pre-line text-ink">{{ $profile?->current_address ?: trim(($profile?->city ?: '').', '.($profile?->country ?: ''), ', ') ?: 'Not provided' }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Permanent address</dt><dd class="mt-1 whitespace-pre-line text-ink">{{ $profile?->permanent_address ?: 'Not provided' }}</dd></div>
+                </dl>
+            </section>
 
-        <section class="border border-line bg-white p-6">
-            <h2 class="font-display text-2xl">Personal Information</h2>
-
-            @if ($profile)
-                @if ($profile->profile_photo_path)
-                    <img src="{{ route('admin.graduates.files', [$graduate, 'photo']) }}" alt="Alumni profile photo" class="mb-5 size-20 rounded-full object-cover">
-                @endif
-                <dl class="mt-6 grid gap-4">
+            <section class="overflow-hidden rounded-md border border-line bg-surface">
+                <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Academic Details</h2>
+                <dl class="grid gap-3 p-4 text-xs">
+                    <div><dt class="uppercase tracking-wide text-muted">Student no.</dt><dd class="mt-1 font-semibold text-ink">{{ $graduate->student_number }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Program</dt><dd class="mt-1 text-ink">{{ $graduate->program_code ?: 'Not listed' }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Batch</dt><dd class="mt-1 text-ink">{{ $graduate->batch_year ?: 'Not listed' }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Latin honor</dt><dd class="mt-1 text-ink">{{ ucwords(str_replace('_', ' ', $graduate->latin_honor)) }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Birthdate</dt><dd class="mt-1 text-ink">{{ $profile?->birthdate?->format('M j, Y') ?? 'Not provided' }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Sex / civil status</dt><dd class="mt-1 text-ink">{{ $profile?->sex ? ucwords(str_replace('_', ' ', $profile->sex)) : 'Not provided' }} · {{ $profile?->civil_status ? ucfirst($profile->civil_status) : 'Not provided' }}</dd></div>
+                    <div><dt class="uppercase tracking-wide text-muted">Profile status</dt><dd class="mt-1 text-ink">{{ $profile?->completed_at ? 'Complete' : 'Incomplete' }}</dd></div>
                     <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">First name</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->first_name ?: $graduate->first_name ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Middle name</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->middle_name ?: $graduate->middle_name ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Last name</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->last_name ?: $graduate->last_name ?: 'Not provided' }}{{ $profile->suffix ? ' '.$profile->suffix : '' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Birthdate</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->birthdate?->format('M j, Y') ?? 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Sex</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->sex ? ucwords(str_replace('_', ' ', $profile->sex)) : 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Civil status</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->civil_status ? ucfirst($profile->civil_status) : 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Phone</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->phone ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Email</dt>
-                        <dd class="mt-2 break-all font-medium text-ink">{{ $applicant?->email ?? 'Not available' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Current address</dt>
-                        <dd class="mt-2 whitespace-pre-line text-sm leading-6 text-ink">{{ $profile->current_address ?: trim(($profile->city ?: '').', '.($profile->country ?: ''), ', ') ?: 'Not provided' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Permanent address</dt>
-                        <dd class="mt-2 whitespace-pre-line text-sm leading-6 text-ink">{{ $profile->permanent_address ?: 'Not provided' }}</dd>
+                        <dt class="uppercase tracking-wide text-muted">Diploma / TOR</dt>
+                        <dd class="mt-1">@if ($profile?->diploma_document_path)<a href="{{ route('admin.graduates.files', [$graduate, 'diploma']) }}" class="font-medium text-forest underline underline-offset-4">Download document</a>@else<span class="text-ink">Not provided</span>@endif</dd>
                     </div>
                 </dl>
-                <div class="mt-5">
-                    <h3 class="text-xs uppercase tracking-wider text-muted">Diploma / TOR</h3>
-                    @if ($profile->diploma_document_path)
-                        <a href="{{ route('admin.graduates.files', [$graduate, 'diploma']) }}" class="mt-2 inline-block text-sm font-medium text-forest underline underline-offset-4">Download document</a>
-                    @else
-                        <p class="mt-2 text-sm text-muted">Not provided</p>
-                    @endif
-                </div>
-                <div class="mt-7 border-t border-line pt-5">
-                    <h3 class="font-display text-xl">Employment history</h3>
-                    @forelse ($profile->employments as $employment)
-                        <article class="border-b border-line py-4 last:border-b-0">
-                            <div class="flex flex-col justify-between gap-1 sm:flex-row sm:items-start">
-                                <div>
-                                    <h4 class="font-semibold text-ink">{{ $employment->job_title }}</h4>
-                                    <p class="mt-1 text-sm text-muted">{{ $employment->employer }}{{ $employment->location ? ' · '.$employment->location : '' }}</p>
+            </section>
+        </aside>
+
+        <div class="grid min-w-0 gap-4">
+            <section class="overflow-hidden rounded-md border border-line bg-surface" aria-labelledby="career-history-heading">
+                <header class="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
+                    <h2 id="career-history-heading" class="flex items-center gap-2 text-sm font-semibold"><svg aria-hidden="true" class="size-4 text-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V4h8v3M3 12h18" /></svg>Career History</h2>
+                    <a href="{{ route('admin.graduates.edit', $graduate) }}" class="inline-flex min-h-8 items-center gap-2 rounded-md bg-forest px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-forest-dark"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 4 4 4L9 19l-5 1 1-5L16 4zM14 6l4 4" /></svg>Manage</a>
+                </header>
+                @if ($profile?->employments->isNotEmpty())
+                    <div class="divide-y divide-line px-4 sm:px-5">
+                        @foreach ($profile->employments as $employment)
+                            <article class="py-4">
+                                <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
+                                    <div class="min-w-0">
+                                        <h3 class="font-semibold">{{ $employment->job_title }}</h3>
+                                        <p class="mt-1 text-xs text-muted">{{ $employment->employer }}{{ $employment->location ? ' · '.$employment->location : '' }}{{ $employment->country ? ' · '.$employment->country : '' }}</p>
+                                    </div>
+                                    <div class="flex shrink-0 flex-wrap items-center gap-2 text-xs text-muted">
+                                        <span>{{ $employment->start_date->format('M Y') }} – {{ $employment->is_current ? 'Present' : ($employment->end_date?->format('M Y') ?? 'Date not provided') }}</span>
+                                        <span class="rounded-full bg-mint px-2 py-1 font-semibold text-forest">{{ $employment->is_current ? 'Current' : 'Past' }}</span>
+                                    </div>
                                 </div>
-                                <p class="text-sm text-muted">{{ $employment->start_date->format('M Y') }} – {{ $employment->is_current ? 'Present' : ($employment->end_date?->format('M Y') ?? 'Date not provided') }}</p>
-                            </div>
-                            @if ($employment->description)
-                                <p class="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{{ $employment->description }}</p>
-                            @endif
-                            <p class="mt-2 text-xs font-semibold uppercase tracking-wide text-forest">{{ $employment->is_current ? 'Current role' : 'Past role' }}</p>
-                        </article>
-                    @empty
-                        <p class="mt-3 text-sm text-muted">No employment history has been added.</p>
-                    @endforelse
-                </div>
-            @else
-                <div class="mt-6 rounded-lg border border-dashed border-line bg-paper p-5 text-sm text-muted">
-                    This applicant has not completed their alumni profile yet.
-                </div>
-            @endif
-        </section>
+                                <p class="mt-2 text-xs text-muted">{{ \App\Models\Employment::EMPLOYMENT_STATUSES[$employment->employment_status] ?? 'Status not provided' }}{{ $employment->sector ? ' · '.(\App\Models\Employment::SECTORS[$employment->sector] ?? $employment->sector) : '' }}{{ $employment->industry ? ' · '.$employment->industry : '' }}</p>
+                                <p class="mt-1 text-xs text-muted">{{ $employment->job_level ? (\App\Models\Employment::JOB_LEVELS[$employment->job_level] ?? $employment->job_level) : 'Level not provided' }}{{ $employment->monthly_income ? ' · '.(\App\Models\Employment::MONTHLY_INCOME_RANGES[$employment->monthly_income] ?? $employment->monthly_income) : '' }}{{ $employment->months_to_employment !== null ? ' · '.$employment->months_to_employment.' months to employment' : '' }}{{ $employment->course_relevance ? ' · '.(\App\Models\Employment::COURSE_RELEVANCE_OPTIONS[$employment->course_relevance] ?? $employment->course_relevance) : '' }}</p>
+                                @if ($employment->description)<p class="mt-2 whitespace-pre-line text-xs leading-5 text-muted">{{ $employment->description }}</p>@endif
+                            </article>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="grid min-h-40 place-items-center px-4 py-8 text-center">
+                        <div><svg aria-hidden="true" class="mx-auto size-9 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2" /></svg><p class="mt-3 text-sm font-medium text-muted">No employment records</p></div>
+                    </div>
+                @endif
+            </section>
+
+            <section class="overflow-hidden rounded-md border border-line bg-surface" aria-labelledby="survey-responses-heading">
+                <header class="border-b border-line px-4 py-3 sm:px-5">
+                    <h2 id="survey-responses-heading" class="flex items-center gap-2 text-sm font-semibold"><svg aria-hidden="true" class="size-4 text-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8l2 2h3v15H3V6h3l2-2z" /><path d="M8 10h8M8 14h8M8 18h5" /></svg>Survey Responses</h2>
+                </header>
+                @if ($applicant?->surveyResponses->isNotEmpty())
+                    <div class="divide-y divide-line px-4 sm:px-5">
+                        @foreach ($applicant->surveyResponses as $response)
+                            <article class="flex flex-col justify-between gap-2 py-4 sm:flex-row sm:items-center">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                                        <div><h3 class="text-sm font-semibold">{{ $response->survey?->title ?? 'Survey' }}</h3><p class="mt-1 text-xs text-muted">Submitted {{ $response->submitted_at?->format('F j, Y') ?? 'date unavailable' }}</p></div>
+                                        <span class="w-fit rounded-full bg-mint px-2.5 py-1 text-[10px] font-semibold text-forest">Submitted</span>
+                                    </div>
+                                    @if ($response->survey)
+                                        <dl class="mt-3 grid gap-2">
+                                            @foreach ($response->survey->questions as $questionIndex => $question)
+                                                <div class="border-l-2 border-line pl-3">
+                                                    <dt class="text-xs text-muted">{{ $question }}</dt>
+                                                    <dd class="mt-1 whitespace-pre-line text-sm text-ink">{{ $response->answers[$questionIndex] ?? 'No response' }}</dd>
+                                                </div>
+                                            @endforeach
+                                        </dl>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="grid min-h-40 place-items-center px-4 py-8 text-center">
+                        <div><svg aria-hidden="true" class="mx-auto size-9 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8l2 2h3v15H3V6h3l2-2z" /><path d="M8 10h8M8 14h8M8 18h5" /></svg><p class="mt-3 text-sm font-medium text-muted">No survey responses yet</p></div>
+                    </div>
+                @endif
+            </section>
+        </div>
     </div>
 </div>
 @endsection

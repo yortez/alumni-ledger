@@ -2,6 +2,7 @@
 
 use App\Models\AlumniProfile;
 use App\Models\Graduate;
+use App\Models\Survey;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -390,9 +391,29 @@ it('allows administrators to view applicant details', function () {
     $profile->employments()->create([
         'job_title' => 'Program Assistant',
         'employer' => 'Community Works',
+        'employment_status' => 'employed_local',
+        'sector' => 'private',
+        'industry' => 'Community services',
+        'job_level' => 'rank_file',
+        'monthly_income' => 'prefer_not_to_say',
+        'country' => 'Philippines',
+        'months_to_employment' => 3,
+        'course_relevance' => 'somewhat_relevant',
         'start_date' => '2017-06-01',
         'end_date' => '2020-05-31',
         'is_current' => false,
+    ]);
+    $survey = Survey::query()->create([
+        'title' => 'Community priorities',
+        'questions' => ['What should we improve?'],
+        'target_programs' => [],
+        'target_graduation_years' => [],
+        'is_active' => true,
+    ]);
+    $survey->responses()->create([
+        'user_id' => $applicant->id,
+        'answers' => ['More alumni events.'],
+        'submitted_at' => now(),
     ]);
     $admin = User::factory()->create();
     $admin->forceFill(['is_admin' => true])->save();
@@ -401,8 +422,9 @@ it('allows administrators to view applicant details', function () {
         ->get('/admin/graduates/'.$graduate->getKey())
         ->assertOk()
         ->assertSee('Alumni profile')
-        ->assertSee('Jordan Parker Smith Jr.')
-        ->assertSee('Personal Information')
+        ->assertSee('JORDAN PARKER SMITH JR.')
+        ->assertSee('Contact Information')
+        ->assertSee('Academic Details')
         ->assertSee('+1 555 0102')
         ->assertSee('Jan 2, 1995')
         ->assertSee('Male')
@@ -412,9 +434,17 @@ it('allows administrators to view applicant details', function () {
         ->assertSee('Seattle')
         ->assertDontSee('Operations Manager')
         ->assertDontSee('Northline Group')
-        ->assertSee('Employment history')
+        ->assertSee('Career History')
+        ->assertSee('Manage')
         ->assertSee('Program Assistant')
-        ->assertSee('Community Works');
+        ->assertSee('Employed (Local)')
+        ->assertSee('Private')
+        ->assertSee('Community services')
+        ->assertSee('3 months to employment')
+        ->assertSee('Community Works')
+        ->assertSee('Survey Responses')
+        ->assertSee('Community priorities')
+        ->assertSee('More alumni events.');
 });
 
 it('lets administrators edit graduate records in the master list', function () {

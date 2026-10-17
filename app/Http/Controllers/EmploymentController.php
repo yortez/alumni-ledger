@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Employment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EmploymentController extends Controller
 {
@@ -49,14 +50,22 @@ class EmploymentController extends Controller
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
     private function rules(): array
     {
         return [
+            'employment_status' => ['required', Rule::in(array_keys(Employment::EMPLOYMENT_STATUSES))],
+            'sector' => ['nullable', Rule::in(array_keys(Employment::SECTORS))],
             'job_title' => ['required', 'string', 'max:255'],
             'employer' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:120'],
+            'industry' => ['nullable', 'string', 'max:255'],
+            'job_level' => ['nullable', Rule::in(array_keys(Employment::JOB_LEVELS))],
+            'monthly_income' => ['nullable', Rule::in(array_keys(Employment::MONTHLY_INCOME_RANGES))],
+            'months_to_employment' => ['nullable', 'integer', 'between:0,600'],
+            'course_relevance' => ['nullable', Rule::in(array_keys(Employment::COURSE_RELEVANCE_OPTIONS))],
             'start_date' => ['required', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'is_current' => ['required', 'boolean'],
