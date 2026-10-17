@@ -109,23 +109,65 @@ it('prevents a graduate record from being claimed twice', function () {
 });
 
 it('saves profile details without requiring career information', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['email' => 'old@example.com']);
 
     $response = $this->actingAs($user)->put('/profile', [
+        'first_name' => 'Morgan',
+        'middle_name' => 'Avery',
+        'last_name' => 'Lee',
+        'suffix' => 'Jr.',
+        'birthdate' => '1990-04-13',
+        'sex' => 'female',
+        'civil_status' => 'single',
         'phone' => '+1 555 0100',
-        'city' => 'Portland',
-        'country' => 'United States',
+        'email' => 'morgan@example.com',
+        'current_address' => '123 Main Street, Portland, Oregon',
+        'permanent_address' => '45 Oak Avenue, Salem, Oregon',
     ]);
 
     $response->assertRedirectToRoute('dashboard');
     $this->assertDatabaseHas('alumni_profiles', [
         'user_id' => $user->id,
+        'first_name' => 'Morgan',
+        'middle_name' => 'Avery',
+        'last_name' => 'Lee',
+        'suffix' => 'Jr.',
+        'sex' => 'female',
+        'civil_status' => 'single',
         'phone' => '+1 555 0100',
-        'city' => 'Portland',
-        'country' => 'United States',
+        'current_address' => '123 Main Street, Portland, Oregon',
+        'permanent_address' => '45 Oak Avenue, Salem, Oregon',
         'completed_at' => AlumniProfile::query()->where('user_id', $user->id)->value('completed_at'),
     ]);
-    expect(AlumniProfile::query()->where('user_id', $user->id)->firstOrFail()->completed_at)->not->toBeNull();
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'name' => 'Morgan Avery Lee Jr.',
+        'email' => 'morgan@example.com',
+        'email_verified_at' => null,
+    ]);
+    $profile = AlumniProfile::query()->where('user_id', $user->id)->firstOrFail();
+    expect($profile->birthdate->toDateString())->toBe('1990-04-13')
+        ->and($profile->completed_at)->not->toBeNull();
+});
+
+it('rejects an email address already used by another account', function () {
+    User::factory()->create(['email' => 'taken@example.com']);
+    $user = User::factory()->create(['email' => 'alumni@example.com']);
+
+    $this->actingAs($user)
+        ->put('/profile', [
+            'first_name' => 'Morgan',
+            'last_name' => 'Lee',
+            'phone' => '+1 555 0100',
+            'email' => 'taken@example.com',
+        ])
+        ->assertSessionHasErrors('email');
+
+    $this->assertDatabaseHas('users', [
+        'id' => $user->id,
+        'email' => 'alumni@example.com',
+    ]);
+    $this->assertDatabaseMissing('alumni_profiles', ['user_id' => $user->id]);
 });
 
 it('shows account and graduate information in the alumni profile form', function () {
@@ -150,6 +192,12 @@ it('shows account and graduate information in the alumni profile form', function
         ->assertSee('Academic Information')
         ->assertDontSee('Career Information')
         ->assertSee('Employment history')
+        ->assertSee('name="first_name"', false)
+        ->assertSee('name="birthdate"', false)
+        ->assertSee('name="sex"', false)
+        ->assertSee('name="civil_status"', false)
+        ->assertSee('name="current_address"', false)
+        ->assertSee('name="permanent_address"', false)
         ->assertSee('morgan@example.com')
         ->assertSee('ENVS')
         ->assertSee('2020')
@@ -209,7 +257,16 @@ it('allows administrators to view applicant details', function () {
         'email' => 'jordan@example.com',
     ]);
     $profile = $applicant->profile()->create([
+        'first_name' => 'Jordan',
+        'middle_name' => 'Parker',
+        'last_name' => 'Smith',
+        'suffix' => 'Jr.',
+        'birthdate' => '1995-01-02',
+        'sex' => 'male',
+        'civil_status' => 'single',
         'phone' => '+1 555 0102',
+        'current_address' => '12 Pine Street, Seattle',
+        'permanent_address' => '45 Oak Road, Olympia',
         'job_title' => 'Operations Manager',
         'employer' => 'Northline Group',
         'industry' => 'Logistics',
@@ -234,9 +291,14 @@ it('allows administrators to view applicant details', function () {
         ->get('/admin/graduates/'.$graduate->getKey())
         ->assertOk()
         ->assertSee('Alumni profile')
-        ->assertSee('Jordan Smith')
+        ->assertSee('Jordan Parker Smith Jr.')
         ->assertSee('Personal Information')
         ->assertSee('+1 555 0102')
+        ->assertSee('Jan 2, 1995')
+        ->assertSee('Male')
+        ->assertSee('Single')
+        ->assertSee('12 Pine Street, Seattle')
+        ->assertSee('45 Oak Road, Olympia')
         ->assertSee('Seattle')
         ->assertDontSee('Operations Manager')
         ->assertDontSee('Northline Group')

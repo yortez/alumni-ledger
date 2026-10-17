@@ -17,7 +17,13 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <p class="text-xs uppercase tracking-wider text-muted">Graduate record</p>
-                    <h2 class="mt-2 font-display text-3xl">{{ $graduate->fullName() }}</h2>
+                    @php($displayName = implode(' ', array_filter([
+                        $profile?->first_name ?: $graduate->first_name,
+                        $profile?->middle_name ?: $graduate->middle_name,
+                        $profile?->last_name ?: $graduate->last_name,
+                        $profile?->suffix,
+                    ])))
+                    <h2 class="mt-2 font-display text-3xl">{{ $displayName ?: $graduate->fullName() }}</h2>
                 </div>
                 @if ($profile?->completed_at)
                     <span class="rounded-full border border-forest bg-mint px-3 py-1 text-xs font-semibold uppercase tracking-wide text-forest">Profile complete</span>
@@ -64,12 +70,44 @@
             @if ($profile)
                 <dl class="mt-6 grid gap-4">
                     <div>
-                        <dt class="text-xs uppercase tracking-wider text-muted">Location</dt>
-                        <dd class="mt-2 font-medium text-ink">{{ $profile->city ?: 'Not provided' }}{{ $profile->city && $profile->country ? ', ' : '' }}{{ $profile->country ?: '' }}</dd>
+                        <dt class="text-xs uppercase tracking-wider text-muted">First name</dt>
+                        <dd class="mt-2 font-medium text-ink">{{ $profile->first_name ?: $graduate->first_name ?: 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-muted">Middle name</dt>
+                        <dd class="mt-2 font-medium text-ink">{{ $profile->middle_name ?: $graduate->middle_name ?: 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-muted">Last name</dt>
+                        <dd class="mt-2 font-medium text-ink">{{ $profile->last_name ?: $graduate->last_name ?: 'Not provided' }}{{ $profile->suffix ? ' '.$profile->suffix : '' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-muted">Birthdate</dt>
+                        <dd class="mt-2 font-medium text-ink">{{ $profile->birthdate?->format('M j, Y') ?? 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-muted">Sex</dt>
+                        <dd class="mt-2 font-medium text-ink">{{ $profile->sex ? ucwords(str_replace('_', ' ', $profile->sex)) : 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-muted">Civil status</dt>
+                        <dd class="mt-2 font-medium text-ink">{{ $profile->civil_status ? ucfirst($profile->civil_status) : 'Not provided' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs uppercase tracking-wider text-muted">Phone</dt>
                         <dd class="mt-2 font-medium text-ink">{{ $profile->phone ?: 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-muted">Email</dt>
+                        <dd class="mt-2 break-all font-medium text-ink">{{ $applicant?->email ?? 'Not available' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-muted">Current address</dt>
+                        <dd class="mt-2 whitespace-pre-line text-sm leading-6 text-ink">{{ $profile->current_address ?: trim(($profile->city ?: '').', '.($profile->country ?: ''), ', ') ?: 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs uppercase tracking-wider text-muted">Permanent address</dt>
+                        <dd class="mt-2 whitespace-pre-line text-sm leading-6 text-ink">{{ $profile->permanent_address ?: 'Not provided' }}</dd>
                     </div>
                 </dl>
                 <div class="mt-7 border-t border-line pt-5">

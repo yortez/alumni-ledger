@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'phone', 'job_title', 'employer', 'industry', 'employment_status', 'city',
-    'country', 'linkedin_url', 'bio', 'completed_at',
+    'first_name', 'middle_name', 'last_name', 'suffix', 'birthdate', 'sex',
+    'civil_status', 'phone', 'current_address', 'permanent_address', 'job_title',
+    'employer', 'industry', 'employment_status', 'city', 'country', 'linkedin_url',
+    'bio', 'completed_at',
 ])]
 class AlumniProfile extends Model
 {
@@ -21,5 +23,17 @@ class AlumniProfile extends Model
     public function employments(): HasMany
     {
         return $this->hasMany(Employment::class);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'birthdate' => 'date',
+        ];
     }
 }
