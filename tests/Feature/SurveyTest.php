@@ -16,7 +16,18 @@ it('shows the survey manager to administrators', function () {
         ->get('/admin/surveys')
         ->assertOk()
         ->assertSee('Survey manager')
-        ->assertSee('Questions')
+        ->assertSee('Create Survey')
+        ->assertDontSee('Add Question');
+});
+
+it('shows the survey builder on its own page', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)
+        ->get('/admin/surveys/create')
+        ->assertOk()
+        ->assertSee('Create survey')
         ->assertSee('Add Question')
         ->assertSee('Question type');
 });

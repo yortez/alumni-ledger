@@ -48,6 +48,11 @@ class AnnouncementController extends Controller
         ]);
     }
 
+    public function create(): View
+    {
+        return view('admin.announcement-create');
+    }
+
     public function edit(Announcement $announcement): View
     {
         return view('admin.announcement-edit', [

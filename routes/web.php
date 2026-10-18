@@ -45,12 +45,14 @@ Route::middleware('auth')->group(function (): void {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
     Route::middleware('admin.permission:manage_admins')->group(function (): void {
+        Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
         Route::patch('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     });
 
     Route::middleware('admin.permission:manage_roles')->group(function (): void {
+        Route::get('/roles/create', [AdminRoleController::class, 'create'])->name('roles.create');
         Route::get('/roles', [AdminRoleController::class, 'index'])->name('roles.index');
         Route::post('/roles', [AdminRoleController::class, 'store'])->name('roles.store');
         Route::patch('/roles/{role}', [AdminRoleController::class, 'update'])->name('roles.update');
@@ -61,6 +63,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         Route::get('/graduates/import-template', [GraduateController::class, 'downloadImportTemplate'])->name('graduates.import-template');
         Route::get('/graduates/export', [GraduateController::class, 'export'])->name('graduates.export');
         Route::get('/graduates', [GraduateController::class, 'index'])->name('graduates.index');
+        Route::get('/graduates/create', [GraduateController::class, 'create'])->name('graduates.create');
         Route::get('/graduates/{graduate}/files/{file}', [GraduateController::class, 'file'])->name('graduates.files');
         Route::get('/graduates/{graduate}/edit', [GraduateController::class, 'edit'])->name('graduates.edit');
         Route::get('/graduates/{graduate}', [GraduateController::class, 'show'])->name('graduates.show');
@@ -70,16 +73,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     });
 
     Route::middleware('admin.permission:announcements')->group(function (): void {
+        Route::get('/announcements/create', [AnnouncementController::class, 'create'])->name('announcements.create');
         Route::get('/announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
         Route::resource('announcements', AnnouncementController::class)->only(['index', 'store', 'update', 'destroy']);
     });
 
     Route::middleware('admin.permission:surveys')->group(function (): void {
+        Route::get('/surveys/create', [AdminSurveyController::class, 'create'])->name('surveys.create');
         Route::get('/surveys/{survey}/edit', [AdminSurveyController::class, 'edit'])->name('surveys.edit');
         Route::resource('surveys', AdminSurveyController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     });
 
     Route::middleware('admin.permission:jobs')->group(function (): void {
+        Route::get('/jobs/create', [App\Http\Controllers\Admin\JobController::class, 'create'])->name('jobs.create');
         Route::get('/jobs', [App\Http\Controllers\Admin\JobController::class, 'index'])->name('jobs.index');
         Route::get('/jobs/{job}/edit', [App\Http\Controllers\Admin\JobController::class, 'edit'])->name('jobs.edit');
         Route::post('/jobs', [App\Http\Controllers\Admin\JobController::class, 'store'])->name('jobs.store');

@@ -6,23 +6,7 @@
 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
     <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div><h1 class="text-xl font-semibold">Job Opportunities</h1><p class="mt-1 text-xs text-muted">{{ $jobCount }} jobs · {{ $publishedCount }} published</p></div>
-        <details class="relative">
-            <summary class="inline-flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Post Job</summary>
-            <div class="absolute right-0 z-20 mt-2 max-h-[82vh] w-[min(92vw,40rem)] overflow-y-auto rounded-md border border-line bg-surface p-5 shadow-xl">
-                <h2 class="text-sm font-semibold">Post a new role</h2>
-                <form method="POST" action="{{ route('admin.jobs.store') }}" class="mt-4 grid gap-4 sm:grid-cols-2">@csrf
-                    <div class="field"><label for="title">Job title</label><input id="title" name="title" maxlength="180" value="{{ old('title') }}" required>@error('title')<p class="field-error">{{ $message }}</p>@enderror</div>
-                    <div class="field"><label for="company">Company</label><input id="company" name="company" maxlength="180" value="{{ old('company') }}" required>@error('company')<p class="field-error">{{ $message }}</p>@enderror</div>
-                    <div class="field"><label for="location">Location</label><input id="location" name="location" maxlength="180" value="{{ old('location') }}" required>@error('location')<p class="field-error">{{ $message }}</p>@enderror</div>
-                    <div class="field"><label for="employment_type">Employment type</label><input id="employment_type" name="employment_type" maxlength="80" value="{{ old('employment_type', 'Full-time') }}" required>@error('employment_type')<p class="field-error">{{ $message }}</p>@enderror</div>
-                    <div class="field sm:col-span-2"><label for="description">Description</label><textarea id="description" name="description" rows="4" maxlength="10000" required>{{ old('description') }}</textarea>@error('description')<p class="field-error">{{ $message }}</p>@enderror</div>
-                    <div class="field sm:col-span-2"><label for="requirements">Requirements <span class="font-normal text-muted">Optional</span></label><textarea id="requirements" name="requirements" rows="3" maxlength="10000">{{ old('requirements') }}</textarea>@error('requirements')<p class="field-error">{{ $message }}</p>@enderror</div>
-                    <div class="field"><label for="application_deadline">Application deadline</label><input id="application_deadline" name="application_deadline" type="date" min="{{ today()->toDateString() }}" value="{{ old('application_deadline') }}">@error('application_deadline')<p class="field-error">{{ $message }}</p>@enderror</div>
-                    <div class="field"><label for="status">Status</label><select id="status" name="status" required><option value="published" @selected(old('status', 'published') === 'published')>Published</option><option value="draft" @selected(old('status') === 'draft')>Draft</option></select>@error('status')<p class="field-error">{{ $message }}</p>@enderror</div>
-                    <button type="submit" class="bg-forest px-4 py-2.5 text-sm font-semibold text-white hover:bg-forest-dark sm:col-span-2">Create job</button>
-                </form>
-            </div>
-        </details>
+        <a href="{{ route('admin.jobs.create') }}" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Post Job</a>
     </header>
 
     <form method="GET" action="{{ route('admin.jobs.index') }}" class="mb-4 flex flex-wrap items-center gap-2 rounded-md border border-line bg-surface p-3 sm:p-4">

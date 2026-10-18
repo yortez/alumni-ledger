@@ -8,21 +8,7 @@
         <div><h1 class="text-xl font-semibold">Administrator Access</h1><p class="mt-1 text-xs text-muted">{{ $adminCount }} administrator accounts</p></div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('admin.roles.index') }}" class="inline-flex min-h-9 items-center rounded-md border border-line bg-surface px-3 py-2 text-xs font-medium text-muted transition hover:text-ink">Role Definitions</a>
-            <details class="relative">
-                <summary class="inline-flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Add Administrator</summary>
-                <div class="absolute right-0 z-20 mt-2 max-h-[82vh] w-[min(92vw,34rem)] overflow-y-auto rounded-md border border-line bg-surface p-5 shadow-xl">
-                    <h2 class="text-sm font-semibold">Create an administrator</h2>
-                    <form method="POST" action="{{ route('admin.users.store') }}" class="mt-4 grid gap-4 sm:grid-cols-2">@csrf
-                        <div class="field"><label for="name">Full name</label><input id="name" name="name" value="{{ old('name') }}" required>@error('name')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <div class="field"><label for="username">Username</label><input id="username" name="username" value="{{ old('username') }}" required>@error('username')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <div class="field sm:col-span-2"><label for="email">Email</label><input id="email" name="email" type="email" value="{{ old('email') }}" required>@error('email')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <div class="field"><label for="password">Temporary password</label><input id="password" name="password" type="password" required>@error('password')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <div class="field"><label for="password_confirmation">Confirm password</label><input id="password_confirmation" name="password_confirmation" type="password" required></div>
-                        <div class="field sm:col-span-2"><label for="role_id">Role</label><select id="role_id" name="role_id" required>@foreach ($roles as $role)<option value="{{ $role->id }}" @selected((int) old('role_id', $roles->firstWhere('type', 'content_admin')?->id) === $role->id)>{{ $role->name }}</option>@endforeach</select>@error('role_id')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <button type="submit" class="bg-forest px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-forest-dark sm:col-span-2">Create administrator</button>
-                    </form>
-                </div>
-            </details>
+            <a href="{{ route('admin.users.create') }}" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Add Administrator</a>
         </div>
     </header>
 

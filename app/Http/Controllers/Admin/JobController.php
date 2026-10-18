@@ -11,6 +11,11 @@ use Illuminate\View\View;
 
 class JobController extends Controller
 {
+    public function create(): View
+    {
+        return view('admin.job-create');
+    }
+
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));

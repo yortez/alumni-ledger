@@ -14,6 +14,18 @@ it('shows the announcement manager to administrators', function () {
         ->get('/admin/announcements')
         ->assertOk()
         ->assertSee('Announcements')
+        ->assertSee('Post Announcement')
+        ->assertDontSee('Announcement Details');
+});
+
+it('shows the announcement creation form on its own page', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)
+        ->get('/admin/announcements/create')
+        ->assertOk()
+        ->assertSee('Create announcement')
         ->assertSee('Announcement Details')
         ->assertSee('Publish Settings')
         ->assertSee('Pin this announcement');

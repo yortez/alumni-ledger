@@ -11,6 +11,13 @@ use Illuminate\View\View;
 
 class AdminUserController extends Controller
 {
+    public function create(): View
+    {
+        return view('admin.user-create', [
+            'roles' => AdminRole::query()->orderBy('name')->get(),
+        ]);
+    }
+
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));

@@ -14,6 +14,11 @@ it('lets a role manager create a role with a custom type and module permissions'
         ->get('/admin/roles')
         ->assertOk()
         ->assertSee('Role definitions')
+        ->assertSee('Add Role');
+
+    $this->actingAs($superAdmin)
+        ->get('/admin/roles/create')
+        ->assertOk()
         ->assertSee('Create a role')
         ->assertSee('Role type');
 

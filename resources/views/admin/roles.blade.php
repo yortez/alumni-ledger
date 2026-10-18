@@ -7,19 +7,7 @@
     <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div><h1 class="text-xl font-semibold">Role Definitions</h1><p class="mt-1 text-xs text-muted">{{ $roleCount }} roles</p></div>
         <div class="flex flex-wrap gap-2"><a href="{{ route('admin.users.index') }}" class="inline-flex min-h-9 items-center rounded-md border border-line bg-surface px-3 py-2 text-xs font-medium text-muted transition hover:text-ink">Administrator Accounts</a>
-            <details class="relative">
-                <summary class="inline-flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Add Role</summary>
-                <div class="absolute right-0 z-20 mt-2 max-h-[82vh] w-[min(92vw,34rem)] overflow-y-auto rounded-md border border-line bg-surface p-5 shadow-xl">
-                    <h2 class="text-sm font-semibold">Create a role</h2>
-                    <form method="POST" action="{{ route('admin.roles.store') }}" class="mt-4 grid gap-4">@csrf
-                        <div class="field"><label for="name">Role name</label><input id="name" name="name" maxlength="120" value="{{ old('name') }}" required>@error('name')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <div class="field"><label for="type">Role type</label><input id="type" name="type" maxlength="60" pattern="[A-Za-z0-9_-]+" value="{{ old('type') }}" required><p class="mt-1 text-xs text-muted">Use letters, numbers, hyphens, or underscores.</p>@error('type')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <div class="field"><label for="description">Description <span class="font-normal text-muted">Optional</span></label><textarea id="description" name="description" rows="3" maxlength="1000">{{ old('description') }}</textarea>@error('description')<p class="field-error">{{ $message }}</p>@enderror</div>
-                        <fieldset class="grid gap-2"><legend class="text-sm font-semibold">Module permissions</legend>@foreach ($permissions as $permission => $label)<label class="flex items-start gap-2 py-1 text-sm"><input class="mt-1" type="checkbox" name="permissions[]" value="{{ $permission }}" @checked(in_array($permission, old('permissions', [])))><span>{{ $label }}</span></label>@endforeach @error('permissions')<p class="field-error">{{ $message }}</p>@enderror @error('permissions.*')<p class="field-error">{{ $message }}</p>@enderror</fieldset>
-                        <button type="submit" class="bg-forest px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-forest-dark">Create role</button>
-                    </form>
-                </div>
-            </details>
+            <a href="{{ route('admin.roles.create') }}" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Add Role</a>
         </div>
     </header>
 

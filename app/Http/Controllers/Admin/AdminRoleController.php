@@ -12,6 +12,13 @@ use Illuminate\View\View;
 
 class AdminRoleController extends Controller
 {
+    public function create(): View
+    {
+        return view('admin.role-create', [
+            'permissions' => AdminRole::PERMISSIONS,
+        ]);
+    }
+
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));

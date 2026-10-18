@@ -11,6 +11,12 @@ uses(RefreshDatabase::class);
 it('allows an administrator to create and publish a job', function () {
     $admin = User::factory()->create(['is_admin' => true]);
 
+    $this->actingAs($admin)
+        ->get('/admin/jobs/create')
+        ->assertOk()
+        ->assertSee('Create job posting')
+        ->assertSee('Application deadline');
+
     $response = $this->actingAs($admin)->post('/admin/jobs', [
         'title' => 'Community Partnerships Lead',
         'company' => 'Civic Lab',

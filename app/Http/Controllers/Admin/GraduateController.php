@@ -19,6 +19,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GraduateController extends Controller
 {
+    public function create(): View
+    {
+        return view('admin.graduate-create');
+    }
+
     public function index(Request $request): View
     {
         $filters = $this->graduateFilters($request);
@@ -204,7 +209,7 @@ class GraduateController extends Controller
 
         Graduate::query()->create($validated);
 
-        return back()->with('status', 'Graduate added to the master list.');
+        return redirect()->route('admin.graduates.index')->with('status', 'Graduate added to the master list.');
     }
 
     public function update(Request $request, Graduate $graduate): RedirectResponse
@@ -301,6 +306,6 @@ class GraduateController extends Controller
             );
         });
 
-        return back()->with('status', count($rows).' graduate records imported.');
+        return redirect()->route('admin.graduates.index')->with('status', count($rows).' graduate records imported.');
     }
 }

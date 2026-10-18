@@ -323,6 +323,30 @@ it('forbids non-admin users from viewing the graduate master list', function () 
         ->assertForbidden();
 });
 
+it('shows the full-page graduate form and returns to the list after creation', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+
+    $this->actingAs($admin)
+        ->get('/admin/graduates')
+        ->assertOk()
+        ->assertSee('Add Alumni')
+        ->assertDontSee('Add to records');
+
+    $this->get('/admin/graduates/create')
+        ->assertOk()
+        ->assertSee('Add alumni record')
+        ->assertSee('Import records from CSV')
+        ->assertSee('Download sample CSV template');
+
+    $this->post('/admin/graduates', [
+        'student_number' => '2024-3001',
+        'first_name' => 'Alex',
+        'last_name' => 'Rivera',
+        'latin_honor' => 'none',
+    ])->assertRedirectToRoute('admin.graduates.index');
+});
+
 it('shows profile completion and employment details to administrators', function () {
     Graduate::query()->create([
         'student_number' => '2018-0099',

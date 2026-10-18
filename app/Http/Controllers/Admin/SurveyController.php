@@ -14,6 +14,16 @@ use Illuminate\View\View;
 
 class SurveyController extends Controller
 {
+    public function create(): View
+    {
+        return view('admin.survey-create', [
+            'programs' => Graduate::query()->whereNotNull('program_code')->where('program_code', '<>', '')
+                ->distinct()->orderBy('program_code')->pluck('program_code'),
+            'graduationYears' => Graduate::query()->whereNotNull('batch_year')
+                ->distinct()->orderByDesc('batch_year')->pluck('batch_year'),
+        ]);
+    }
+
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));

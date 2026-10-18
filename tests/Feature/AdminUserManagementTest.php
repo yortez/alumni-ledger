@@ -15,6 +15,12 @@ it('lets a super admin create an administrator account with a role', function ()
     $this->actingAs($superAdmin)
         ->get('/admin/users')
         ->assertOk()
+        ->assertSee('Add Administrator')
+        ->assertDontSee('Temporary password');
+
+    $this->actingAs($superAdmin)
+        ->get('/admin/users/create')
+        ->assertOk()
         ->assertSee('Create an administrator')
         ->assertSee('Records administrator');
 
