@@ -18,7 +18,7 @@
 
     <section class="grid gap-3">
         @forelse ($roles as $role)
-            <article class="overflow-hidden rounded-md border border-line bg-surface">
+            <article class="rounded-md border border-line bg-surface">
                 <div class="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center sm:px-5">
                     <div class="flex min-w-0 items-center gap-3"><span class="grid size-9 shrink-0 place-items-center rounded-full bg-forest/15 text-xs font-bold text-forest">{{ strtoupper(substr($role->name, 0, 1)) }}</span><div class="min-w-0"><h2 class="truncate text-sm font-semibold">{{ $role->name }}</h2><p class="mt-1 text-[10px] text-muted">{{ $role->type }} · {{ $role->users_count }} assigned administrators</p></div>@if ($role->is_system)<span class="rounded-full bg-warning/15 px-2.5 py-1 text-[10px] font-semibold text-warning">Protected</span>@endif</div>
                     <div class="flex shrink-0 items-center gap-2"><details class="relative"><summary class="inline-flex min-h-8 cursor-pointer list-none items-center gap-2 rounded-md border border-line px-3 py-2 text-[10px] font-medium text-muted hover:text-ink"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 4 4 4L9 19l-5 1 1-5L16 4zM14 6l4 4" /></svg>Edit</summary>
