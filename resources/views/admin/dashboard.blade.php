@@ -30,6 +30,7 @@
                             @case('briefcase')<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/></svg>@break
                         @endswitch
                     </span>
+
                     <div class="min-w-0">
                         <p class="dashboard-metric-value">{{ number_format($metric['value']) }}</p>
                         <h3 class="dashboard-metric-label">{{ $metric['label'] }}</h3>
