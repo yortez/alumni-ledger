@@ -28,6 +28,27 @@ if (navigationToggle && navigation) {
 	});
 }
 
+const notificationDialog = document.querySelector('#notification-dialog');
+
+if (notificationDialog instanceof HTMLDialogElement) {
+	document.querySelectorAll('[data-notifications-open]').forEach((notificationButton) => {
+		notificationButton.addEventListener('click', (event) => {
+			event.preventDefault();
+			notificationDialog.showModal();
+		});
+	});
+
+	notificationDialog.querySelector('[data-notification-dialog-close]')?.addEventListener('click', () => {
+		notificationDialog.close();
+	});
+
+	notificationDialog.addEventListener('click', (event) => {
+		if (event.target === notificationDialog) {
+			notificationDialog.close();
+		}
+	});
+}
+
 document.querySelectorAll('[data-question-builder]').forEach((builder) => {
 	const questionList = builder.querySelector('[data-question-list]');
 	const questionTemplate = builder.querySelector('[data-question-template]');

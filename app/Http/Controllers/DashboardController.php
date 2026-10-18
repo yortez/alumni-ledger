@@ -44,22 +44,22 @@ class DashboardController extends Controller
 
         $metrics = [];
         if ($adminRole->hasPermission('manage_admins')) {
-            $metrics[] = ['label' => 'Administrator accounts', 'value' => User::query()->where('is_admin', true)->count(), 'detail' => 'Accounts with administrative access'];
+            $metrics[] = ['label' => 'Administrator accounts', 'value' => User::query()->where('is_admin', true)->count(), 'detail' => 'Accounts with administrative access', 'icon' => 'users', 'tone' => 'violet'];
         }
         if ($adminRole->hasPermission('graduates')) {
-            $metrics[] = ['label' => 'Graduate records', 'value' => Graduate::query()->count(), 'detail' => 'Entries in the master list'];
-            $metrics[] = ['label' => 'Accounts claimed', 'value' => User::query()->whereNotNull('student_number')->count(), 'detail' => 'Graduates with an account'];
-            $metrics[] = ['label' => 'Applicant profiles', 'value' => AlumniProfile::query()->whereNotNull('completed_at')->count(), 'detail' => 'Profiles completed'];
+            $metrics[] = ['label' => 'Graduate records', 'value' => Graduate::query()->count(), 'detail' => 'Entries in the master list', 'icon' => 'graduates', 'tone' => 'cyan'];
+            $metrics[] = ['label' => 'Accounts claimed', 'value' => User::query()->whereNotNull('student_number')->count(), 'detail' => 'Graduates with an account', 'icon' => 'verified', 'tone' => 'green'];
+            $metrics[] = ['label' => 'Applicant profiles', 'value' => AlumniProfile::query()->whereNotNull('completed_at')->count(), 'detail' => 'Profiles completed', 'icon' => 'profile', 'tone' => 'blue'];
         }
         if ($adminRole->hasPermission('announcements')) {
-            $metrics[] = ['label' => 'Published announcements', 'value' => Announcement::published()->count(), 'detail' => 'Visible to alumni'];
+            $metrics[] = ['label' => 'Published announcements', 'value' => Announcement::published()->count(), 'detail' => 'Visible to alumni', 'icon' => 'announcement', 'tone' => 'pink'];
         }
         if ($adminRole->hasPermission('surveys')) {
-            $metrics[] = ['label' => 'Open surveys', 'value' => $this->openSurveyCount(), 'detail' => 'Accepting responses'];
+            $metrics[] = ['label' => 'Open surveys', 'value' => $this->openSurveyCount(), 'detail' => 'Accepting responses', 'icon' => 'survey', 'tone' => 'amber'];
         }
         if ($adminRole->hasPermission('jobs')) {
-            $metrics[] = ['label' => 'Active jobs', 'value' => Job::published()->count(), 'detail' => 'Currently accepting applications'];
-            $metrics[] = ['label' => 'Applications to review', 'value' => JobApplication::query()->whereIn('status', ['submitted', 'reviewing'])->count(), 'detail' => 'Submitted or under review'];
+            $metrics[] = ['label' => 'Active jobs', 'value' => Job::published()->count(), 'detail' => 'Currently accepting applications', 'icon' => 'building', 'tone' => 'rose'];
+            $metrics[] = ['label' => 'Applications to review', 'value' => JobApplication::query()->whereIn('status', ['submitted', 'reviewing'])->count(), 'detail' => 'Submitted or under review', 'icon' => 'briefcase', 'tone' => 'orange'];
         }
 
         $workspaceDefinitions = [

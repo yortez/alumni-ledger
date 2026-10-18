@@ -3,11 +3,11 @@
 @section('title', 'Edit job posting')
 
 @section('content')
-<div class="mx-auto max-w-3xl px-5 py-10 sm:px-8 lg:py-14">
-    <div class="mb-6 flex items-center justify-between gap-4 border-b border-line pb-6">
+<div class="mx-auto max-w-3xl px-5 py-7 sm:px-8">
+    <div class="mb-5 flex items-center justify-between gap-4 border-b border-line pb-5">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="font-display mt-3 text-4xl sm:text-5xl">Edit job posting</h1>
+            <h1 class="mt-1 text-xl font-semibold">Edit job posting</h1>
         </div>
         <a href="{{ route('admin.jobs.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Back to jobs</a>
     </div>

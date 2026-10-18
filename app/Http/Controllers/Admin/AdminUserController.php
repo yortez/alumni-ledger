@@ -7,6 +7,8 @@ use App\Models\AdminRole;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdminUserController extends Controller
@@ -77,12 +79,47 @@ class AdminUserController extends Controller
         abort_if($user->is($request->user()), 403);
 
         $validated = $request->validate([
-            'role_id' => ['required', 'integer', 'exists:admin_roles,id'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'username' => ['sometimes', 'required', 'string', 'max:40', 'alpha_dash', Rule::unique('users', 'username')->ignore($user)],
+            'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
+            'role_id' => ['sometimes', 'required', 'integer', 'exists:admin_roles,id'],
         ]);
-        $role = AdminRole::query()->findOrFail($validated['role_id']);
-        abort_unless($request->user()->canDelegateAdminPermissions($role->permissions ?? []), 403);
 
-        if ($user->hasAdminPermission('manage_roles') && ! $role->hasPermission('manage_roles')) {
+        $user->fill(Arr::only($validated, ['name', 'username', 'email']));
+
+        if (isset($validated['role_id'])) {
+            $role = AdminRole::query()->findOrFail($validated['role_id']);
+            abort_unless($request->user()->canDelegateAdminPermissions($role->permissions ?? []), 403);
+
+            if ($user->hasAdminPermission('manage_roles') && ! $role->hasPermission('manage_roles')) {
+                $anotherRoleManagerExists = User::query()
+                    ->where('is_admin', true)
+                    ->whereKeyNot($user->id)
+                    ->get()
+                    ->contains(fn (User $administrator): bool => $administrator->hasAdminPermission('manage_roles'));
+
+                if (! $anotherRoleManagerExists) {
+                    return back()->withErrors(['role_id' => 'At least one administrator with role-management access must remain.']);
+                }
+            }
+
+            $user->forceFill([
+                'admin_role' => $role->type,
+                'role_id' => $role->id,
+            ]);
+        }
+
+        $user->save();
+
+        return redirect()->route('admin.users.index')->with('status', 'Administrator account updated.');
+    }
+
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($user->is_admin, 404);
+        abort_if($user->is($request->user()), 403);
+
+        if ($user->hasAdminPermission('manage_roles')) {
             $anotherRoleManagerExists = User::query()
                 ->where('is_admin', true)
                 ->whereKeyNot($user->id)
@@ -90,15 +127,12 @@ class AdminUserController extends Controller
                 ->contains(fn (User $administrator): bool => $administrator->hasAdminPermission('manage_roles'));
 
             if (! $anotherRoleManagerExists) {
-                return back()->withErrors(['role_id' => 'At least one administrator with role-management access must remain.']);
+                return back()->withErrors(['admin' => 'At least one administrator with role-management access must remain.']);
             }
         }
 
-        $user->forceFill([
-            'admin_role' => $role->type,
-            'role_id' => $role->id,
-        ])->save();
+        $user->delete();
 
-        return redirect()->route('admin.users.index')->with('status', 'Administrator role updated.');
+        return redirect()->route('admin.users.index')->with('status', 'Administrator account deleted.');
     }
 }

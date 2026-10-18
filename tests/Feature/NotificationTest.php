@@ -28,6 +28,13 @@ it('sends a published announcement as a notification to each user', function () 
     ]);
 
     $this->actingAs($alumni)
+        ->get('/dashboard')
+        ->assertSee('data-notifications-open', false)
+        ->assertSee('id="notification-dialog"', false)
+        ->assertSee('Spring reunion')
+        ->assertSee('View all notifications');
+
+    $this->actingAs($alumni)
         ->get('/notifications')
         ->assertOk()
         ->assertSee('Spring reunion')

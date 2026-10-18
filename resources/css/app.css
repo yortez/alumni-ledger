@@ -63,6 +63,89 @@
     background: linear-gradient(108deg, #4f00bd 0%, #4f00bd 56%, #202741 100%);
 }
 
+.dashboard-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+    gap: 0.625rem;
+}
+
+.dashboard-metric {
+    display: flex;
+    min-width: 0;
+    min-height: 7rem;
+    align-items: flex-start;
+    gap: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 0.5rem;
+    border-top-width: 2px;
+    background: #1d2741;
+    padding: 0.875rem;
+}
+
+.dashboard-metric-icon {
+    display: grid;
+    width: 2.375rem;
+    height: 2.375rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 0.375rem;
+}
+
+.dashboard-metric-icon svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.dashboard-metric-value {
+    color: #f2f4fc;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dashboard-metric-label {
+    margin-top: 0.375rem;
+    color: #96a2c0;
+    font-size: 0.6rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.dashboard-metric-detail {
+    margin-top: 0.375rem;
+    overflow: hidden;
+    color: var(--metric-accent);
+    font-size: 0.6rem;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-metric-violet { --metric-accent: #a78bfa; border-top-color: #7c3aed; }
+.dashboard-metric-violet .dashboard-metric-icon { color: #a78bfa; background: #30265d; }
+.dashboard-metric-cyan { --metric-accent: #22d3ee; border-top-color: #06b6d4; }
+.dashboard-metric-cyan .dashboard-metric-icon { color: #22d3ee; background: #153e51; }
+.dashboard-metric-green { --metric-accent: #34d399; border-top-color: #10b981; }
+.dashboard-metric-green .dashboard-metric-icon { color: #34d399; background: #174540; }
+.dashboard-metric-blue { --metric-accent: #60a5fa; border-top-color: #3b82f6; }
+.dashboard-metric-blue .dashboard-metric-icon { color: #60a5fa; background: #1c3b5c; }
+.dashboard-metric-pink { --metric-accent: #f472b6; border-top-color: #ec4899; }
+.dashboard-metric-pink .dashboard-metric-icon { color: #f472b6; background: #4a254b; }
+.dashboard-metric-amber { --metric-accent: #facc15; border-top-color: #eab308; }
+.dashboard-metric-amber .dashboard-metric-icon { color: #facc15; background: #494326; }
+.dashboard-metric-rose { --metric-accent: #fb7185; border-top-color: #f43f5e; }
+.dashboard-metric-rose .dashboard-metric-icon { color: #fb7185; background: #4a2542; }
+.dashboard-metric-orange { --metric-accent: #fb923c; border-top-color: #f97316; }
+.dashboard-metric-orange .dashboard-metric-icon { color: #fb923c; background: #4b3329; }
+
+@media (min-width: 64rem) {
+    .dashboard-metrics {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
+
 .eyebrow {
     color: var(--color-terracotta);
     font-size: 0.7rem;

@@ -61,6 +61,7 @@ it('rejects registration when the student number is not in the master list', fun
 });
 
 it('creates an alumni account from a matching graduate record', function () {
+    $admin = User::factory()->create(['is_admin' => true]);
     Graduate::query()->create([
         'student_number' => '2020-0042',
         'first_name' => 'Morgan',
@@ -85,6 +86,18 @@ it('creates an alumni account from a matching graduate record', function () {
         'student_number' => '2020-0042',
         'email' => 'morgan@example.com',
     ]);
+    $this->assertDatabaseHas('notifications', [
+        'notifiable_id' => $admin->id,
+        'notifiable_type' => User::class,
+        'data->type' => 'alumni_registered',
+        'data->title' => 'New alumni registered',
+    ]);
+
+    $this->actingAs($admin)
+        ->get('/notifications')
+        ->assertSee('New alumni registered')
+        ->assertSee('Morgan Lee (2020-0042) has registered.');
+
     expect(Hash::check('a-secure-password', User::query()->where('email', 'morgan@example.com')->value('password')))->toBeTrue();
 });
 

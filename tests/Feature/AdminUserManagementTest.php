@@ -122,6 +122,76 @@ it('lets a super admin change another administrator role but not their own', fun
     expect($superAdmin->fresh()->admin_role)->toBe('super_admin');
 });
 
+it('lets a super admin edit another administrator account', function () {
+    $superAdmin = User::factory()->create();
+    $superAdmin->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
+    $recordsAdmin = User::factory()->create();
+    $recordsAdmin->forceFill(['is_admin' => true, 'admin_role' => 'records_admin'])->save();
+
+    $this->actingAs($superAdmin)
+        ->get('/admin/users')
+        ->assertSee('Administrator name')
+        ->assertSee('Email address')
+        ->assertSee('Delete')
+        ->assertSee('Open account menu');
+
+    $this->actingAs($superAdmin)
+        ->patch("/admin/users/{$recordsAdmin->id}", [
+            'name' => 'Casey Updated',
+            'username' => 'caseyupdated',
+            'email' => 'casey.updated@example.com',
+            'role_id' => AdminRole::query()->where('type', 'content_admin')->value('id'),
+        ])
+        ->assertRedirectToRoute('admin.users.index');
+
+    $this->assertDatabaseHas('users', [
+        'id' => $recordsAdmin->id,
+        'name' => 'Casey Updated',
+        'username' => 'caseyupdated',
+        'email' => 'casey.updated@example.com',
+        'admin_role' => 'content_admin',
+    ]);
+});
+
+it('lets a super admin delete another administrator but not their own account', function () {
+    $superAdmin = User::factory()->create();
+    $superAdmin->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
+    $recordsAdmin = User::factory()->create();
+    $recordsAdmin->forceFill(['is_admin' => true, 'admin_role' => 'records_admin'])->save();
+
+    $this->actingAs($superAdmin)
+        ->delete("/admin/users/{$recordsAdmin->id}")
+        ->assertRedirectToRoute('admin.users.index');
+
+    $this->assertDatabaseMissing('users', ['id' => $recordsAdmin->id]);
+
+    $this->delete("/admin/users/{$superAdmin->id}")->assertForbidden();
+    $this->assertDatabaseHas('users', ['id' => $superAdmin->id]);
+});
+
+it('does not allow deleting the last administrator with role-management access', function () {
+    $accountManagerRole = AdminRole::query()->create([
+        'name' => 'Account manager',
+        'type' => 'account_manager',
+        'permissions' => ['manage_admins'],
+    ]);
+    $roleManagerRole = AdminRole::query()->create([
+        'name' => 'Role manager',
+        'type' => 'role_manager',
+        'permissions' => ['manage_roles'],
+    ]);
+    $accountManager = User::factory()->create();
+    $accountManager->forceFill(['is_admin' => true, 'role_id' => $accountManagerRole->id])->save();
+    $roleManager = User::factory()->create();
+    $roleManager->forceFill(['is_admin' => true, 'role_id' => $roleManagerRole->id])->save();
+
+    $this->actingAs($accountManager)
+        ->delete("/admin/users/{$roleManager->id}")
+        ->assertSessionHasErrors('admin');
+
+    $this->assertDatabaseHas('users', ['id' => $roleManager->id]);
+});
+
 it('keeps the acting super administrator in place when another super administrator is reassigned', function () {
     $superAdmin = User::factory()->create();
     $superAdmin->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();

@@ -38,6 +38,10 @@
                     <a href="{{ route('jobs.index') }}" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-forest underline underline-offset-4">
                         View jobs
                     </a>
+                @elseif (($notification->data['type'] ?? null) === 'alumni_registered' && auth()->user()->hasAdminPermission('graduates'))
+                    <a href="{{ route('admin.graduates.index') }}" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-forest underline underline-offset-4">
+                        View graduate records
+                    </a>
                 @endif
 
                 <p class="mt-4 text-xs text-muted">

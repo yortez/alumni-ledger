@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Graduate;
 use App\Models\User;
+use App\Notifications\AlumniRegistered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
 class AuthController extends Controller
@@ -43,6 +45,11 @@ class AuthController extends Controller
                 'password' => $validated['password'],
             ]);
         });
+
+        Notification::send(
+            User::query()->where('is_admin', true)->get(),
+            new AlumniRegistered($user),
+        );
 
         Auth::login($user);
         $request->session()->regenerate();
