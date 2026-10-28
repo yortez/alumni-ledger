@@ -130,6 +130,8 @@ it('lets a super admin edit another administrator account', function () {
 
     $this->actingAs($superAdmin)
         ->get('/admin/users')
+        ->assertSee('data-admin-edit-open', false)
+        ->assertSee('id="admin-edit-dialog"', false)
         ->assertSee('Administrator name')
         ->assertSee('Email address')
         ->assertSee('Delete')

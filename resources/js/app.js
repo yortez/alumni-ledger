@@ -49,6 +49,100 @@ if (notificationDialog instanceof HTMLDialogElement) {
 	});
 }
 
+const adminEditDialog = document.querySelector('#admin-edit-dialog');
+
+if (adminEditDialog instanceof HTMLDialogElement) {
+	const editForm = adminEditDialog.querySelector('[data-admin-edit-form]');
+	const deleteForm = adminEditDialog.querySelector('[data-admin-delete-form]');
+	const editButtons = [...document.querySelectorAll('[data-admin-edit-open]')];
+
+	const openAdminEditDialog = (button, preserveValues = false) => {
+		editForm.action = button.dataset.updateUrl;
+		deleteForm.action = button.dataset.deleteUrl;
+		editForm.elements.namedItem('admin_id').value = button.dataset.adminId;
+
+		if (!preserveValues) {
+			editForm.elements.namedItem('name').value = button.dataset.adminName;
+			editForm.elements.namedItem('username').value = button.dataset.adminUsername;
+			editForm.elements.namedItem('email').value = button.dataset.adminEmail;
+			editForm.elements.namedItem('role_id').value = button.dataset.adminRole;
+		}
+
+		if (!adminEditDialog.open) {
+			adminEditDialog.showModal();
+		}
+	};
+
+	editButtons.forEach((button) => {
+		button.addEventListener('click', () => openAdminEditDialog(button));
+	});
+
+	adminEditDialog.querySelectorAll('[data-admin-edit-close]').forEach((closeButton) => {
+		closeButton.addEventListener('click', () => adminEditDialog.close());
+	});
+
+	adminEditDialog.addEventListener('click', (event) => {
+		if (event.target === adminEditDialog) {
+			adminEditDialog.close();
+		}
+	});
+
+	const previousAdminButton = editButtons.find((button) => button.dataset.adminId === adminEditDialog.dataset.reopenFor);
+
+	if (previousAdminButton) {
+		openAdminEditDialog(previousAdminButton, true);
+	}
+}
+
+const jobEditDialog = document.querySelector('#job-edit-dialog');
+
+if (jobEditDialog instanceof HTMLDialogElement) {
+	const editForm = jobEditDialog.querySelector('[data-job-edit-form]');
+	const deleteForm = jobEditDialog.querySelector('[data-job-delete-form]');
+	const editButtons = [...document.querySelectorAll('[data-job-edit-open]')];
+
+	const openJobEditDialog = (button, preserveValues = false) => {
+		editForm.action = button.dataset.updateUrl;
+		deleteForm.action = button.dataset.deleteUrl;
+		editForm.elements.namedItem('job_id').value = button.dataset.jobId;
+
+		if (!preserveValues) {
+			editForm.elements.namedItem('title').value = button.dataset.jobTitle;
+			editForm.elements.namedItem('company').value = button.dataset.jobCompany;
+			editForm.elements.namedItem('location').value = button.dataset.jobLocation;
+			editForm.elements.namedItem('employment_type').value = button.dataset.jobEmploymentType;
+			editForm.elements.namedItem('description').value = button.dataset.jobDescription;
+			editForm.elements.namedItem('requirements').value = button.dataset.jobRequirements;
+			editForm.elements.namedItem('application_deadline').value = button.dataset.jobDeadline;
+			editForm.elements.namedItem('status').value = button.dataset.jobStatus;
+		}
+
+		if (!jobEditDialog.open) {
+			jobEditDialog.showModal();
+		}
+	};
+
+	editButtons.forEach((button) => {
+		button.addEventListener('click', () => openJobEditDialog(button));
+	});
+
+	jobEditDialog.querySelectorAll('[data-job-edit-close]').forEach((closeButton) => {
+		closeButton.addEventListener('click', () => jobEditDialog.close());
+	});
+
+	jobEditDialog.addEventListener('click', (event) => {
+		if (event.target === jobEditDialog) {
+			jobEditDialog.close();
+		}
+	});
+
+	const previousJobButton = editButtons.find((button) => button.dataset.jobId === jobEditDialog.dataset.reopenFor);
+
+	if (previousJobButton) {
+		openJobEditDialog(previousJobButton, true);
+	}
+}
+
 document.querySelectorAll('[data-question-builder]').forEach((builder) => {
 	const questionList = builder.querySelector('[data-question-list]');
 	const questionTemplate = builder.querySelector('[data-question-template]');

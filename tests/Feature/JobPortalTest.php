@@ -45,6 +45,9 @@ it('filters admin job postings by search and status', function () {
         ->get('/admin/jobs?search=Civic&status=published')
         ->assertOk()
         ->assertSee('Research Coordinator')
+        ->assertSee('data-job-edit-open', false)
+        ->assertSee('id="job-edit-dialog"', false)
+        ->assertDontSee('title="Edit job"', false)
         ->assertDontSee('Office Assistant');
 });
 
