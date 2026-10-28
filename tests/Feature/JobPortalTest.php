@@ -160,6 +160,9 @@ it('lets administrators review a candidate profile and update the application st
     ]);
     $profile = $applicant->profile()->create([
         'phone' => '+1 555 0107',
+        'current_address' => '42 Beacon Street',
+        'bio' => 'Researcher focused on equitable public services.',
+        'linkedin_url' => 'https://www.linkedin.com/in/jamiepatel',
         'job_title' => 'Research Associate',
         'employer' => 'Civic Lab',
         'industry' => 'Public policy',
@@ -197,6 +200,10 @@ it('lets administrators review a candidate profile and update the application st
         ->assertSee('Applicant profile')
         ->assertSee('Research Associate')
         ->assertSee('Civic Lab')
+        ->assertSee('+1 555 0107')
+        ->assertSee('42 Beacon Street')
+        ->assertSee('Researcher focused on equitable public services.')
+        ->assertSee('https://www.linkedin.com/in/jamiepatel')
         ->assertSee('Employment history')
         ->assertSee('Policy Intern')
         ->assertSee('City Office');
