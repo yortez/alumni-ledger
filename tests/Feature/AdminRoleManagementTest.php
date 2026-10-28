@@ -9,12 +9,19 @@ uses(RefreshDatabase::class);
 it('lets a role manager create a role with a custom type and module permissions', function () {
     $superAdmin = User::factory()->create();
     $superAdmin->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
+    AdminRole::query()->create([
+        'name' => 'Existing role',
+        'type' => 'existing_role',
+        'permissions' => ['surveys'],
+    ]);
 
     $this->actingAs($superAdmin)
         ->get('/admin/roles')
         ->assertOk()
         ->assertSee('Role definitions')
-        ->assertSee('Add Role');
+        ->assertSee('Add Role')
+        ->assertSee('data-role-edit-open', false)
+        ->assertSee('id="role-edit-dialog"', false);
 
     $this->actingAs($superAdmin)
         ->get('/admin/roles/create')

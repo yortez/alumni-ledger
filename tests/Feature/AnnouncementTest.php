@@ -194,6 +194,12 @@ it('lets administrators edit an announcement', function () {
     ]);
 
     $this->actingAs($admin)
+        ->get('/admin/announcements')
+        ->assertOk()
+        ->assertSee('data-announcement-edit-open', false)
+        ->assertSee('id="announcement-edit-dialog"', false);
+
+    $this->actingAs($admin)
         ->get("/admin/announcements/{$announcement->id}/edit")
         ->assertOk()
         ->assertSee('Edit announcement');

@@ -20,20 +20,7 @@
         @forelse ($roles as $role)
             <article class="rounded-md border border-line bg-surface">
                 <div class="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center sm:px-5">
-                    <div class="flex min-w-0 items-center gap-3"><span class="grid size-9 shrink-0 place-items-center rounded-full bg-forest/15 text-xs font-bold text-forest">{{ strtoupper(substr($role->name, 0, 1)) }}</span><div class="min-w-0"><h2 class="truncate text-sm font-semibold">{{ $role->name }}</h2><p class="mt-1 text-[10px] text-muted">{{ $role->type }} · {{ $role->users_count }} assigned administrators</p></div>@if ($role->is_system)<span class="rounded-full bg-warning/15 px-2.5 py-1 text-[10px] font-semibold text-warning">Protected</span>@endif</div>
-                    <div class="flex shrink-0 items-center gap-2"><details class="relative"><summary class="inline-flex min-h-8 cursor-pointer list-none items-center gap-2 rounded-md border border-line px-3 py-2 text-[10px] font-medium text-muted hover:text-ink"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 4 4 4L9 19l-5 1 1-5L16 4zM14 6l4 4" /></svg>Edit</summary>
-                        <div class="absolute right-0 z-20 mt-2 max-h-[75vh] w-[min(92vw,32rem)] overflow-y-auto rounded-md border border-line bg-surface p-4 shadow-xl">
-                            <form method="POST" action="{{ route('admin.roles.update', $role) }}" class="grid gap-4">@csrf @method('PATCH')
-                                <div class="field"><label for="name-{{ $role->id }}">Role name</label><input id="name-{{ $role->id }}" name="name" maxlength="120" value="{{ old('name', $role->name) }}" required>@error('name')<p class="field-error">{{ $message }}</p>@enderror</div>
-                                @unless ($role->is_system)<div class="field"><label for="type-{{ $role->id }}">Role type</label><input id="type-{{ $role->id }}" name="type" maxlength="60" pattern="[A-Za-z0-9_-]+" value="{{ old('type', $role->type) }}" required>@error('type')<p class="field-error">{{ $message }}</p>@enderror</div>@endunless
-                                <div class="field"><label for="description-{{ $role->id }}">Description</label><textarea id="description-{{ $role->id }}" name="description" rows="2" maxlength="1000">{{ old('description', $role->description) }}</textarea>@error('description')<p class="field-error">{{ $message }}</p>@enderror</div>
-                                @if ($role->is_system)<p class="text-xs leading-5 text-muted">This protected system role has access to all modules and role-management controls.</p>@else<fieldset class="grid gap-2"><legend class="text-sm font-semibold">Module permissions</legend>@foreach ($permissions as $permission => $label)<label class="flex items-start gap-2 py-1 text-xs"><input class="mt-1" type="checkbox" name="permissions[]" value="{{ $permission }}" @checked(in_array($permission, $role->permissions ?? []))><span>{{ $label }}</span></label>@endforeach @error('permissions')<p class="field-error">{{ $message }}</p>@enderror @error('permissions.*')<p class="field-error">{{ $message }}</p>@enderror</fieldset>@endif
-                                <button type="submit" class="bg-forest px-4 py-2.5 text-xs font-semibold text-white hover:bg-forest-dark">Save role</button>
-                            </form>
-                            @unless ($role->is_system)<form method="POST" action="{{ route('admin.roles.destroy', $role) }}" class="mt-3">@csrf @method('DELETE')<button type="submit" class="text-xs font-medium text-danger underline underline-offset-4">Delete role</button></form>@endunless
-                            @error('role')<p class="field-error mt-3">{{ $message }}</p>@enderror
-                        </div>
-                    </details></div>
+                    <div class="flex min-w-0 items-center gap-3"><span class="grid size-9 shrink-0 place-items-center rounded-full bg-forest/15 text-xs font-bold text-forest">{{ strtoupper(substr($role->name, 0, 1)) }}</span><div class="min-w-0"><h2 class="truncate text-sm font-semibold"><button type="button" data-role-edit-open data-role-id="{{ $role->id }}" data-role-name="{{ $role->name }}" data-role-type="{{ $role->type }}" data-role-description="{{ $role->description }}" data-role-permissions="{{ implode(',', $role->permissions ?? []) }}" data-role-system="{{ $role->is_system ? 'true' : 'false' }}" data-update-url="{{ route('admin.roles.update', $role) }}" data-delete-url="{{ route('admin.roles.destroy', $role) }}" aria-haspopup="dialog" aria-controls="role-edit-dialog" class="text-left underline decoration-transparent underline-offset-4 transition hover:text-forest hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">{{ $role->name }}</button></h2><p class="mt-1 text-[10px] text-muted">{{ $role->type }} · {{ $role->users_count }} assigned administrators</p></div>@if ($role->is_system)<span class="rounded-full bg-warning/15 px-2.5 py-1 text-[10px] font-semibold text-warning">Protected</span>@endif</div>
                 </div>
             </article>
         @empty
@@ -41,5 +28,24 @@
         @endforelse
     </section>
     <div class="mt-4">{{ $roles->links() }}</div>
+    <dialog id="role-edit-dialog" data-reopen-for="{{ old('role_id') }}" aria-labelledby="role-edit-title" class="m-auto max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-md border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45">
+        <div class="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
+            <div><p class="eyebrow">Role definitions</p><h2 id="role-edit-title" class="mt-1 text-lg font-semibold">Edit role</h2></div>
+            <button type="button" data-role-edit-close aria-label="Close edit dialog" title="Close" class="grid size-9 shrink-0 place-items-center rounded-md border border-line text-muted transition hover:bg-paper hover:text-ink"><svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12M6 6l12 12" /></svg></button>
+        </div>
+        @if ($errors->any())<p class="mx-5 mt-4 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800" role="alert">{{ $errors->first() }}</p>@endif
+        <form method="POST" action="{{ route('admin.roles.index') }}" data-role-edit-form class="grid gap-4 px-5 py-5">@csrf @method('PATCH')
+            <input type="hidden" name="role_id" value="{{ old('role_id') }}">
+            <label class="grid gap-1.5 text-xs font-medium text-muted">Role name<input name="name" maxlength="120" value="{{ old('name') }}" required class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink"></label>
+            <label class="grid gap-1.5 text-xs font-medium text-muted">Description<textarea name="description" rows="3" maxlength="1000" class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink">{{ old('description') }}</textarea></label>
+            <div data-role-custom-fields class="grid gap-4">
+                <label class="grid gap-1.5 text-xs font-medium text-muted">Role type<input name="type" maxlength="60" pattern="[A-Za-z0-9_-]+" value="{{ old('type') }}" required class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink"></label>
+                <fieldset class="grid gap-2"><legend class="text-sm font-semibold">Module permissions</legend>@foreach ($permissions as $permission => $label)<label class="flex items-start gap-2 py-1 text-xs"><input class="mt-1" type="checkbox" name="permissions[]" value="{{ $permission }}" @checked(in_array($permission, old('permissions', []), true))><span>{{ $label }}</span></label>@endforeach</fieldset>
+            </div>
+            <p data-role-system-note hidden class="rounded-md bg-surface-raised p-3 text-xs leading-5 text-muted">This protected system role has access to all modules and role-management controls. Its type and permissions cannot be changed.</p>
+            <div class="flex justify-end gap-2 border-t border-line pt-4"><button type="button" data-role-edit-close class="inline-flex min-h-9 items-center justify-center rounded-md border border-line px-3 py-2 text-xs font-medium text-muted transition hover:text-ink">Cancel</button><button type="submit" class="inline-flex min-h-9 items-center justify-center rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark">Save role</button></div>
+        </form>
+        <form method="POST" action="{{ route('admin.roles.index') }}" data-role-delete-form onsubmit="return confirm('Delete this role?')" class="border-t border-line px-5 py-3">@csrf @method('DELETE')<button type="submit" class="inline-flex min-h-9 items-center justify-center rounded-md border border-red-300 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-50">Delete role</button></form>
+    </dialog>
 </div>
 @endsection

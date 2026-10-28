@@ -17,7 +17,8 @@ it('shows the survey manager to administrators', function () {
         ->assertOk()
         ->assertSee('Survey manager')
         ->assertSee('Create Survey')
-        ->assertDontSee('Add Question');
+        ->assertSee('data-question-builder', false)
+        ->assertSee('Add Question');
 });
 
 it('shows the survey builder on its own page', function () {
@@ -297,6 +298,12 @@ it('lets administrators edit a survey', function () {
         'target_graduation_years' => [],
         'is_active' => true,
     ]);
+
+    $this->actingAs($admin)
+        ->get('/admin/surveys')
+        ->assertOk()
+        ->assertSee('data-survey-edit-open', false)
+        ->assertSee('id="survey-edit-dialog"', false);
 
     $this->actingAs($admin)
         ->get("/admin/surveys/{$survey->id}/edit")

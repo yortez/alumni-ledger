@@ -28,13 +28,11 @@
                             <span class="text-muted">{{ $announcement->published_at?->format('M j, Y') ?? 'Draft' }}</span>
                             @if ($isExpired)<span class="rounded-full bg-danger/15 px-2.5 py-1 font-semibold text-danger">Expired</span>@elseif (! $announcement->published_at)<span class="rounded-full bg-warning/15 px-2.5 py-1 font-semibold text-warning">Draft</span>@elseif ($announcement->published_at->isFuture())<span class="rounded-full bg-info/15 px-2.5 py-1 font-semibold text-info">Scheduled</span>@endif
                         </div>
-                        <h2 class="mt-2 break-words text-sm font-semibold">{{ $announcement->title }}</h2>
+                        <h2 class="mt-2 break-words text-sm font-semibold"><button type="button" data-announcement-edit-open data-announcement-id="{{ $announcement->id }}" data-announcement-title="{{ $announcement->title }}" data-announcement-body="{{ $announcement->body }}" data-announcement-category="{{ $announcement->category }}" data-announcement-status="{{ $announcement->published_at ? 'published' : 'draft' }}" data-announcement-publish-date="{{ $announcement->published_at?->toDateString() }}" data-announcement-expiry-date="{{ $announcement->expires_at?->toDateString() }}" data-announcement-pinned="{{ $announcement->is_pinned ? '1' : '0' }}" data-update-url="{{ route('admin.announcements.update', $announcement) }}" data-delete-url="{{ route('admin.announcements.destroy', $announcement) }}" aria-haspopup="dialog" aria-controls="announcement-edit-dialog" class="text-left underline decoration-transparent underline-offset-4 transition hover:text-forest hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">{{ $announcement->title }}</button></h2>
                         <p class="mt-2 whitespace-pre-line break-words text-sm leading-6 text-muted">{{ $announcement->body }}</p>
                         <p class="mt-2 text-[10px] text-muted">Posted by {{ $announcement->creator?->username ?? 'Administrator' }}@if ($announcement->expires_at) · Expires {{ $announcement->expires_at->format('M j, Y') }}@endif</p>
                     </div>
                     <div class="flex shrink-0 items-center gap-1.5">
-                        <a href="{{ route('admin.announcements.edit', $announcement) }}" title="Edit announcement" aria-label="Edit announcement" class="grid size-8 place-items-center rounded-md border border-line text-muted transition hover:bg-surface-raised hover:text-ink"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 4 4 4L9 19l-5 1 1-5L16 4zM14 6l4 4" /></svg></a>
-                        <form method="POST" action="{{ route('admin.announcements.destroy', $announcement) }}">@csrf @method('DELETE')<button type="submit" title="Delete announcement" aria-label="Delete announcement" class="grid size-8 place-items-center rounded-md bg-danger text-white transition hover:bg-danger/80"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6" /></svg></button></form>
                     </div>
                 </div>
             </article>
@@ -43,5 +41,26 @@
         @endforelse
     </section>
     <div class="mt-4">{{ $announcements->links() }}</div>
+    <dialog id="announcement-edit-dialog" data-reopen-for="{{ old('announcement_id') }}" aria-labelledby="announcement-edit-title" class="m-auto max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-3xl overflow-y-auto rounded-md border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45">
+        <div class="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
+            <div><p class="eyebrow">Announcements</p><h2 id="announcement-edit-title" class="mt-1 text-lg font-semibold">Edit announcement</h2></div>
+            <button type="button" data-announcement-edit-close aria-label="Close edit dialog" title="Close" class="grid size-9 shrink-0 place-items-center rounded-md border border-line text-muted transition hover:bg-paper hover:text-ink"><svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12M6 6l12 12" /></svg></button>
+        </div>
+        @if ($errors->any())<p class="mx-5 mt-4 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800" role="alert">{{ $errors->first() }}</p>@endif
+        <form method="POST" action="{{ route('admin.announcements.index') }}" data-announcement-edit-form class="grid gap-4 px-5 py-5">@csrf @method('PATCH')
+            <input type="hidden" name="announcement_id" value="{{ old('announcement_id') }}">
+            <label class="grid gap-1.5 text-xs font-medium text-muted">Title<input name="title" value="{{ old('title') }}" maxlength="180" required placeholder="Announcement title" class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink"></label>
+            <label class="grid gap-1.5 text-xs font-medium text-muted">Content<textarea name="body" rows="6" maxlength="10000" required placeholder="Write your announcement here..." class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink">{{ old('body') }}</textarea></label>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <label class="grid gap-1.5 text-xs font-medium text-muted">Category<select name="category" required class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink">@foreach (\App\Models\Announcement::CATEGORIES as $value => $label)<option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>@endforeach</select></label>
+                <label class="grid gap-1.5 text-xs font-medium text-muted">Status<select name="status" required class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink"><option value="published" @selected(old('status') === 'published')>Published</option><option value="draft" @selected(old('status') === 'draft')>Draft</option></select></label>
+                <label class="grid gap-1.5 text-xs font-medium text-muted">Publish date<input type="date" name="publish_date" value="{{ old('publish_date') }}" class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink"></label>
+                <label class="grid gap-1.5 text-xs font-medium text-muted">Expiry date<input type="date" name="expiry_date" value="{{ old('expiry_date') }}" class="min-w-0 rounded-md border border-line bg-surface-raised px-3 py-2.5 text-xs text-ink"></label>
+            </div>
+            <div><input type="hidden" name="is_pinned" value="0"><label class="flex items-center gap-2 rounded-md border border-line bg-surface-raised p-3 text-xs font-medium"><input type="checkbox" name="is_pinned" value="1" @checked(old('is_pinned'))> Pin this announcement</label><p class="mt-1 pl-6 text-[10px] text-muted">Pinned announcements appear at the top of the alumni dashboard.</p></div>
+            <div class="flex justify-end gap-2 border-t border-line pt-4"><button type="button" data-announcement-edit-close class="inline-flex min-h-9 items-center justify-center rounded-md border border-line px-3 py-2 text-xs font-medium text-muted transition hover:text-ink">Cancel</button><button type="submit" class="inline-flex min-h-9 items-center justify-center rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark">Save changes</button></div>
+        </form>
+        <form method="POST" action="{{ route('admin.announcements.index') }}" data-announcement-delete-form onsubmit="return confirm('Delete this announcement?')" class="border-t border-line px-5 py-3">@csrf @method('DELETE')<button type="submit" class="inline-flex min-h-9 items-center justify-center rounded-md border border-red-300 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-50">Delete announcement</button></form>
+    </dialog>
 </div>
 @endsection
