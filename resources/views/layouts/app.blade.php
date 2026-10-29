@@ -43,7 +43,7 @@
                 </div>
                 <nav id="main-navigation" aria-label="Main navigation" class="mx-auto hidden flex max-w-7xl flex-col gap-1 px-4 pb-2 sm:px-7 md:flex md:flex-row md:justify-center md:py-1.5">
                     @if (auth()->user()->is_admin)
-                        <a href="{{ route('filament.admin.pages.dashboard') }}" class="nav-link {{ request()->routeIs('filament.admin.*') ? 'nav-link-active' : '' }}" @if (request()->routeIs('filament.admin.*')) aria-current="page" @endif>Overview</a>
+                        <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'nav-link-active' : '' }}" @if (request()->routeIs('dashboard')) aria-current="page" @endif>Overview</a>
                         @if (auth()->user()->hasAdminPermission('graduates'))<a href="{{ route('admin.graduates.index') }}" class="nav-link {{ request()->routeIs('admin.graduates.*') ? 'nav-link-active' : '' }}" @if (request()->routeIs('admin.graduates.*')) aria-current="page" @endif>Graduates</a>@endif
                         @if (auth()->user()->hasAdminPermission('announcements'))<a href="{{ route('admin.announcements.index') }}" class="nav-link {{ request()->routeIs('admin.announcements.*') ? 'nav-link-active' : '' }}" @if (request()->routeIs('admin.announcements.*')) aria-current="page" @endif>Announcements</a>@endif
                         @if (auth()->user()->hasAdminPermission('surveys'))<a href="{{ route('admin.surveys.index') }}" class="nav-link {{ request()->routeIs('admin.surveys.*') ? 'nav-link-active' : '' }}" @if (request()->routeIs('admin.surveys.*')) aria-current="page" @endif>Surveys</a>@endif

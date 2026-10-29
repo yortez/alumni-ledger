@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\AdminRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -12,14 +11,12 @@ it('renders a records administrator dashboard with master-list actions', functio
 
     $this->actingAs($admin)
         ->get('/dashboard')
-        ->assertRedirectToRoute('filament.admin.pages.dashboard');
-
-    $this->get('/admin')
         ->assertOk()
+        ->assertSee('Records administrator dashboard')
         ->assertSee('Graduate records')
-        ->assertSee('Accounts claimed')
+        ->assertSee('Applicant profiles')
         ->assertSee('Open master list')
-        ->assertDontSee('Open content manager');
+        ->assertDontSee('Announcement manager');
 });
 
 it('renders a content administrator dashboard with publishing and application actions', function () {
@@ -28,11 +25,9 @@ it('renders a content administrator dashboard with publishing and application ac
 
     $this->actingAs($admin)
         ->get('/dashboard')
-        ->assertRedirectToRoute('filament.admin.pages.dashboard');
-
-    $this->get('/admin')
         ->assertOk()
-        ->assertSee('Open surveys')
+        ->assertSee('Content administrator dashboard')
+        ->assertSee('Published announcements')
         ->assertSee('Active jobs')
         ->assertSee('Open content manager')
         ->assertDontSee('Administrator access');
@@ -44,38 +39,12 @@ it('renders a super administrator dashboard with access to every module', functi
 
     $this->actingAs($admin)
         ->get('/dashboard')
-        ->assertRedirectToRoute('filament.admin.pages.dashboard');
-
-    $this->get('/admin')
         ->assertOk()
+        ->assertSee('Super administrator dashboard')
+        ->assertSee('Administrator accounts')
         ->assertSee('Graduate records')
-        ->assertSee('Open surveys')
-        ->assertSee('Active jobs')
+        ->assertSee('Published announcements')
         ->assertSee('Administrator access')
         ->assertSee('Open master list')
         ->assertSee('Open content manager');
-});
-
-it('allows administrators with a role to access the Filament panel', function () {
-    $role = AdminRole::factory()->create();
-    $admin = User::factory()->create();
-    $admin->forceFill(['is_admin' => true, 'role_id' => $role->id])->save();
-
-    $this->actingAs($admin)
-        ->get('/admin')
-        ->assertOk();
-});
-
-it('forbids alumni and administrators without a role from the Filament panel', function () {
-    $alumnus = User::factory()->create();
-    $adminWithoutRole = User::factory()->create();
-    $adminWithoutRole->forceFill(['is_admin' => true, 'admin_role' => 'missing_role'])->save();
-
-    $this->actingAs($alumnus)
-        ->get('/admin')
-        ->assertForbidden();
-
-    $this->actingAs($adminWithoutRole)
-        ->get('/admin')
-        ->assertForbidden();
 });
