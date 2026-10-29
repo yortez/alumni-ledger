@@ -113,10 +113,12 @@
                                     </div>
                                     @if ($response->survey)
                                         <dl class="mt-3 grid gap-2">
-                                            @foreach ($response->survey->questions as $questionIndex => $question)
+                                            @foreach ($response->survey->normalizedQuestions() as $questionIndex => $question)
                                                 <div class="border-l-2 border-line pl-3">
-                                                    <dt class="text-xs text-muted">{{ $question }}</dt>
-                                                    <dd class="mt-1 whitespace-pre-line text-sm text-ink">{{ $response->answers[$questionIndex] ?? 'No response' }}</dd>
+                                                    @if ($question['section_label'])<p class="text-[10px] font-semibold uppercase tracking-wider text-muted">{{ $question['section_label'] }}</p>@endif
+                                                    <dt class="mt-1 text-xs text-muted">{{ $question['prompt'] }}</dt>
+                                                    @php($answer = $response->answers[$questionIndex] ?? null)
+                                                    <dd class="mt-1 whitespace-pre-line text-sm text-ink">{{ is_array($answer) ? implode(', ', $answer) : ($answer !== null && $answer !== '' ? $answer : 'No response') }}</dd>
                                                 </div>
                                             @endforeach
                                         </dl>

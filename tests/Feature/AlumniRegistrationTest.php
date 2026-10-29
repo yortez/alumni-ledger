@@ -484,14 +484,20 @@ it('allows administrators to view applicant details', function () {
     ]);
     $survey = Survey::query()->create([
         'title' => 'Community priorities',
-        'questions' => ['What should we improve?'],
+        'questions' => [[
+            'prompt' => 'Which support options would help?',
+            'section_label' => 'Community',
+            'type' => 'checkbox',
+            'required' => false,
+            'options' => ['More alumni events.', 'Career mentoring'],
+        ]],
         'target_programs' => [],
         'target_graduation_years' => [],
         'is_active' => true,
     ]);
     $survey->responses()->create([
         'user_id' => $applicant->id,
-        'answers' => ['More alumni events.'],
+        'answers' => [['More alumni events.', 'Career mentoring']],
         'submitted_at' => now(),
     ]);
     $admin = User::factory()->create();
@@ -523,7 +529,9 @@ it('allows administrators to view applicant details', function () {
         ->assertSee('Community Works')
         ->assertSee('Survey Responses')
         ->assertSee('Community priorities')
-        ->assertSee('More alumni events.');
+        ->assertSee('Community')
+        ->assertSee('Which support options would help?')
+        ->assertSee('More alumni events., Career mentoring');
 });
 
 it('lets administrators edit graduate records in the master list', function () {
