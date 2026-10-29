@@ -101,6 +101,34 @@ it('only shows published and current jobs to alumni', function () {
     $response->assertOk()->assertSee('Open role')->assertDontSee('Draft role')->assertDontSee('Expired role');
 });
 
+it('shows a limited preview of published and current jobs on the alumni dashboard', function () {
+    $user = User::factory()->create();
+    $oldestJob = Job::factory()->for($user, 'creator')->create([
+        'title' => 'Oldest dashboard role',
+        'status' => 'published',
+    ]);
+    $oldestJob->forceFill(['created_at' => now()->subDays(5)])->save();
+    Job::factory()->for($user, 'creator')->create(['title' => 'Current role one', 'status' => 'published']);
+    Job::factory()->for($user, 'creator')->create(['title' => 'Current role two', 'status' => 'published']);
+    Job::factory()->for($user, 'creator')->create(['title' => 'Current role three', 'status' => 'published']);
+    Job::factory()->for($user, 'creator')->create(['title' => 'Draft dashboard role', 'status' => 'draft']);
+    Job::factory()->for($user, 'creator')->create([
+        'title' => 'Expired dashboard role',
+        'status' => 'published',
+        'application_deadline' => now()->subDay(),
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSee('Current role one')
+        ->assertSee('Current role two')
+        ->assertSee('Current role three')
+        ->assertDontSee('Oldest dashboard role')
+        ->assertDontSee('Draft dashboard role')
+        ->assertDontSee('Expired dashboard role');
+});
+
 it('forbids non administrators from managing jobs', function () {
     $user = User::factory()->create();
 

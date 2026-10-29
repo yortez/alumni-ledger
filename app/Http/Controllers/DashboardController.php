@@ -33,6 +33,12 @@ class DashboardController extends Controller
             'surveys' => Survey::availableTo($user)
                 ->latest()
                 ->get(),
+            'jobs' => Job::query()
+                ->published()
+                ->latest('created_at')
+                ->latest('id')
+                ->limit(3)
+                ->get(),
         ]);
     }
 

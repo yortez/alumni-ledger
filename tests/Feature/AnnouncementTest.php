@@ -141,6 +141,11 @@ it('shows published announcements but not drafts on the alumni dashboard', funct
         ->assertSee('Announcements')
         ->assertSee('Campus update')
         ->assertSee('The library will reopen next week.')
+        ->assertSeeInOrder([
+            'id="announcements-heading"',
+            'id="surveys-heading"',
+            'id="jobs-heading"',
+        ], false)
         ->assertDontSee('Planning note')
         ->assertDontSee('Future event');
 });

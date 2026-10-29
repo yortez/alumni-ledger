@@ -303,7 +303,7 @@ it('shows account and graduate information in the alumni profile form', function
         ->assertSee('Cum Laude');
 });
 
-it('shows the alumni welcome banner and career action on the dashboard', function () {
+it('shows the alumni profile panel and career action on the dashboard', function () {
     Graduate::query()->create([
         'student_number' => '2020-0042',
         'first_name' => 'Morgan',
@@ -315,16 +315,25 @@ it('shows the alumni welcome banner and career action on the dashboard', functio
         'name' => 'Morgan Lee',
         'student_number' => '2020-0042',
     ]);
+    $user->profile()->create([
+        'job_title' => 'Research Associate',
+        'employer' => 'Field Lab',
+        'completed_at' => now(),
+    ]);
 
     $this->actingAs($user)
         ->get('/dashboard')
         ->assertOk()
-        ->assertSee('Welcome back, MORGAN LEE!')
+        ->assertSee('Your alumni feed')
+        ->assertSee('Morgan Lee')
+        ->assertSee('Research Associate')
+        ->assertSee('Field Lab')
         ->assertSee('BSIT')
-        ->assertSee('Batch 2020')
+        ->assertSee('2020')
         ->assertSee('Verified')
-        ->assertSee('My Profile')
-        ->assertSee('Update Career')
+        ->assertSee('Profile complete')
+        ->assertSee('Edit profile')
+        ->assertDontSee('2020-0042')
         ->assertSee('href="'.route('profile.edit').'#employment-history"', false);
 });
 
