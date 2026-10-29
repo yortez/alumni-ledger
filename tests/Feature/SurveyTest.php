@@ -188,6 +188,32 @@ it('stores one response from an eligible alumnus and prevents a second response'
     $this->assertDatabaseCount('survey_responses', 1);
 });
 
+it('lists the surveys open to an alumnus', function () {
+    Graduate::query()->create([
+        'student_number' => '2022-4400',
+        'first_name' => 'Nina',
+        'last_name' => 'Reyes',
+        'program_code' => 'CS',
+        'batch_year' => 2022,
+    ]);
+    $alumnus = User::factory()->create(['student_number' => '2022-4400']);
+    Survey::query()->create([
+        'title' => 'Career pathways',
+        'description' => 'Tell us about your first role.',
+        'questions' => ['What was your first role?'],
+        'target_programs' => [],
+        'target_graduation_years' => [],
+        'is_active' => true,
+        'closes_at' => now()->addWeeks(2),
+    ]);
+
+    $this->actingAs($alumnus)
+        ->get('/surveys')
+        ->assertOk()
+        ->assertSee('Career pathways')
+        ->assertSee('1 question');
+});
+
 it('renders and stores typed survey answers including multiple selections', function () {
     Graduate::query()->create([
         'student_number' => '2024-5510',

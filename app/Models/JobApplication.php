@@ -14,6 +14,14 @@ class JobApplication extends Model
     /** @use HasFactory<JobApplicationFactory> */
     use HasFactory;
 
+    public const STATUS_LABELS = [
+        'submitted' => 'Submitted',
+        'reviewing' => 'Under review',
+        'interview_scheduled' => 'Interview scheduled',
+        'approved' => 'Approved',
+        'rejected' => 'Rejected',
+    ];
+
     public function job(): BelongsTo
     {
         return $this->belongsTo(Job::class);

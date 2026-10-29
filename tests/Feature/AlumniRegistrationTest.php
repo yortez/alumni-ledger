@@ -22,7 +22,7 @@ it('renders the alumni registration form', function () {
 it('removes the separate login URL while keeping sign-in on the homepage', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('Welcome back')
+        ->assertSee('Sign in')
         ->assertSee(route('login.store'), false);
 
     $this->get('/login')->assertNotFound();
@@ -315,23 +315,25 @@ it('shows the alumni profile panel and career action on the dashboard', function
         'name' => 'Morgan Lee',
         'student_number' => '2020-0042',
     ]);
-    $user->profile()->create([
+    $profile = $user->profile()->create(['completed_at' => now()]);
+    $profile->employments()->create([
         'job_title' => 'Research Associate',
         'employer' => 'Field Lab',
-        'completed_at' => now(),
+        'start_date' => '2023-06-01',
+        'is_current' => true,
     ]);
 
     $this->actingAs($user)
         ->get('/dashboard')
         ->assertOk()
-        ->assertSee('Your alumni feed')
+        ->assertSee('Dashboard')
         ->assertSee('Morgan Lee')
         ->assertSee('Research Associate')
         ->assertSee('Field Lab')
         ->assertSee('BSIT')
         ->assertSee('2020')
         ->assertSee('Verified')
-        ->assertSee('Profile complete')
+        ->assertSee('Complete')
         ->assertSee('Edit profile')
         ->assertDontSee('2020-0042')
         ->assertSee('href="'.route('profile.edit').'#employment-history"', false);
@@ -548,7 +550,7 @@ it('lets administrators edit graduate records in the master list', function () {
     $this->actingAs($admin)
         ->get("/admin/graduates/{$graduate->id}/edit")
         ->assertOk()
-        ->assertSee('Edit graduate');
+        ->assertSee('Edit alumni record');
 
     $this->actingAs($admin)
         ->patch("/admin/graduates/{$graduate->id}", [

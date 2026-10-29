@@ -5,6 +5,7 @@ use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -100,4 +101,87 @@ it('notifies the applicant when the job application status changes', function ()
         ->get('/notifications')
         ->assertOk()
         ->assertSee('Interview scheduled');
+});
+
+it('keeps notifications unread while the inbox is open and marks one on demand', function () {
+    $alumni = User::factory()->create();
+
+    $notification = $alumni->notifications()->create([
+        'id' => (string) Str::uuid(),
+        'type' => 'database',
+        'data' => [
+            'type' => 'survey',
+            'title' => 'Career mobility survey',
+            'message' => 'Five questions about your current role.',
+            'survey_id' => 1,
+        ],
+    ]);
+
+    $this->actingAs($alumni)
+        ->get('/notifications')
+        ->assertOk()
+        ->assertSee('Career mobility survey')
+        ->assertSee('data-emphasis="true"', false)
+        ->assertSee('1 unread');
+
+    expect($notification->fresh()->read_at)->toBeNull();
+
+    $this->actingAs($alumni)
+        ->post(route('notifications.read', $notification->id))
+        ->assertOk()
+        ->assertJson(['unread' => 0]);
+
+    expect($notification->fresh()->read_at)->not->toBeNull();
+});
+
+it('filters the inbox by notification type', function () {
+    $alumni = User::factory()->create();
+
+    $alumni->notifications()->create([
+        'id' => (string) Str::uuid(),
+        'type' => 'database',
+        'data' => ['type' => 'announcement', 'title' => 'Transcript requests now online', 'message' => 'The registrar now accepts requests online.'],
+    ]);
+
+    $alumni->notifications()->create([
+        'id' => (string) Str::uuid(),
+        'type' => 'database',
+        'data' => ['type' => 'survey', 'title' => 'Career mobility survey', 'message' => 'Five questions about your current role.'],
+    ]);
+
+    $filtered = $this->actingAs($alumni)
+        ->get('/notifications?type=announcement')
+        ->assertOk()
+        ->assertSee('Transcript requests now online');
+
+    expect(substr_count($filtered->getContent(), 'data-emphasis="'))->toBe(1);
+
+    $unfiltered = $this->actingAs($alumni)
+        ->get('/notifications?type=unknown')
+        ->assertOk()
+        ->assertSee('Transcript requests now online')
+        ->assertSee('Career mobility survey');
+
+    expect(substr_count($unfiltered->getContent(), 'data-emphasis="'))->toBe(2);
+});
+
+it('marks every notification as read from the inbox action', function () {
+    $alumni = User::factory()->create();
+
+    foreach (['First update', 'Second update'] as $title) {
+        $alumni->notifications()->create([
+            'id' => (string) Str::uuid(),
+            'type' => 'database',
+            'data' => ['type' => 'announcement', 'title' => $title, 'message' => 'Body of the update.'],
+        ]);
+    }
+
+    expect($alumni->unreadNotifications()->count())->toBe(2);
+
+    $this->actingAs($alumni)
+        ->post(route('notifications.read-all'))
+        ->assertRedirect(route('notifications.index'))
+        ->assertSessionHas('status', 'All notifications marked as read.');
+
+    expect($alumni->unreadNotifications()->count())->toBe(0);
 });

@@ -1,42 +1,106 @@
-<div>
-    <!-- You must be the change you wish to see in the world. - Mahatma Gandhi -->
 @extends('layouts.app')
 
 @section('title', $survey->title)
 
 @section('content')
-<div class="mx-auto max-w-3xl px-5 py-10 sm:px-8 lg:py-14">
-    <a href="{{ route('surveys.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Back to surveys</a>
-    <header class="mt-6 border-b border-line pb-7"><p class="eyebrow">Alumni survey</p><h1 class="font-display mt-3 text-4xl">{{ $survey->title }}</h1>@if ($survey->description)<p class="mt-4 leading-7 text-muted">{{ $survey->description }}</p>@endif</header>
-    <form method="POST" action="{{ route('surveys.responses.store', $survey) }}" class="mt-7 grid gap-5">
+@php($questions = $survey->normalizedQuestions())
+
+<div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
+    <a href="{{ route('surveys.index') }}" class="inline-flex items-center gap-1 text-caption font-semibold text-ink-tertiary transition hover:text-ink"><x-chevron class="rotate-180" />All surveys</a>
+
+    <div class="mt-5 border-b border-hairline pb-6">
+        <h1 class="text-display font-semibold wrap-break-word">{{ $survey->title }}</h1>
+        @if ($survey->description)
+            <p class="mt-3 max-w-[70ch] whitespace-pre-line text-body text-ink-secondary">{{ $survey->description }}</p>
+        @endif
+        <p class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-ink-tertiary">
+            <span>{{ count($questions) }} {{ count($questions) === 1 ? 'question' : 'questions' }}</span>
+            @if ($survey->closes_at)
+                <span>Closes {{ $survey->closes_at->format('j F Y') }}</span>
+            @endif
+        </p>
+    </div>
+
+    <form method="POST" action="{{ route('surveys.responses.store', $survey) }}" class="mt-6 grid max-w-4xl gap-4">
         @csrf
-        @foreach ($survey->normalizedQuestions() as $index => $question)
+
+        @foreach ($questions as $index => $question)
+            @if ($question['section_label'] !== '' && $question['section_label'] !== ($currentSection ?? null))
+                <h2 class="mt-4 text-title font-semibold text-ink">{{ $question['section_label'] }}</h2>
+            @endif
+            @php($currentSection = $question['section_label'])
             @php($oldAnswer = old("answers.{$index}", $question['type'] === 'checkbox' ? [] : ''))
-            <section class="form-surface">
-                @if ($question['section_label'])<p class="eyebrow">{{ $question['section_label'] }}</p>@endif
-                <div class="grid gap-3">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-terracotta">Question {{ $index + 1 }} @if ($question['required'])<span aria-label="required">*</span>@else<span class="font-normal normal-case tracking-normal text-muted">Optional</span>@endif</p>
-                        <h2 class="mt-2 text-base font-semibold leading-6 text-ink">{{ $question['prompt'] }}</h2>
+
+            <section class="panel p-5 sm:p-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex min-w-0 items-baseline gap-2">
+                        <span aria-hidden="true" class="shrink-0 text-micro tabular-nums text-ink-tertiary">{{ $index + 1 }}</span>
+                        <h3 class="text-small font-semibold text-ink">
+                            {{ $question['prompt'] }}
+                            @if ($question['required'])
+                                <span class="text-accent" aria-hidden="true">*</span>
+                            @endif
+                        </h3>
                     </div>
-                    @if ($question['type'] === 'short_text')
-                        <input id="answer-{{ $index }}" type="text" name="answers[{{ $index }}]" value="{{ $oldAnswer }}" maxlength="1000" @if ($question['required']) required @endif>
-                    @elseif ($question['type'] === 'long_text')
-                        <textarea id="answer-{{ $index }}" name="answers[{{ $index }}]" rows="5" maxlength="5000" @if ($question['required']) required @endif>{{ $oldAnswer }}</textarea>
-                    @elseif ($question['type'] === 'radio')
-                        <fieldset class="grid gap-2"><legend class="sr-only">{{ $question['prompt'] }}</legend>@foreach ($question['options'] as $optionIndex => $option)<label class="flex items-center gap-2 text-sm text-ink"><input id="answer-{{ $index }}-{{ $optionIndex }}" type="radio" name="answers[{{ $index }}]" value="{{ $option }}" @checked($oldAnswer === $option) @if ($question['required']) required @endif>{{ $option }}</label>@endforeach</fieldset>
-                    @elseif ($question['type'] === 'checkbox')
-                        <fieldset class="grid gap-2"><legend class="sr-only">{{ $question['prompt'] }}</legend>@foreach ($question['options'] as $optionIndex => $option)<label class="flex items-center gap-2 text-sm text-ink"><input id="answer-{{ $index }}-{{ $optionIndex }}" type="checkbox" name="answers[{{ $index }}][]" value="{{ $option }}" @checked(is_array($oldAnswer) && in_array($option, $oldAnswer, true))>{{ $option }}</label>@endforeach</fieldset>
-                    @else
-                        <select id="answer-{{ $index }}" name="answers[{{ $index }}]" @if ($question['required']) required @endif><option value="">Select an option</option>@foreach ($question['options'] as $option)<option value="{{ $option }}" @selected($oldAnswer === $option)>{{ $option }}</option>@endforeach</select>
-                    @endif
-                    @error("answers.{$index}")<span class="field-error">{{ $message }}</span>@enderror
-                    @error("answers.{$index}.*")<span class="field-error">{{ $message }}</span>@enderror
+                    <p class="shrink-0 text-micro text-ink-tertiary">{{ $question['required'] ? 'Required' : 'Optional' }}</p>
                 </div>
+
+                @if ($question['type'] === 'short_text')
+                    <div class="field mt-3">
+                        <label class="sr-only" for="answer-{{ $index }}">{{ $question['prompt'] }}</label>
+                        <input id="answer-{{ $index }}" type="text" name="answers[{{ $index }}]" value="{{ $oldAnswer }}" maxlength="1000" @if ($question['required']) required @endif>
+                    </div>
+                @elseif ($question['type'] === 'long_text')
+                    <div class="field mt-3">
+                        <label class="sr-only" for="answer-{{ $index }}">{{ $question['prompt'] }}</label>
+                        <textarea id="answer-{{ $index }}" name="answers[{{ $index }}]" rows="5" maxlength="5000" @if ($question['required']) required @endif>{{ $oldAnswer }}</textarea>
+                    </div>
+                @elseif ($question['type'] === 'radio' || $question['type'] === 'checkbox')
+                    <fieldset class="mt-4 grid gap-2.5">
+                        <legend class="sr-only">{{ $question['prompt'] }}</legend>
+                        @foreach ($question['options'] as $optionIndex => $option)
+                            <label class="flex cursor-pointer items-center gap-2.5 text-small text-ink">
+                                <input
+                                    id="answer-{{ $index }}-{{ $optionIndex }}"
+                                    type="{{ $question['type'] }}"
+                                    name="answers[{{ $index }}]{{ $question['type'] === 'checkbox' ? '[]' : '' }}"
+                                    value="{{ $option }}"
+                                    class="size-4 shrink-0 accent-accent"
+                                    @checked($question['type'] === 'checkbox' ? (is_array($oldAnswer) && in_array($option, $oldAnswer, true)) : $oldAnswer === $option)
+                                    @if ($question['type'] === 'radio' && $question['required']) required @endif>
+                                {{ $option }}
+                            </label>
+                        @endforeach
+                    </fieldset>
+                @else
+                    <div class="field mt-3">
+                        <label class="sr-only" for="answer-{{ $index }}">{{ $question['prompt'] }}</label>
+                        <select id="answer-{{ $index }}" name="answers[{{ $index }}]" @if ($question['required']) required @endif>
+                            <option value="">Select an option</option>
+                            @foreach ($question['options'] as $option)
+                                <option value="{{ $option }}" @selected($oldAnswer === $option)>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+
+                @error("answers.{$index}")
+                    <p class="field-error mt-2">{{ $message }}</p>
+                @enderror
+                @error("answers.{$index}.*")
+                    <p class="field-error mt-2">{{ $message }}</p>
+                @enderror
             </section>
         @endforeach
-        @error('answers')<p class="field-error">{{ $message }}</p>@enderror
-        <div class="flex flex-col-reverse justify-between gap-4 border-t border-line pt-5 sm:flex-row sm:items-center"><a href="{{ route('surveys.index') }}" class="text-sm font-medium text-muted">Cancel</a><button class="inline-flex items-center justify-between gap-8 bg-forest px-5 py-3.5 text-sm font-semibold text-white hover:bg-forest-dark" type="submit">Submit response <span aria-hidden="true">&#8599;</span></button></div>
+
+        @error('answers')
+            <p class="field-error">{{ $message }}</p>
+        @enderror
+
+        <div class="mt-2 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-hairline pt-5 sm:flex-row sm:items-center">
+            <a href="{{ route('surveys.index') }}" class="text-center text-caption font-semibold text-ink-tertiary transition hover:text-ink sm:text-left">Cancel</a>
+            <button type="submit" class="flex h-11 items-center justify-center rounded-full bg-accent px-6 text-caption font-semibold text-white transition hover:bg-accent-strong">Submit response</button>
+        </div>
     </form>
 </div>
 @endsection

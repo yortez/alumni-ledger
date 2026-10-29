@@ -132,6 +132,80 @@ it('returns 404 when an alumnus attempts to change another alumni employment rec
     ]);
 });
 
+it('keeps the new entry form closed until it is asked for and reopens it on errors', function () {
+    $user = User::factory()->create();
+
+    $collapsed = $this->actingAs($user)->get(route('profile.edit'))->assertOk();
+    $collapsed->assertSee('Add employment')->assertSee('New Employment Entry');
+
+    expect(preg_match('/<details[^>]*data-new-employment-entry[^>]*\bopen\b/', $collapsed->getContent()))->toBe(0);
+
+    $reopened = $this->actingAs($user)
+        ->followingRedirects()
+        ->post(route('profile.employments.store'), [
+            'employment_status' => 'not_a_status',
+            'job_title' => 'Analyst',
+            'employer' => 'Civic Lab',
+            'start_date' => '2024-01-01',
+            'is_current' => '0',
+        ])
+        ->assertOk()
+        ->assertSee('field-error', false);
+
+    expect(preg_match('/<details[^>]*data-new-employment-entry[^>]*\bopen\b/', $reopened->getContent()))->toBe(1);
+});
+
+it('shows the current employment on the dashboard and the profile header', function () {
+    $user = User::factory()->create(['name' => 'Mara Villanueva']);
+    $profile = $user->profile()->create(['completed_at' => now()]);
+
+    $profile->employments()->create([
+        'job_title' => 'Junior Analyst',
+        'employer' => 'Northwind',
+        'start_date' => '2022-01-01',
+        'end_date' => '2023-12-31',
+        'is_current' => false,
+    ]);
+    $profile->employments()->create([
+        'job_title' => 'Data Analyst',
+        'employer' => 'Example Corporation',
+        'start_date' => '2024-03-01',
+        'is_current' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSee('Data Analyst')
+        ->assertSee('Example Corporation')
+        ->assertDontSee('Junior Analyst');
+
+    $this->actingAs($user)
+        ->get(route('profile.edit'))
+        ->assertOk()
+        ->assertSee('Data Analyst')
+        ->assertSee('Example Corporation')
+        ->assertSee('My profile');
+});
+
+it('shows a further-studies status when that is the current employment state', function () {
+    $user = User::factory()->create();
+    $profile = $user->profile()->create(['completed_at' => now()]);
+
+    $profile->employments()->create([
+        'employment_status' => 'studying',
+        'job_title' => 'Graduate student',
+        'employer' => 'University of the Philippines',
+        'start_date' => '2024-06-01',
+        'is_current' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSee('Further studies');
+});
+
 it('rejects an employment end date before its start date', function () {
     $user = User::factory()->create();
 

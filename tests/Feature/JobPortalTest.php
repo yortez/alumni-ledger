@@ -101,6 +101,31 @@ it('only shows published and current jobs to alumni', function () {
     $response->assertOk()->assertSee('Open role')->assertDontSee('Draft role')->assertDontSee('Expired role');
 });
 
+it('filters alumni job listings by employment type', function () {
+    $user = User::factory()->create();
+    Job::factory()->for($user, 'creator')->create(['title' => 'Full time role', 'status' => 'published', 'employment_type' => 'Full-time']);
+    Job::factory()->for($user, 'creator')->create(['title' => 'Contract role', 'status' => 'published', 'employment_type' => 'Contract']);
+
+    $this->actingAs($user)
+        ->get('/jobs?type=Contract')
+        ->assertSee('Contract role')
+        ->assertDontSee('Full time role');
+});
+
+it('marks the roles an alumnus has already applied to', function () {
+    $user = User::factory()->create();
+    $applied = Job::factory()->for($user, 'creator')->create(['title' => 'Reviewed role', 'employment_type' => 'Full-time']);
+    Job::factory()->for($user, 'creator')->create(['title' => 'Untouched role', 'employment_type' => 'Full-time']);
+    JobApplication::factory()->for($applied, 'job')->for($user, 'user')->create(['status' => 'reviewing']);
+
+    $response = $this->actingAs($user)->get('/jobs');
+
+    $response->assertOk()->assertSee('Applied')->assertSee('Under review');
+
+    expect(substr_count($response->getContent(), 'data-emphasis="false"'))->toBe(1)
+        ->and(substr_count($response->getContent(), 'data-emphasis="true"'))->toBe(1);
+});
+
 it('shows a limited preview of published and current jobs on the alumni dashboard', function () {
     $user = User::factory()->create();
     $oldestJob = Job::factory()->for($user, 'creator')->create([
@@ -181,6 +206,33 @@ it('allows a profiled alumni to apply once per job', function () {
     expect(JobApplication::query()->whereBelongsTo($job)->whereBelongsTo($user)->count())->toBe(1);
 });
 
+it('lists applicants with their current role and application status', function () {
+    $admin = User::factory()->create(['is_admin' => true]);
+    $job = Job::factory()->for($admin, 'creator')->create(['title' => 'Program Officer', 'status' => 'published']);
+    $applicant = User::factory()->create(['name' => 'Riley Moore', 'email' => 'riley@example.com']);
+    $profile = $applicant->profile()->create(['completed_at' => now()]);
+    $profile->employments()->create([
+        'job_title' => 'Research Assistant',
+        'employer' => 'Field Lab',
+        'start_date' => '2024-01-01',
+        'is_current' => true,
+    ]);
+    JobApplication::factory()->for($job, 'job')->for($applicant, 'user')->create([
+        'status' => 'interview_scheduled',
+        'submitted_at' => now(),
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.jobs.applications.index', $job))
+        ->assertOk()
+        ->assertSee('Riley Moore')
+        ->assertSee('Research Assistant')
+        ->assertSee('Field Lab')
+        ->assertSee('Interview scheduled')
+        ->assertSee('View profile')
+        ->assertDontSee('Schedule interview');
+});
+
 it('lets administrators review a candidate profile and update the application status', function () {
     $admin = User::factory()->create(['is_admin' => true]);
     $applicant = User::factory()->create([
@@ -194,13 +246,17 @@ it('lets administrators review a candidate profile and update the application st
         'current_address' => '42 Beacon Street',
         'bio' => 'Researcher focused on equitable public services.',
         'linkedin_url' => 'https://www.linkedin.com/in/jamiepatel',
-        'job_title' => 'Research Associate',
-        'employer' => 'Civic Lab',
-        'industry' => 'Public policy',
-        'employment_status' => 'employed',
         'city' => 'Boston',
         'country' => 'United States',
         'completed_at' => now(),
+    ]);
+    $profile->employments()->create([
+        'job_title' => 'Research Associate',
+        'employer' => 'Civic Lab',
+        'industry' => 'Public policy',
+        'employment_status' => 'employed_local',
+        'start_date' => '2019-06-01',
+        'is_current' => true,
     ]);
     $profile->employments()->create([
         'job_title' => 'Policy Intern',
@@ -231,6 +287,8 @@ it('lets administrators review a candidate profile and update the application st
         ->assertSee('Applicant profile')
         ->assertSee('Research Associate')
         ->assertSee('Civic Lab')
+        ->assertSee('Public policy')
+        ->assertSee('Employed (Local)')
         ->assertSee('+1 555 0107')
         ->assertSee('42 Beacon Street')
         ->assertSee('Researcher focused on equitable public services.')

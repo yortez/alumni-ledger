@@ -18,7 +18,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $profile = $request->user()->profile;
-        $profile?->load('employments');
+        $profile?->load(['employments', 'currentEmployment']);
         $graduate = Graduate::query()
             ->where('student_number', $request->user()->student_number)
             ->first();

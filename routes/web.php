@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('/profile/employments/{employment}', [EmploymentController::class, 'update'])->name('profile.employments.update');
     Route::delete('/profile/employments/{employment}', [EmploymentController::class, 'destroy'])->name('profile.employments.destroy');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
     Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');

@@ -25,13 +25,7 @@ class JobApplicationStatusUpdated extends Notification
 
     public function toDatabase(object $notifiable): array
     {
-        $labels = [
-            'submitted' => 'Submitted',
-            'reviewing' => 'Under review',
-            'interview_scheduled' => 'Interview scheduled',
-            'approved' => 'Approved',
-            'rejected' => 'Rejected',
-        ];
+        $labels = JobApplication::STATUS_LABELS;
 
         return [
             'title' => $labels[$this->application->status] ?? 'Application updated',

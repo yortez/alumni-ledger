@@ -352,6 +352,63 @@ if (roleEditDialog instanceof HTMLDialogElement) {
 	}
 }
 
+const notificationMarkReadUrl = document.querySelector('[data-notification-row][data-mark-read-url]') !== null;
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+if (notificationMarkReadUrl && csrfToken) {
+	const syncUnreadIndicators = (unread) => {
+		document.querySelectorAll('[data-unread-count]').forEach((badge) => {
+			badge.textContent = unread > 99 ? '99+' : String(unread);
+			badge.classList.toggle('hidden', unread === 0);
+		});
+
+		document.querySelectorAll('[data-unread-summary]').forEach((label) => {
+			label.textContent = `${unread} unread`;
+			label.classList.toggle('hidden', unread === 0);
+		});
+
+		document.querySelectorAll('[data-unread-form]').forEach((form) => {
+			form.classList.toggle('hidden', unread === 0);
+		});
+	};
+
+	document.querySelectorAll('[data-notification-row]').forEach((row) => {
+		row.addEventListener('toggle', () => {
+			if (!(row instanceof HTMLDetailsElement) || !row.open) {
+				return;
+			}
+
+			const markReadUrl = row.dataset.markReadUrl;
+
+			if (!markReadUrl) {
+				return;
+			}
+
+			row.dataset.emphasis = 'false';
+			delete row.dataset.markReadUrl;
+
+			fetch(markReadUrl, {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'X-CSRF-TOKEN': csrfToken,
+				},
+				credentials: 'same-origin',
+			})
+				.then((response) => (response.ok ? response.json() : null))
+				.then((payload) => {
+					if (payload) {
+						syncUnreadIndicators(payload.unread);
+					}
+				})
+				.catch(() => {
+					row.dataset.emphasis = 'true';
+					row.dataset.markReadUrl = markReadUrl;
+				});
+		});
+	});
+}
+
 document.querySelectorAll('[data-question-builder]').forEach((builder) => {
 	const questionList = builder.querySelector('[data-question-list]');
 	const questionTemplate = builder.querySelector('[data-question-template]');

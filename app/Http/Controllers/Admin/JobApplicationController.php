@@ -14,20 +14,14 @@ use Illuminate\View\View;
 
 class JobApplicationController extends Controller
 {
-    public const STATUS_LABELS = [
-        'submitted' => 'Submitted',
-        'reviewing' => 'Under review',
-        'interview_scheduled' => 'Interview scheduled',
-        'approved' => 'Approved',
-        'rejected' => 'Rejected',
-    ];
+    public const STATUS_LABELS = JobApplication::STATUS_LABELS;
 
     public function index(Job $job): View
     {
         return view('admin.job-applications', [
             'job' => $job,
             'applications' => $job->applications()
-                ->with(['user:id,name,username,email,student_number', 'user.profile'])
+                ->with(['user:id,name,username,email,student_number', 'user.profile.currentEmployment'])
                 ->latest('submitted_at')
                 ->paginate(25),
             'statusLabels' => self::STATUS_LABELS,
@@ -38,7 +32,7 @@ class JobApplicationController extends Controller
     {
         abort_unless($application->job_id === $job->id, 404);
 
-        $application->load(['user.profile.employments']);
+        $application->load(['user.profile.employments', 'user.profile.currentEmployment']);
         $graduate = $application->user?->student_number
             ? Graduate::query()->where('student_number', $application->user->student_number)->first()
             : null;

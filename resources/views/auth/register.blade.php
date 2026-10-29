@@ -3,86 +3,89 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#141a32">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#000000">
     <title>Create account · Alumni Tracer Management System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-[#1e293b] text-white antialiased">
-<main class="grid min-h-screen md:grid-cols-[minmax(0,1.5fr)_minmax(310px,1fr)]">
-    <section class="flex items-center justify-center bg-[radial-gradient(ellipse_at_50%_20%,#202849_0%,#171d37_48%,#141a32_100%)] px-5 py-12 sm:px-8 md:min-h-screen" aria-labelledby="registration-title">
-        <div class="w-full max-w-80">
-            <header class="flex flex-col items-center text-center">
-                <span class="grid size-13 place-items-center rounded-2xl bg-[#7256ed] text-2xl shadow-lg shadow-violet-950/25" aria-hidden="true">&#127891;</span>
-                <h1 id="registration-title" class="mt-5 text-xl font-semibold tracking-tight text-slate-50">Alumni Registration</h1>
-                <p class="mt-3 text-xs leading-5 text-[#8795b3]">Create your alumni account to access the tracer portal. Your student number will be verified against our graduate records.</p>
-            </header>
-
-            <ul class="mt-7 grid gap-3" aria-label="Registration information">
-                <li class="flex items-center gap-3 rounded-[10px] border border-[#343c58] bg-[#202741]/90 px-3.5 py-3">
-                    <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-indigo-500/20 text-sm" aria-hidden="true">&#128737;&#65039;</span>
-                    <div>
-                        <h2 class="text-xs font-semibold text-slate-200">Verification Required</h2>
-                        <p class="mt-0.5 text-[11px] leading-4 text-[#8795b3]">Your student number must match an official graduate record.</p>
-                    </div>
-                </li>
-                <li class="flex items-center gap-3 rounded-[10px] border border-[#343c58] bg-[#202741]/90 px-3.5 py-3">
-                    <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-emerald-500/15 text-sm" aria-hidden="true">&#128274;</span>
-                    <div>
-                        <h2 class="text-xs font-semibold text-slate-200">Secure &amp; Private</h2>
-                        <p class="mt-0.5 text-[11px] leading-4 text-[#8795b3]">Registration details are used to verify your record and create your account.</p>
-                    </div>
-                </li>
-            </ul>
-
-            <p class="mt-6 text-center text-xs"><a href="{{ route('home') }}" class="font-medium text-violet-300 transition hover:text-white">&larr; Back to Login</a></p>
+<body class="flex min-h-screen flex-col bg-canvas text-ink">
+    <header class="bg-black">
+        <div class="mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-5 sm:px-8">
+            <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3" aria-label="Alumni Tracer Management System home">
+                <span class="grid size-7 shrink-0 place-items-center rounded-[6px] bg-white text-micro font-semibold text-black">AT</span>
+                <span class="truncate text-meta text-white"><span class="sm:hidden">Alumni Tracer</span><span class="hidden sm:inline">Alumni Tracer Management System</span></span>
+            </a>
+            <a href="{{ route('home') }}" class="ml-auto hidden shrink-0 rounded-full bg-white px-4 py-1.5 text-meta font-semibold text-black transition hover:bg-chip-gray sm:inline-flex">Sign in</a>
         </div>
-    </section>
+    </header>
 
-    <section class="flex items-start justify-center border-t border-white/10 bg-[#1e293b] px-5 py-8 sm:px-8 md:min-h-screen md:border-l md:border-t-0 md:px-6 md:py-7" aria-labelledby="create-account-heading">
-        <div class="w-full max-w-80">
-            <header class="mb-5">
-                <h2 id="create-account-heading" class="text-lg font-semibold tracking-tight text-slate-50">Create Account</h2>
-                <p class="mt-1 text-[11px] text-slate-400">Fill in your details to register as an alumnus</p>
-            </header>
+    <main class="grid flex-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <section class="flex items-center border-b border-hairline px-5 py-14 sm:px-8 lg:border-b-0 lg:border-r lg:px-16" aria-labelledby="registration-title">
+            <div class="w-full max-w-xl">
+                <h1 id="registration-title" class="text-display font-semibold">Create your alumni account</h1>
+                <p class="mt-5 max-w-lg text-body text-ink-secondary">
+                    Your student number is matched against the graduate master list before the account is activated.
+                </p>
 
-            <form method="POST" action="{{ route('register.store') }}" class="grid gap-3.5">
-                @csrf
-                <div class="grid gap-1.5">
-                    <label for="student_number" class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Student number <span class="text-rose-400">*</span></label>
-                    <input id="student_number" name="student_number" value="{{ old('student_number') }}" placeholder="e.g. 2018-00001" autocomplete="off" required autofocus @error('student_number') aria-describedby="student-number-hint student-number-error" @else aria-describedby="student-number-hint" @enderror class="min-h-10 w-full rounded-md border border-slate-700 bg-slate-800 px-3 text-xs text-slate-100 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400">
-                    <p id="student-number-hint" class="text-[10px] leading-4 text-slate-500">Must match your official graduate record.</p>
-                    @error('student_number')<p id="student-number-error" class="text-xs text-rose-300" role="alert">{{ $message }}</p>@enderror
-                </div>
-                <div class="grid gap-1.5">
-                    <label for="username" class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Username <span class="text-rose-400">*</span></label>
-                    <input id="username" name="username" value="{{ old('username') }}" autocomplete="username" required @error('username') aria-describedby="username-error" @enderror class="min-h-10 w-full rounded-md border border-slate-300 bg-slate-100 px-3 text-xs text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400">
-                    @error('username')<p id="username-error" class="text-xs text-rose-300" role="alert">{{ $message }}</p>@enderror
-                </div>
-                <div class="grid gap-1.5">
-                    <label for="email" class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Email address <span class="text-rose-400">*</span></label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="Your active email address" autocomplete="email" required @error('email') aria-describedby="email-error" @enderror class="min-h-10 w-full rounded-md border border-slate-700 bg-slate-800 px-3 text-xs text-slate-100 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400">
-                    @error('email')<p id="email-error" class="text-xs text-rose-300" role="alert">{{ $message }}</p>@enderror
-                </div>
-                <div class="grid gap-1.5">
-                    <label for="password" class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Password <span class="text-rose-400">*</span></label>
-                    <input id="password" type="password" name="password" autocomplete="new-password" required @error('password') aria-describedby="password-error" @enderror class="min-h-10 w-full rounded-md border border-slate-300 bg-slate-100 px-3 text-xs text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400">
-                    @error('password')<p id="password-error" class="text-xs text-rose-300" role="alert">{{ $message }}</p>@enderror
-                </div>
-                <div class="grid gap-1.5">
-                    <label for="password_confirmation" class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Confirm password <span class="text-rose-400">*</span></label>
-                    <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password" required class="min-h-10 w-full rounded-md border border-slate-700 bg-slate-800 px-3 text-xs text-slate-100 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400">
-                </div>
+                <dl class="mt-10 grid gap-x-10 gap-y-8 border-t border-hairline pt-8 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-caption font-semibold text-ink">Verified against records</dt>
+                        <dd class="mt-2 text-meta leading-5 text-ink-tertiary">The student number on this form must exist in the graduate master list.</dd>
+                    </div>
+                    <div>
+                        <dt class="text-caption font-semibold text-ink">Kept to your record</dt>
+                        <dd class="mt-2 text-meta leading-5 text-ink-tertiary">Details are used to verify your record and to build your alumni profile.</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
 
-                <p class="rounded-md border border-amber-500/25 bg-amber-500/5 px-3 py-2.5 text-[10px] leading-4 text-amber-300">By registering, you consent to the collection and processing of your personal data in accordance with the Data Privacy Act (RA 10173).</p>
-                <button type="submit" class="mt-0.5 min-h-10 w-full rounded-md bg-gradient-to-r from-indigo-500 to-violet-500 px-4 text-xs font-semibold text-white shadow-md shadow-indigo-950/20 transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e293b]">Create account</button>
-            </form>
+        <section class="flex items-start bg-surface px-5 py-14 sm:px-10 lg:px-12" aria-labelledby="create-account-heading">
+            <div class="mx-auto w-full max-w-sm">
+                <h2 id="create-account-heading" class="text-headline font-semibold">Register</h2>
+                <p class="mt-2 text-caption text-ink-tertiary">All fields are required.</p>
 
-            <p class="mt-4 text-center text-[11px] text-slate-400">Already have an account? <a href="{{ route('home') }}" class="font-semibold text-violet-300 transition hover:text-white">Sign In</a></p>
-        </div>
-    </section>
-</main>
+                <form method="POST" action="{{ route('register.store') }}" class="mt-8 grid gap-4">
+                    @csrf
+                    <div class="field">
+                        <label for="student_number">Student number</label>
+                        <input id="student_number" name="student_number" value="{{ old('student_number') }}" placeholder="2018-00001" autocomplete="off" required autofocus @error('student_number') aria-describedby="student-number-hint student-number-error" @else aria-describedby="student-number-hint" @enderror>
+                        <p id="student-number-hint" class="text-micro text-ink-tertiary">Must match your official graduate record.</p>
+                        @error('student_number')<p id="student-number-error" class="field-error" role="alert">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="field">
+                        <label for="username">Username</label>
+                        <input id="username" name="username" value="{{ old('username') }}" autocomplete="username" required @error('username') aria-describedby="username-error" @enderror>
+                        @error('username')<p id="username-error" class="field-error" role="alert">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="field">
+                        <label for="email">Email address</label>
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="you@example.edu" autocomplete="email" required @error('email') aria-describedby="email-error" @enderror>
+                        @error('email')<p id="email-error" class="field-error" role="alert">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input id="password" type="password" name="password" autocomplete="new-password" required @error('password') aria-describedby="password-error" @enderror>
+                        @error('password')<p id="password-error" class="field-error" role="alert">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="field">
+                        <label for="password_confirmation">Confirm password</label>
+                        <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password" required>
+                    </div>
+
+                    <p class="rounded-chip bg-canvas px-4 py-3 text-micro leading-5 text-ink-tertiary">
+                        By registering, you consent to the collection and processing of your personal data in accordance with the Data Privacy Act (RA 10173).
+                    </p>
+
+                    <button type="submit" class="flex h-11 w-full items-center justify-center rounded-full bg-accent text-caption font-semibold text-white transition hover:bg-accent-strong">Create account</button>
+                </form>
+
+                <p class="mt-6 text-caption text-ink-tertiary">Already have an account? <a href="{{ route('home') }}" class="font-semibold text-accent transition hover:text-accent-strong">Sign in</a></p>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

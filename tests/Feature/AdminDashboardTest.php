@@ -16,7 +16,8 @@ it('renders a records administrator dashboard with master-list actions', functio
         ->assertSee('Graduate records')
         ->assertSee('Applicant profiles')
         ->assertSee('Open master list')
-        ->assertDontSee('Announcement manager');
+        ->assertDontSee('Manage announcements')
+        ->assertDontSee('Administrator access');
 });
 
 it('renders a content administrator dashboard with publishing and application actions', function () {
@@ -29,7 +30,7 @@ it('renders a content administrator dashboard with publishing and application ac
         ->assertSee('Content administrator dashboard')
         ->assertSee('Published announcements')
         ->assertSee('Active jobs')
-        ->assertSee('Open content manager')
+        ->assertSee('Manage announcements')
         ->assertDontSee('Administrator access');
 });
 
@@ -46,5 +47,5 @@ it('renders a super administrator dashboard with access to every module', functi
         ->assertSee('Published announcements')
         ->assertSee('Administrator access')
         ->assertSee('Open master list')
-        ->assertSee('Open content manager');
+        ->assertSee('Manage announcements');
 });

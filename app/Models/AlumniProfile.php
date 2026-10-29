@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'first_name', 'middle_name', 'last_name', 'suffix', 'birthdate', 'sex',
@@ -24,6 +25,17 @@ class AlumniProfile extends Model
     public function employments(): HasMany
     {
         return $this->hasMany(Employment::class);
+    }
+
+    /**
+     * The role the alumnus currently holds, which is the only employment data the app displays.
+     */
+    public function currentEmployment(): HasOne
+    {
+        return $this->hasOne(Employment::class)
+            ->where('is_current', true)
+            ->orderByDesc('start_date')
+            ->orderByDesc('id');
     }
 
     /**
