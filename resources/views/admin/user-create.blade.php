@@ -4,12 +4,12 @@
 
 @section('content')
 <div class="mx-auto w-full max-w-3xl px-5 pb-16 pt-8 sm:px-8">
+    <x-back-link :href="route('admin.users.index')" label="Administrator access" class="mb-5" />
     <div class="mb-5 flex items-center justify-between gap-4 border-b border-line pb-5">
         <div>
             <p class="eyebrow">Administration</p>
             <h1 class="mt-1 text-display font-semibold">Create an administrator</h1>
         </div>
-        <a href="{{ route('admin.users.index') }}" class="text-xs font-medium text-forest underline underline-offset-4">Cancel</a>
     </div>
 
     <section class="panel p-4 sm:p-6">

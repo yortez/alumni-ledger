@@ -21,6 +21,7 @@
     <main class="grid flex-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <section class="flex items-center border-b border-hairline px-5 py-14 sm:px-8 lg:border-b-0 lg:border-r lg:px-16" aria-labelledby="registration-title">
             <div class="w-full max-w-xl">
+                <x-back-link :href="route('home')" label="Sign in" class="mb-5" />
                 <h1 id="registration-title" class="text-display font-semibold">Create your alumni account</h1>
                 <p class="mt-5 max-w-lg text-body text-ink-secondary">
                     Your student number is matched against the graduate master list before the account is activated.

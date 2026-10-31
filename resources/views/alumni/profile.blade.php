@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
+    <x-back-link :href="route('dashboard')" label="Dashboard" class="mb-5" />
     @php($currentEmployment = $profile?->currentEmployment)
 
     <header class="mb-6 border-b border-hairline pb-6">

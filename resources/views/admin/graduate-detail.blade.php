@@ -12,12 +12,12 @@
 @php($displayName = $displayName ?: $graduate->fullName())
 @php($initial = strtoupper(substr($displayName, 0, 1)))
 <div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
+    <x-back-link :href="route('admin.graduates.index')" label="All alumni" class="mb-4" />
     <div class="mb-4 flex items-center justify-between gap-4">
         <div>
             <p class="eyebrow">Administration</p>
             <h1 class="mt-1 text-display font-semibold">Alumni profile</h1>
         </div>
-        <a href="{{ route('admin.graduates.index') }}" class="text-sm font-medium text-forest underline underline-offset-4">Back to roster</a>
     </div>
 
     <div class="grid items-start gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">

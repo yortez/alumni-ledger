@@ -279,7 +279,9 @@ it('lets administrators review a candidate profile and update the application st
     $indexResponse = $this->actingAs($admin)->get(route('admin.jobs.applications.index', $job));
 
     $indexResponse->assertOk()
-        ->assertSee('View profile');
+        ->assertSee('View profile')
+        ->assertSee('All job postings')
+        ->assertSee(route('admin.jobs.index'));
 
     $detailResponse = $this->actingAs($admin)->get(route('admin.jobs.applications.show', [$job, $application]));
 

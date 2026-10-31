@@ -6,7 +6,7 @@
 @php($questions = $survey->normalizedQuestions())
 
 <div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
-    <a href="{{ route('surveys.index') }}" class="inline-flex items-center gap-1 text-caption font-semibold text-ink-tertiary transition hover:text-ink"><x-chevron class="rotate-180" />All surveys</a>
+    <x-back-link :href="route('surveys.index')" label="All surveys" />
 
     <div class="mt-5 border-b border-hairline pb-6">
         <h1 class="text-display font-semibold wrap-break-word">{{ $survey->title }}</h1>

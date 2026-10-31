@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
-    <a href="{{ route('admin.surveys.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Back to surveys</a>
+    <x-back-link :href="route('admin.surveys.index')" label="Survey manager" class="mb-5" />
     <header class="mb-6 border-b border-hairline pb-6"><p class="eyebrow">Survey responses</p><h1 class="mt-3 text-display font-semibold">{{ $survey->title }}</h1><p class="mt-3 text-caption text-ink-tertiary">{{ $responses->total() }} submitted</p></header>
     <div class="mt-7 grid gap-4">
         @forelse ($responses as $response)

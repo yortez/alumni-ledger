@@ -15,7 +15,7 @@
 @php($isRejected = $application->status === 'rejected')
 
 <div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
-    <a href="{{ route('admin.jobs.applications.index', $job) }}" class="inline-flex items-center gap-1 text-caption font-semibold text-ink-tertiary transition hover:text-ink"><x-chevron class="rotate-180" />All applicants</a>
+    <x-back-link :href="route('admin.jobs.applications.index', $job)" label="All applicants" />
 
     <div class="mt-5 border-b border-hairline pb-6">
         <h1 class="text-display font-semibold">Applicant profile</h1>

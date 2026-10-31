@@ -8,6 +8,7 @@
 @endphp
 
 <div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
+    <x-back-link :href="route('dashboard')" label="Dashboard" class="mb-5" />
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
             <h1 class="text-display font-semibold">Notifications</h1>
