@@ -3,16 +3,16 @@
 @section('title', 'Add alumni record')
 
 @section('content')
-<div class="mx-auto max-w-5xl px-5 py-7 sm:px-8">
+<div class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
     <div class="mb-5 flex items-center justify-between gap-4 border-b border-line pb-5">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="mt-1 text-xl font-semibold">Add alumni record</h1>
+            <h1 class="mt-1 text-display font-semibold">Add alumni record</h1>
         </div>
         <a href="{{ route('admin.graduates.index') }}" class="text-xs font-medium text-forest underline underline-offset-4">Cancel</a>
     </div>
 
-    <section class="overflow-hidden rounded-md border border-line bg-surface">
+    <section class="panel overflow-hidden">
         <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Alumni Details</h2>
         <form method="POST" action="{{ route('admin.graduates.store') }}" class="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
             @csrf
@@ -27,7 +27,7 @@
         </form>
     </section>
 
-    <section class="mt-5 overflow-hidden rounded-md border border-line bg-surface">
+    <section class="panel mt-5 overflow-hidden">
         <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Import records from CSV</h2>
         <form method="POST" action="{{ route('admin.graduates.import') }}" enctype="multipart/form-data" class="grid gap-3 p-4 sm:p-5">
             @csrf

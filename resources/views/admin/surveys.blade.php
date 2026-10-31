@@ -5,13 +5,13 @@
 @section('title', 'Survey manager')
 
 @section('content')
-<div class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
+<div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
     <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
-        <div><h1 class="text-xl font-semibold">Survey manager</h1><p class="mt-1 text-xs text-muted">{{ $surveyCount }} surveys</p></div>
+        <div><h1 class="text-display font-semibold">Survey manager</h1><p class="mt-1 text-meta text-ink-tertiary">{{ $surveyCount }} surveys</p></div>
         <a href="{{ route('admin.surveys.create') }}" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Create Survey</a>
     </header>
 
-    <form method="GET" action="{{ route('admin.surveys.index') }}" class="mb-4 flex flex-wrap items-center gap-2 rounded-md border border-line bg-surface p-3 sm:p-4">
+    <form method="GET" action="{{ route('admin.surveys.index') }}" class="panel mb-4 flex flex-wrap items-center gap-2 p-3 sm:p-4">
         <label class="relative block w-full sm:max-w-72"><span class="sr-only">Search surveys</span><svg aria-hidden="true" class="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg><input type="search" name="search" value="{{ $filters['search'] }}" placeholder="Search surveys..." class="w-full rounded-md border border-line bg-surface-raised py-2 pl-9 pr-3 text-xs text-ink placeholder:text-muted focus:border-forest focus:outline-none"></label>
         <label><span class="sr-only">Survey status</span><select name="status" class="min-w-36 rounded-md border border-line bg-surface-raised px-3 py-2 text-xs text-ink focus:border-forest focus:outline-none"><option value="">All Status</option><option value="open" @selected($filters['status'] === 'open')>Open</option><option value="draft" @selected($filters['status'] === 'draft')>Draft</option><option value="closed" @selected($filters['status'] === 'closed')>Closed</option></select></label>
         <button type="submit" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark">Filter</button><a href="{{ route('admin.surveys.index') }}" class="inline-flex min-h-9 items-center rounded-md border border-line bg-surface-raised px-4 py-2 text-xs font-medium text-muted transition hover:text-ink">Reset</a>
@@ -20,7 +20,7 @@
     <section class="grid gap-3">
         @forelse ($surveys as $survey)
             @php($isClosed = $survey->is_active && $survey->closes_at?->isPast())
-            <article class="overflow-hidden rounded-md border border-line bg-surface">
+            <article class="panel overflow-hidden">
                 <div class="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-start sm:px-5">
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2 text-[10px]"><span class="rounded-full px-2.5 py-1 font-semibold {{ $survey->is_active && ! $isClosed ? 'bg-mint text-forest' : 'bg-surface-raised text-muted' }}">{{ $isClosed ? 'Closed' : ($survey->is_active ? 'Open' : 'Draft') }}</span><span class="text-muted">{{ $survey->responses_count }} responses</span></div>
@@ -40,7 +40,7 @@
         @endforelse
     </section>
     <div class="mt-4">{{ $surveys->links() }}</div>
-    <dialog id="survey-edit-dialog" data-reopen-for="{{ old('survey_id') }}" aria-labelledby="survey-edit-title" class="m-auto max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-md border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45">
+    <dialog id="survey-edit-dialog" data-reopen-for="{{ old('survey_id') }}" aria-labelledby="survey-edit-title" class="m-auto max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-4xl overflow-y-auto rounded-card border border-hairline bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45">
         <div class="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
             <div><p class="eyebrow">Survey manager</p><h2 id="survey-edit-title" class="mt-1 text-lg font-semibold">Edit survey</h2></div>
             <button type="button" data-survey-edit-close aria-label="Close edit dialog" title="Close" class="grid size-9 shrink-0 place-items-center rounded-md border border-line text-muted transition hover:bg-paper hover:text-ink"><svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12M6 6l12 12" /></svg></button>

@@ -3,22 +3,22 @@
 @section('title', 'Role definitions')
 
 @section('content')
-<div class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
+<div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
     <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
-        <div><h1 class="text-xl font-semibold">Role Definitions</h1><p class="mt-1 text-xs text-muted">{{ $roleCount }} roles</p></div>
+        <div><h1 class="text-display font-semibold">Role Definitions</h1><p class="mt-1 text-meta text-ink-tertiary">{{ $roleCount }} roles</p></div>
         <div class="flex flex-wrap gap-2"><a href="{{ route('admin.users.index') }}" class="inline-flex min-h-9 items-center rounded-md border border-line bg-surface px-3 py-2 text-xs font-medium text-muted transition hover:text-ink">Administrator Accounts</a>
             <a href="{{ route('admin.roles.create') }}" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Add Role</a>
         </div>
     </header>
 
-    <form method="GET" action="{{ route('admin.roles.index') }}" class="mb-4 flex flex-wrap items-center gap-2 rounded-md border border-line bg-surface p-3 sm:p-4">
+    <form method="GET" action="{{ route('admin.roles.index') }}" class="panel mb-4 flex flex-wrap items-center gap-2 p-3 sm:p-4">
         <label class="relative block w-full sm:max-w-72"><span class="sr-only">Search roles</span><svg aria-hidden="true" class="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg><input type="search" name="search" value="{{ $search }}" placeholder="Search role name or type..." class="w-full rounded-md border border-line bg-surface-raised py-2 pl-9 pr-3 text-xs text-ink placeholder:text-muted focus:border-forest focus:outline-none"></label>
         <button type="submit" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark">Filter</button><a href="{{ route('admin.roles.index') }}" class="inline-flex min-h-9 items-center rounded-md border border-line bg-surface-raised px-4 py-2 text-xs font-medium text-muted transition hover:text-ink">Reset</a>
     </form>
 
     <section class="grid gap-3">
         @forelse ($roles as $role)
-            <article class="rounded-md border border-line bg-surface">
+            <article class="panel">
                 <div class="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center sm:px-5">
                     <div class="flex min-w-0 items-center gap-3"><span class="grid size-9 shrink-0 place-items-center rounded-full bg-forest/15 text-xs font-bold text-forest">{{ strtoupper(substr($role->name, 0, 1)) }}</span><div class="min-w-0"><h2 class="truncate text-sm font-semibold"><button type="button" data-role-edit-open data-role-id="{{ $role->id }}" data-role-name="{{ $role->name }}" data-role-type="{{ $role->type }}" data-role-description="{{ $role->description }}" data-role-permissions="{{ implode(',', $role->permissions ?? []) }}" data-role-system="{{ $role->is_system ? 'true' : 'false' }}" data-update-url="{{ route('admin.roles.update', $role) }}" data-delete-url="{{ route('admin.roles.destroy', $role) }}" aria-haspopup="dialog" aria-controls="role-edit-dialog" class="text-left underline decoration-transparent underline-offset-4 transition hover:text-forest hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest">{{ $role->name }}</button></h2><p class="mt-1 text-[10px] text-muted">{{ $role->type }} · {{ $role->users_count }} assigned administrators</p></div>@if ($role->is_system)<span class="rounded-full bg-warning/15 px-2.5 py-1 text-[10px] font-semibold text-warning">Protected</span>@endif</div>
                 </div>
@@ -28,7 +28,7 @@
         @endforelse
     </section>
     <div class="mt-4">{{ $roles->links() }}</div>
-    <dialog id="role-edit-dialog" data-reopen-for="{{ old('role_id') }}" aria-labelledby="role-edit-title" class="m-auto max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-md border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45">
+    <dialog id="role-edit-dialog" data-reopen-for="{{ old('role_id') }}" aria-labelledby="role-edit-title" class="m-auto max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-card border border-hairline bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45">
         <div class="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
             <div><p class="eyebrow">Role definitions</p><h2 id="role-edit-title" class="mt-1 text-lg font-semibold">Edit role</h2></div>
             <button type="button" data-role-edit-close aria-label="Close edit dialog" title="Close" class="grid size-9 shrink-0 place-items-center rounded-md border border-line text-muted transition hover:bg-paper hover:text-ink"><svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12M6 6l12 12" /></svg></button>

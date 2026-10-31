@@ -1,6 +1,6 @@
 @php($questionEntries = is_array($questionEntries) ? $questionEntries : [])
 @php($nextQuestionIndex = $questionEntries === [] ? 0 : max(array_map('intval', array_keys($questionEntries))) + 1)
-<section class="overflow-hidden rounded-md border border-line bg-surface" data-question-builder data-next-index="{{ $nextQuestionIndex }}" data-max-questions="20">
+<section class="panel overflow-hidden" data-question-builder data-next-index="{{ $nextQuestionIndex }}" data-max-questions="20">
     <header class="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
         <h3 class="text-sm font-semibold">Questions</h3>
         <button type="button" data-add-question class="inline-flex min-h-8 items-center gap-1.5 rounded-md bg-forest px-3 py-1.5 text-[10px] font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Add Question</button>
@@ -10,7 +10,7 @@
             @php($question = is_array($question) ? $question : ['prompt' => $question])
             @php($questionType = $question['type'] ?? 'long_text')
             @php($optionsText = $question['options_text'] ?? implode("\n", $question['options'] ?? []))
-            <article class="rounded-md border border-line bg-surface-raised p-3 sm:p-4" data-question-card>
+            <article class="rounded-chip border border-hairline bg-surface-raised p-3 sm:p-4" data-question-card>
                 <div class="flex items-center gap-2">
                     <span class="grid size-5 shrink-0 place-items-center rounded-full bg-forest text-[10px] font-semibold text-white" data-question-number>{{ $loop->iteration }}</span>
                     <div class="field min-w-0 flex-1"><label for="question-prompt-{{ $index }}" class="sr-only">Question prompt</label><input id="question-prompt-{{ $index }}" name="questions[{{ $index }}][prompt]" value="{{ old("questions.{$index}.prompt", $question['prompt'] ?? '') }}" maxlength="1000" placeholder="Enter your question here..." required data-question-field>@error("questions.{$index}.prompt")<p class="field-error">{{ $message }}</p>@enderror</div>
@@ -30,7 +30,7 @@
     </div>
     <p class="px-4 pb-3 text-[10px] text-muted">Add up to 20 questions. Choice questions need at least two options.</p>
     <template data-question-template>
-        <article class="rounded-md border border-line bg-surface-raised p-3 sm:p-4" data-question-card>
+        <article class="rounded-chip border border-hairline bg-surface-raised p-3 sm:p-4" data-question-card>
             <div class="flex items-center gap-2">
                 <span class="grid size-5 shrink-0 place-items-center rounded-full bg-forest text-[10px] font-semibold text-white" data-question-number></span>
                 <div class="field min-w-0 flex-1"><label for="question-prompt-__INDEX__" class="sr-only">Question prompt</label><input id="question-prompt-__INDEX__" name="questions[__INDEX__][prompt]" maxlength="1000" placeholder="Enter your question here..." required data-question-field></div>

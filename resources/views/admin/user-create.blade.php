@@ -3,16 +3,16 @@
 @section('title', 'Create administrator')
 
 @section('content')
-<div class="mx-auto max-w-3xl px-5 py-7 sm:px-8">
+<div class="mx-auto w-full max-w-3xl px-5 pb-16 pt-8 sm:px-8">
     <div class="mb-5 flex items-center justify-between gap-4 border-b border-line pb-5">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="mt-1 text-xl font-semibold">Create an administrator</h1>
+            <h1 class="mt-1 text-display font-semibold">Create an administrator</h1>
         </div>
         <a href="{{ route('admin.users.index') }}" class="text-xs font-medium text-forest underline underline-offset-4">Cancel</a>
     </div>
 
-    <section class="rounded-md border border-line bg-surface p-4 sm:p-6">
+    <section class="panel p-4 sm:p-6">
         <form method="POST" action="{{ route('admin.users.store') }}" class="grid gap-4 sm:grid-cols-2">
             @csrf
             <div class="field"><label for="name">Full name</label><input id="name" name="name" value="{{ old('name') }}" required>@error('name')<p class="field-error">{{ $message }}</p>@enderror</div>

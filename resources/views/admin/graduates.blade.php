@@ -3,11 +3,11 @@
 @section('title', 'Graduate master list')
 
 @section('content')
-<div class="mx-auto max-w-7xl px-5 py-7 sm:px-8">
+<div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
     <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-semibold">Alumni Records</h1>
-            <p class="mt-1 text-xs text-muted">{{ $graduates->total() }} {{ $graduates->total() === 1 ? 'alumnus' : 'alumni' }} found</p>
+            <h1 class="text-display font-semibold">Alumni Records</h1>
+            <p class="mt-1 text-meta text-ink-tertiary">{{ $graduates->total() }} {{ $graduates->total() === 1 ? 'alumnus' : 'alumni' }} found</p>
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('admin.graduates.export', request()->query()) }}" class="inline-flex min-h-9 items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-xs font-medium text-muted transition hover:border-ink hover:text-ink"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v4h16v-4" /></svg>Export CSV</a>
@@ -15,7 +15,7 @@
         </div>
     </header>
 
-    <form method="GET" action="{{ route('admin.graduates.index') }}" class="mb-4 grid gap-3 rounded-md border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4">
+    <form method="GET" action="{{ route('admin.graduates.index') }}" class="panel mb-4 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
         <label class="relative block"><span class="sr-only">Search alumni</span><svg aria-hidden="true" class="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg><input type="search" name="search" value="{{ $filters['search'] }}" placeholder="Search name, email, student number" class="w-full rounded-md border border-line bg-surface-raised py-2 pl-9 pr-3 text-xs text-ink placeholder:text-muted focus:border-forest focus:outline-none"></label>
         <label><span class="sr-only">Program</span><select name="program" class="w-full rounded-md border border-line bg-surface-raised px-3 py-2 text-xs text-ink focus:border-forest focus:outline-none"><option value="">All Programs</option>@foreach ($programs as $program)<option value="{{ $program }}" @selected($filters['program'] === $program)>{{ $program }}</option>@endforeach</select></label>
         <label><span class="sr-only">Batch</span><select name="batch" class="w-full rounded-md border border-line bg-surface-raised px-3 py-2 text-xs text-ink focus:border-forest focus:outline-none"><option value="">All Batches</option>@foreach ($batches as $batch)<option value="{{ $batch }}" @selected($filters['batch'] === (string) $batch)>{{ $batch }}</option>@endforeach</select></label>
@@ -26,7 +26,7 @@
         </div>
     </form>
 
-    <div class="overflow-x-auto rounded-md border border-line bg-surface">
+    <div class="panel overflow-x-auto">
         <table class="data-table w-full min-w-[900px] border-collapse text-left text-xs">
             <thead class="bg-surface-raised text-[10px] uppercase tracking-wide text-muted"><tr><th class="px-4 py-3 font-semibold">Alumni</th><th class="px-4 py-3 font-semibold">Program</th><th class="px-4 py-3 font-semibold">Batch</th><th class="px-4 py-3 font-semibold">Contact</th><th class="px-4 py-3 font-semibold">Employment</th><th class="px-4 py-3 font-semibold">Verification</th><th class="px-4 py-3 text-right font-semibold">Actions</th></tr></thead>
             <tbody class="divide-y divide-line">

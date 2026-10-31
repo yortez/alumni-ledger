@@ -5,12 +5,12 @@
 @section('title', 'Survey responses')
 
 @section('content')
-<div class="mx-auto max-w-5xl px-5 py-10 sm:px-8 lg:py-14">
+<div class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
     <a href="{{ route('admin.surveys.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Back to surveys</a>
-    <header class="mt-6 border-b border-line pb-7"><p class="eyebrow">Survey responses</p><h1 class="font-display mt-3 text-4xl">{{ $survey->title }}</h1><p class="mt-3 text-sm text-muted">{{ $responses->total() }} submitted</p></header>
+    <header class="mb-6 border-b border-hairline pb-6"><p class="eyebrow">Survey responses</p><h1 class="mt-3 text-display font-semibold">{{ $survey->title }}</h1><p class="mt-3 text-caption text-ink-tertiary">{{ $responses->total() }} submitted</p></header>
     <div class="mt-7 grid gap-4">
         @forelse ($responses as $response)
-            <article class="border border-line bg-white p-5 sm:p-7">
+            <article class="panel p-5 sm:p-7">
                 <div class="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4"><div><h2 class="font-semibold">{{ $response->user->name }}</h2><p class="mt-1 text-xs text-muted">{{ $response->user->student_number }} · {{ $response->user->username }}</p></div><time class="text-xs text-muted" datetime="{{ $response->submitted_at->toIso8601String() }}">{{ $response->submitted_at->format('M j, Y g:i A') }}</time></div>
                 <dl class="mt-5 grid gap-5">@foreach ($survey->normalizedQuestions() as $index => $question)@php($answer = $response->answers[$index] ?? '')<div>@if ($question['section_label'])<p class="text-[10px] font-semibold uppercase tracking-wider text-muted">{{ $question['section_label'] }}</p>@endif<dt class="mt-1 text-xs font-semibold uppercase tracking-wider text-terracotta">{{ $question['prompt'] }}</dt><dd class="mt-2 whitespace-pre-line break-words text-sm leading-6 text-ink">{{ is_array($answer) ? implode(', ', $answer) : ($answer !== '' ? $answer : 'No response') }}</dd></div>@endforeach</dl>
             </article>

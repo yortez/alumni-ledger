@@ -3,16 +3,16 @@
 @section('title', 'Edit announcement')
 
 @section('content')
-<div class="mx-auto max-w-5xl px-5 py-7 sm:px-8">
+<div class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
     <div class="mb-5 flex items-center justify-between gap-4 border-b border-line pb-5">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="mt-1 text-xl font-semibold">Edit announcement</h1>
+            <h1 class="mt-1 text-display font-semibold">Edit announcement</h1>
         </div>
         <a href="{{ route('admin.announcements.index') }}" class="text-xs font-medium text-forest underline underline-offset-4">Cancel</a>
     </div>
 
-    <section class="overflow-hidden rounded-md border border-line bg-surface">
+    <section class="panel overflow-hidden">
         <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Announcement Details</h2>
         <form method="POST" action="{{ route('admin.announcements.update', $announcement) }}">
             @csrf

@@ -11,18 +11,18 @@
 ])))
 @php($displayName = $displayName ?: $graduate->fullName())
 @php($initial = strtoupper(substr($displayName, 0, 1)))
-<div class="mx-auto max-w-7xl px-4 py-6 sm:px-7 lg:py-8">
+<div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
     <div class="mb-4 flex items-center justify-between gap-4">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="mt-1 text-lg font-semibold">Alumni profile</h1>
+            <h1 class="mt-1 text-display font-semibold">Alumni profile</h1>
         </div>
         <a href="{{ route('admin.graduates.index') }}" class="text-sm font-medium text-forest underline underline-offset-4">Back to roster</a>
     </div>
 
     <div class="grid items-start gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
         <aside class="grid gap-3">
-            <section class="overflow-hidden rounded-md border border-line bg-surface">
+            <section class="panel overflow-hidden">
                 <div class="h-16 bg-forest"></div>
                 <div class="px-4 pb-4">
                     @if ($profile?->profile_photo_path)
@@ -37,7 +37,7 @@
                 </div>
             </section>
 
-            <section class="overflow-hidden rounded-md border border-line bg-surface">
+            <section class="panel overflow-hidden">
                 <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Contact Information</h2>
                 <dl class="grid gap-3 p-4 text-xs">
                     <div><dt class="uppercase tracking-wide text-muted">Email</dt><dd class="mt-1 break-all text-ink">{{ $applicant?->email ?? 'Not available' }}</dd></div>
@@ -47,7 +47,7 @@
                 </dl>
             </section>
 
-            <section class="overflow-hidden rounded-md border border-line bg-surface">
+            <section class="panel overflow-hidden">
                 <h2 class="border-b border-line px-4 py-3 text-sm font-semibold">Academic Details</h2>
                 <dl class="grid gap-3 p-4 text-xs">
                     <div><dt class="uppercase tracking-wide text-muted">Student no.</dt><dd class="mt-1 font-semibold text-ink">{{ $graduate->student_number }}</dd></div>
@@ -66,7 +66,7 @@
         </aside>
 
         <div class="grid min-w-0 gap-4">
-            <section class="overflow-hidden rounded-md border border-line bg-surface" aria-labelledby="career-history-heading">
+            <section class="panel overflow-hidden" aria-labelledby="career-history-heading">
                 <header class="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
                     <h2 id="career-history-heading" class="flex items-center gap-2 text-sm font-semibold"><svg aria-hidden="true" class="size-4 text-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M8 7V4h8v3M3 12h18" /></svg>Career History</h2>
                     <a href="{{ route('admin.graduates.edit', $graduate) }}" class="inline-flex min-h-8 items-center gap-2 rounded-md bg-forest px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-forest-dark"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 4 4 4L9 19l-5 1 1-5L16 4zM14 6l4 4" /></svg>Manage</a>
@@ -98,7 +98,7 @@
                 @endif
             </section>
 
-            <section class="overflow-hidden rounded-md border border-line bg-surface" aria-labelledby="survey-responses-heading">
+            <section class="panel overflow-hidden" aria-labelledby="survey-responses-heading">
                 <header class="border-b border-line px-4 py-3 sm:px-5">
                     <h2 id="survey-responses-heading" class="flex items-center gap-2 text-sm font-semibold"><svg aria-hidden="true" class="size-4 text-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8l2 2h3v15H3V6h3l2-2z" /><path d="M8 10h8M8 14h8M8 18h5" /></svg>Survey Responses</h2>
                 </header>

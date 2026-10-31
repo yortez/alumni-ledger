@@ -3,13 +3,13 @@
 @section('title', 'Announcements')
 
 @section('content')
-<div class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
+<div class="mx-auto w-full max-w-[1440px] px-5 pb-16 pt-8 sm:px-8 xl:px-20">
     <header class="mb-5 flex flex-wrap items-center justify-between gap-4">
-        <div><h1 class="text-xl font-semibold">Announcements</h1><p class="mt-1 text-xs text-muted">{{ $announcementCount }} announcements</p></div>
+        <div><h1 class="text-display font-semibold">Announcements</h1><p class="mt-1 text-meta text-ink-tertiary">{{ $announcementCount }} announcements</p></div>
         <a href="{{ route('admin.announcements.create') }}" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><span aria-hidden="true">+</span>Post Announcement</a>
     </header>
 
-    <form method="GET" action="{{ route('admin.announcements.index') }}" class="mb-4 flex flex-wrap items-center gap-2 rounded-md border border-line bg-surface p-3 sm:p-4">
+    <form method="GET" action="{{ route('admin.announcements.index') }}" class="panel mb-4 flex flex-wrap items-center gap-2 p-3 sm:p-4">
         <label class="relative block w-full sm:max-w-72"><span class="sr-only">Search announcements</span><svg aria-hidden="true" class="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" /></svg><input type="search" name="search" value="{{ $filters['search'] }}" placeholder="Search announcements..." class="w-full rounded-md border border-line bg-surface-raised py-2 pl-9 pr-3 text-xs text-ink placeholder:text-muted focus:border-forest focus:outline-none"></label>
         <label><span class="sr-only">Category</span><select name="category" class="min-w-32 rounded-md border border-line bg-surface-raised px-3 py-2 text-xs text-ink focus:border-forest focus:outline-none"><option value="">All Categories</option>@foreach ($categories as $value => $label)<option value="{{ $value }}" @selected($filters['category'] === $value)>{{ $label }}</option>@endforeach</select></label>
         <button type="submit" class="inline-flex min-h-9 items-center gap-2 rounded-md bg-forest px-4 py-2 text-xs font-semibold text-white transition hover:bg-forest-dark"><svg aria-hidden="true" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7v6l-4 2v-8L4 5z" /></svg>Filter</button>
@@ -19,7 +19,7 @@
     <section class="grid gap-3">
         @forelse ($announcements as $announcement)
             @php($isExpired = $announcement->expires_at?->isPast() ?? false)
-            <article class="overflow-hidden rounded-md border border-line bg-surface {{ $announcement->is_pinned ? 'border-t-2 border-t-amber-400' : '' }}">
+            <article class="panel overflow-hidden {{ $announcement->is_pinned ? 'border-t-2 border-t-amber-400' : '' }}">
                 <div class="flex items-start justify-between gap-3 p-4 sm:px-5">
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2 text-[10px]">
@@ -41,7 +41,7 @@
         @endforelse
     </section>
     <div class="mt-4">{{ $announcements->links() }}</div>
-    <dialog id="announcement-edit-dialog" data-reopen-for="{{ old('announcement_id') }}" aria-labelledby="announcement-edit-title" class="m-auto max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-3xl overflow-y-auto rounded-md border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45">
+    <dialog id="announcement-edit-dialog" data-reopen-for="{{ old('announcement_id') }}" aria-labelledby="announcement-edit-title" class="m-auto max-h-[calc(100vh-2rem)] w-[calc(100%-2rem)] max-w-3xl overflow-y-auto rounded-card border border-hairline bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45">
         <div class="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
             <div><p class="eyebrow">Announcements</p><h2 id="announcement-edit-title" class="mt-1 text-lg font-semibold">Edit announcement</h2></div>
             <button type="button" data-announcement-edit-close aria-label="Close edit dialog" title="Close" class="grid size-9 shrink-0 place-items-center rounded-md border border-line text-muted transition hover:bg-paper hover:text-ink"><svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12M6 6l12 12" /></svg></button>

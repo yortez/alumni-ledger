@@ -3,16 +3,16 @@
 @section('title', 'Edit survey')
 
 @section('content')
-<div class="mx-auto max-w-5xl px-5 py-7 sm:px-8">
+<div class="mx-auto w-full max-w-5xl px-5 pb-16 pt-8 sm:px-8">
     <div class="mb-5 flex items-center justify-between gap-4 border-b border-line pb-5">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="mt-1 text-xl font-semibold">Edit survey</h1>
+            <h1 class="mt-1 text-display font-semibold">Edit survey</h1>
         </div>
         <a href="{{ route('admin.surveys.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Back to surveys</a>
     </div>
 
-    <section class="border border-line bg-white p-5 sm:p-6">
+    <section class="panel p-5 sm:p-6">
         <form method="POST" action="{{ route('admin.surveys.update', $survey) }}" class="grid gap-5">
             @csrf
             @method('PATCH')

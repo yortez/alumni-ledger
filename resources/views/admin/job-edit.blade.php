@@ -3,16 +3,16 @@
 @section('title', 'Edit job posting')
 
 @section('content')
-<div class="mx-auto max-w-3xl px-5 py-7 sm:px-8">
+<div class="mx-auto w-full max-w-3xl px-5 pb-16 pt-8 sm:px-8">
     <div class="mb-5 flex items-center justify-between gap-4 border-b border-line pb-5">
         <div>
             <p class="eyebrow">Administration</p>
-            <h1 class="mt-1 text-xl font-semibold">Edit job posting</h1>
+            <h1 class="mt-1 text-display font-semibold">Edit job posting</h1>
         </div>
         <a href="{{ route('admin.jobs.index') }}" class="text-sm font-semibold text-forest underline underline-offset-4">Back to jobs</a>
     </div>
 
-    <section class="border border-line bg-white p-5 sm:p-6">
+    <section class="panel p-5 sm:p-6">
         <form method="POST" action="{{ route('admin.jobs.update', $job) }}" class="grid gap-5">
             @csrf
             @method('PATCH')
