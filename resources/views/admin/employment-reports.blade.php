@@ -44,11 +44,40 @@
         </div>
     </form>
 
-    @if ($canExportAggregate)
+    @if ($canExportAggregate && $reportSuppressed)
+        <section class="panel mt-4 px-4 py-5 sm:px-6" role="status">
+            <h2 class="text-title font-semibold">Aggregate results hidden</h2>
+            <p class="mt-2 text-caption text-ink-tertiary">At least 5 graduates are required to display aggregate results. Widen the selected cohort or choose another program or batch.</p>
+        </section>
+    @elseif ($canExportAggregate && $analytics)
+        <section aria-label="Employment outcome metrics" class="panel mt-4 overflow-hidden">
+            <dl class="grid grid-cols-2 divide-x divide-y divide-hairline sm:grid-cols-4 sm:divide-y-0">
+                <div class="p-4 sm:px-5 sm:py-5">
+                    <dt class="text-meta text-ink-tertiary">Graduates in cohort</dt>
+                    <dd class="mt-2 text-title font-semibold tabular-nums text-ink">{{ number_format($analytics['graduate_count']) }}</dd>
+                </div>
+                <div class="p-4 sm:px-5 sm:py-5">
+                    <dt class="text-meta text-ink-tertiary">Reporting coverage</dt>
+                    <dd class="mt-2 text-title font-semibold tabular-nums text-ink">{{ $analytics['reporting_coverage']['percentage'] }}</dd>
+                    <dd class="mt-1 text-meta text-ink-tertiary">{{ $analytics['reporting_coverage']['count'] }} of {{ $analytics['reporting_coverage']['denominator'] }} reported</dd>
+                </div>
+                <div class="p-4 sm:px-5 sm:py-5">
+                    <dt class="text-meta text-ink-tertiary">Employment rate among respondents</dt>
+                    <dd class="mt-2 text-title font-semibold tabular-nums text-ink">{{ $analytics['employment_rate']['percentage'] }}</dd>
+                    <dd class="mt-1 text-meta text-ink-tertiary">{{ $analytics['employment_rate']['count'] }} of {{ $analytics['employment_rate']['denominator'] }} reported outcomes</dd>
+                </div>
+                <div class="p-4 sm:px-5 sm:py-5">
+                    <dt class="text-meta text-ink-tertiary">Median time to employment</dt>
+                    <dd class="mt-2 text-title font-semibold tabular-nums text-ink">{{ $analytics['time_to_employment']['median_months'] === null ? 'Not reported' : number_format($analytics['time_to_employment']['median_months'], 1).' months' }}</dd>
+                    <dd class="mt-1 text-meta text-ink-tertiary">{{ number_format($analytics['time_to_employment']['sample_count']) }} employed records</dd>
+                </div>
+            </dl>
+        </section>
+
         <section aria-labelledby="employment-outcomes-heading" class="panel overflow-hidden">
             <div class="border-b border-hairline px-4 py-4 sm:px-6">
                 <h2 id="employment-outcomes-heading" class="text-title font-semibold">Outcome distribution</h2>
-                <p class="mt-1 text-meta text-ink-tertiary">{{ number_format($graduateCount) }} graduates in the selected cohort. Missing records are counted as not reported.</p>
+                <p class="mt-1 text-meta text-ink-tertiary">Percentages use all graduates in the selected cohort. Missing current status is counted as not reported.</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="data-table w-full min-w-140 border-collapse text-left text-xs">
@@ -65,6 +94,33 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        </section>
+
+        <section aria-labelledby="employment-characteristics-heading" class="panel mt-4 overflow-hidden">
+            <div class="border-b border-hairline px-4 py-4 sm:px-6">
+                <h2 id="employment-characteristics-heading" class="text-title font-semibold">Characteristics among employed graduates</h2>
+                <p class="mt-1 text-meta text-ink-tertiary">Shares use all currently employed graduates as the denominator; missing values are listed separately.</p>
+            </div>
+            <div class="grid divide-y divide-hairline sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                @foreach ($analytics['distributions'] as $distribution)
+                    <section class="p-4 sm:p-5" aria-label="{{ $distribution['label'] }} distribution">
+                        <h3 class="text-small font-semibold text-ink">{{ $distribution['label'] }}</h3>
+                        <p class="mt-1 text-meta text-ink-tertiary">{{ number_format($distribution['denominator']) }} employed graduates</p>
+                        @if ($distribution['items'] !== [])
+                            <dl class="mt-4 grid gap-2">
+                                @foreach ($distribution['items'] as $item)
+                                    <div class="flex items-start justify-between gap-3 text-caption">
+                                        <dt class="text-ink-secondary">{{ $item['label'] }}</dt>
+                                        <dd class="shrink-0 text-right tabular-nums text-ink">{{ number_format($item['count']) }} <span class="text-ink-tertiary">({{ $item['percentage'] }})</span></dd>
+                                    </div>
+                                @endforeach
+                            </dl>
+                        @else
+                            <p class="mt-4 text-caption text-ink-tertiary">No values reported.</p>
+                        @endif
+                    </section>
+                @endforeach
             </div>
         </section>
     @endif

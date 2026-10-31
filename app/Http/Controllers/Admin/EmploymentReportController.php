@@ -12,18 +12,27 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EmploymentReportController extends Controller
 {
+    private const MINIMUM_REPORT_GROUP_SIZE = 5;
+
     public function index(Request $request): View
     {
         $filters = $this->filters($request);
         $canExportAggregate = $request->user()->hasAdminPermission('employment_reports');
-        $outcomes = $canExportAggregate ? $this->outcomes($filters) : [];
+        $analytics = $canExportAggregate ? $this->analytics($filters) : null;
+        $reportSuppressed = $analytics !== null && $analytics['graduate_count'] < self::MINIMUM_REPORT_GROUP_SIZE;
+
+        if ($reportSuppressed) {
+            $analytics = null;
+        }
 
         return view('admin.employment-reports', [
             'programs' => Graduate::query()->whereNotNull('program_code')->distinct()->orderBy('program_code')->pluck('program_code'),
             'batches' => Graduate::query()->whereNotNull('batch_year')->distinct()->orderByDesc('batch_year')->pluck('batch_year'),
             'filters' => $filters,
-            'outcomes' => $outcomes,
-            'graduateCount' => array_sum(array_column($outcomes, 'count')),
+            'analytics' => $analytics,
+            'outcomes' => $analytics['outcomes'] ?? [],
+            'graduateCount' => $analytics['graduate_count'] ?? null,
+            'reportSuppressed' => $reportSuppressed,
             'canExportAggregate' => $canExportAggregate,
             'canExportDetails' => $request->user()->hasAdminPermission('employment_report_details'),
         ]);
@@ -32,9 +41,9 @@ class EmploymentReportController extends Controller
     public function exportSummary(Request $request): StreamedResponse
     {
         $filters = $this->filters($request);
-        $outcomes = $this->outcomes($filters);
+        $analytics = $this->analytics($filters);
 
-        return response()->streamDownload(function () use ($outcomes): void {
+        return response()->streamDownload(function () use ($analytics): void {
             $stream = fopen('php://output', 'w');
 
             if (! is_resource($stream)) {
@@ -42,13 +51,22 @@ class EmploymentReportController extends Controller
             }
 
             try {
-                fputcsv($stream, ['Employment outcome', 'Graduates', 'Percentage of graduates'], ',', '"', '');
+                if ($analytics['graduate_count'] < self::MINIMUM_REPORT_GROUP_SIZE) {
+                    fputcsv($stream, ['Report', 'Results'], ',', '"', '');
+                    fputcsv($stream, ['Suppressed', 'Minimum cohort size is 5 graduates.'], ',', '"', '');
 
-                foreach ($outcomes as $outcome) {
+                    return;
+                }
+
+                fputcsv($stream, ['Metric', 'Category', 'Count or value', 'Percentage', 'Denominator'], ',', '"', '');
+
+                foreach ($this->summaryRows($analytics) as $row) {
                     fputcsv($stream, [
-                        $this->safeCsvValue($outcome['label']),
-                        $outcome['count'],
-                        $outcome['percentage'],
+                        $this->safeCsvValue($row['metric']),
+                        $this->safeCsvValue($row['category']),
+                        $row['value'],
+                        $row['percentage'],
+                        $row['denominator'],
                     ], ',', '"', '');
                 }
             } finally {
@@ -158,35 +176,223 @@ class EmploymentReportController extends Controller
 
     /**
      * @param  array{program: string, batch: string}  $filters
-     * @return list<array{key: string, label: string, count: int, percentage: string}>
+     * @return array{
+     *     graduate_count: int,
+     *     reported_status_count: int,
+     *     employed_count: int,
+     *     reporting_coverage: array{count: int, denominator: int, percentage: string},
+     *     employment_rate: array{count: int, denominator: int, percentage: string},
+     *     time_to_employment: array{median_months: float|null, sample_count: int},
+     *     outcomes: list<array{key: string, label: string, count: int, percentage: string}>,
+     *     distributions: array<string, array{label: string, denominator: int, items: list<array{key: string, label: string, count: int, percentage: string}>}>
+     * }
      */
-    private function outcomes(array $filters): array
+    private function analytics(array $filters): array
     {
         $labels = [...Employment::EMPLOYMENT_STATUSES, 'not_reported' => 'Not reported'];
-        $counts = array_fill_keys(array_keys($labels), 0);
+        $outcomeCounts = array_fill_keys(array_keys($labels), 0);
+        $distributionDefinitions = [
+            'sector' => ['label' => 'Sector', 'options' => Employment::SECTORS],
+            'monthly_income' => ['label' => 'Monthly income', 'options' => Employment::MONTHLY_INCOME_RANGES],
+            'course_relevance' => ['label' => 'Course relevance', 'options' => Employment::COURSE_RELEVANCE_OPTIONS],
+        ];
+        $distributionCounts = [];
 
-        foreach ($this->graduateQuery($filters)->lazyById(500) as $graduate) {
-            $status = $graduate->user?->profile?->currentEmployment?->employment_status;
-            $key = is_string($status) && array_key_exists($status, $counts) ? $status : 'not_reported';
-            $counts[$key]++;
+        foreach ($distributionDefinitions as $key => $definition) {
+            $distributionCounts[$key] = array_fill_keys(array_keys($definition['options']), 0);
         }
 
-        $graduateCount = array_sum($counts);
+        $employedStatuses = ['employed_local', 'employed_abroad', 'self_employed'];
+        $graduateCount = 0;
+        $reportedStatusCount = 0;
+        $employedCount = 0;
+        $monthsToEmployment = [];
+
+        foreach ($this->graduateQuery($filters)->lazyById(500) as $graduate) {
+            $graduateCount++;
+            $employment = $graduate->user?->profile?->currentEmployment;
+            $status = $employment?->employment_status;
+            $statusKey = is_string($status) && array_key_exists($status, Employment::EMPLOYMENT_STATUSES)
+                ? $status
+                : 'not_reported';
+            $outcomeCounts[$statusKey]++;
+
+            if ($statusKey === 'not_reported') {
+                continue;
+            }
+
+            $reportedStatusCount++;
+
+            if (! in_array($statusKey, $employedStatuses, true)) {
+                continue;
+            }
+
+            $employedCount++;
+
+            foreach ($distributionDefinitions as $key => $definition) {
+                $value = $employment->{$key};
+
+                if (is_string($value) && array_key_exists($value, $distributionCounts[$key])) {
+                    $distributionCounts[$key][$value]++;
+                }
+            }
+
+            if (is_numeric($employment->months_to_employment)) {
+                $monthsToEmployment[] = (float) $employment->months_to_employment;
+            }
+        }
+
         $outcomes = [];
 
         foreach ($labels as $key => $label) {
-            $count = $counts[$key];
+            $count = $outcomeCounts[$key];
             $outcomes[] = [
                 'key' => $key,
                 'label' => $label,
                 'count' => $count,
-                'percentage' => $graduateCount === 0
-                    ? '0.0%'
-                    : number_format($count / $graduateCount * 100, 1).'%',
+                'percentage' => $this->percentage($count, $graduateCount),
             ];
         }
 
-        return $outcomes;
+        $distributions = [];
+
+        foreach ($distributionDefinitions as $key => $definition) {
+            $items = [];
+
+            foreach ($definition['options'] as $optionKey => $label) {
+                $count = $distributionCounts[$key][$optionKey];
+
+                if ($count > 0) {
+                    $items[] = [
+                        'key' => $optionKey,
+                        'label' => $label,
+                        'count' => $count,
+                        'percentage' => $this->percentage($count, $employedCount),
+                    ];
+                }
+            }
+
+            $notReportedCount = $employedCount - array_sum($distributionCounts[$key]);
+
+            if ($notReportedCount > 0) {
+                $items[] = [
+                    'key' => 'not_reported',
+                    'label' => 'Not reported',
+                    'count' => $notReportedCount,
+                    'percentage' => $this->percentage($notReportedCount, $employedCount),
+                ];
+            }
+
+            $distributions[$key] = [
+                'label' => $definition['label'],
+                'denominator' => $employedCount,
+                'items' => $items,
+            ];
+        }
+
+        sort($monthsToEmployment, SORT_NUMERIC);
+        $monthsSampleCount = count($monthsToEmployment);
+        $medianMonths = null;
+
+        if ($monthsSampleCount > 0) {
+            $middle = intdiv($monthsSampleCount, 2);
+            $medianMonths = $monthsSampleCount % 2 === 0
+                ? ($monthsToEmployment[$middle - 1] + $monthsToEmployment[$middle]) / 2
+                : $monthsToEmployment[$middle];
+        }
+
+        return [
+            'graduate_count' => $graduateCount,
+            'reported_status_count' => $reportedStatusCount,
+            'employed_count' => $employedCount,
+            'reporting_coverage' => [
+                'count' => $reportedStatusCount,
+                'denominator' => $graduateCount,
+                'percentage' => $this->percentage($reportedStatusCount, $graduateCount),
+            ],
+            'employment_rate' => [
+                'count' => $employedCount,
+                'denominator' => $reportedStatusCount,
+                'percentage' => $this->percentage($employedCount, $reportedStatusCount),
+            ],
+            'time_to_employment' => [
+                'median_months' => $medianMonths,
+                'sample_count' => $monthsSampleCount,
+            ],
+            'outcomes' => $outcomes,
+            'distributions' => $distributions,
+        ];
+    }
+
+    /**
+     * @param  array{
+     *     graduate_count: int,
+     *     reported_status_count: int,
+     *     employed_count: int,
+     *     reporting_coverage: array{count: int, denominator: int, percentage: string},
+     *     employment_rate: array{count: int, denominator: int, percentage: string},
+     *     time_to_employment: array{median_months: float|null, sample_count: int},
+     *     outcomes: list<array{key: string, label: string, count: int, percentage: string}>,
+     *     distributions: array<string, array{label: string, denominator: int, items: list<array{key: string, label: string, count: int, percentage: string}>}>
+     * }  $analytics
+     * @return list<array{metric: string, category: string, value: string|int, percentage: string, denominator: int}>
+     */
+    private function summaryRows(array $analytics): array
+    {
+        $rows = [
+            [
+                'metric' => 'Reporting coverage',
+                'category' => 'Outcome status reported',
+                'value' => $analytics['reporting_coverage']['count'],
+                'percentage' => $analytics['reporting_coverage']['percentage'],
+                'denominator' => $analytics['reporting_coverage']['denominator'],
+            ],
+            [
+                'metric' => 'Employment rate among respondents',
+                'category' => 'Employed outcomes',
+                'value' => $analytics['employment_rate']['count'],
+                'percentage' => $analytics['employment_rate']['percentage'],
+                'denominator' => $analytics['employment_rate']['denominator'],
+            ],
+            [
+                'metric' => 'Median months to employment',
+                'category' => 'Months',
+                'value' => $analytics['time_to_employment']['median_months'] === null
+                    ? 'Not reported'
+                    : number_format($analytics['time_to_employment']['median_months'], 1, '.', ''),
+                'percentage' => '',
+                'denominator' => $analytics['time_to_employment']['sample_count'],
+            ],
+        ];
+
+        foreach ($analytics['outcomes'] as $outcome) {
+            $rows[] = [
+                'metric' => 'Employment outcomes',
+                'category' => $outcome['label'],
+                'value' => $outcome['count'],
+                'percentage' => $outcome['percentage'],
+                'denominator' => $analytics['graduate_count'],
+            ];
+        }
+
+        foreach ($analytics['distributions'] as $distribution) {
+            foreach ($distribution['items'] as $item) {
+                $rows[] = [
+                    'metric' => $distribution['label'],
+                    'category' => $item['label'],
+                    'value' => $item['count'],
+                    'percentage' => $item['percentage'],
+                    'denominator' => $distribution['denominator'],
+                ];
+            }
+        }
+
+        return $rows;
+    }
+
+    private function percentage(int $count, int $denominator): string
+    {
+        return $denominator === 0 ? '0.0%' : number_format($count / $denominator * 100, 1).'%';
     }
 
     /**
