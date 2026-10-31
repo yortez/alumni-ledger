@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\Admin\EmploymentReportController;
 use App\Http\Controllers\Admin\GraduateController;
 use App\Http\Controllers\Admin\SurveyController as AdminSurveyController;
 use App\Http\Controllers\AuthController;
@@ -74,6 +75,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         Route::post('/graduates/import', [GraduateController::class, 'import'])->name('graduates.import');
         Route::patch('/graduates/{graduate}', [GraduateController::class, 'update'])->name('graduates.update');
     });
+
+    Route::middleware('admin.permission:employment_reports,employment_report_details')->group(function (): void {
+        Route::get('/reports/employment', [EmploymentReportController::class, 'index'])->name('reports.employment.index');
+    });
+
+    Route::get('/reports/employment/summary.csv', [EmploymentReportController::class, 'exportSummary'])
+        ->middleware('admin.permission:employment_reports')
+        ->name('reports.employment.summary');
+    Route::get('/reports/employment/details.csv', [EmploymentReportController::class, 'exportDetails'])
+        ->middleware('admin.permission:employment_report_details')
+        ->name('reports.employment.details');
 
     Route::middleware('admin.permission:announcements')->group(function (): void {
         Route::get('/announcements/create', [AnnouncementController::class, 'create'])->name('announcements.create');

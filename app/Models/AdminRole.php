@@ -16,6 +16,8 @@ class AdminRole extends Model
 
     public const PERMISSIONS = [
         'graduates' => 'Graduate and applicant records',
+        'employment_reports' => 'Aggregate employment outcome reports',
+        'employment_report_details' => 'Identifiable employment report exports',
         'announcements' => 'Announcements',
         'surveys' => 'Surveys and responses',
         'jobs' => 'Job postings and applications',

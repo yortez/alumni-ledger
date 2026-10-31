@@ -38,6 +38,16 @@
                     </section>
                 @endisset
 
+                @isset($workspaces['employment_reports'])
+                    <section aria-labelledby="employment-reports-panel" class="panel flex min-h-44 flex-col p-6">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <h2 id="employment-reports-panel" class="text-title font-semibold">Employment outcomes</h2>
+                            <a href="{{ route($workspaces['employment_reports']['route']) }}" class="inline-flex items-center gap-1 whitespace-nowrap text-caption font-semibold text-accent transition hover:text-accent-strong">{{ $workspaces['employment_reports']['title'] }}<x-chevron /></a>
+                        </div>
+                        <p class="mt-4 text-caption text-ink-secondary">{{ $workspaces['employment_reports']['detail'] }}</p>
+                    </section>
+                @endisset
+
                 @if (isset($metrics['openSurveys']) || isset($metrics['activeJobs']))
                     <div class="grid gap-6 sm:grid-cols-2">
                         @isset($metrics['openSurveys'])

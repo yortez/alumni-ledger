@@ -96,16 +96,23 @@ class DashboardController extends Controller
             'manage_admins' => ['title' => 'Administrator accounts', 'detail' => 'Create administrators and assign their roles.', 'route' => 'admin.users.index'],
             'manage_roles' => ['title' => 'Role definitions', 'detail' => 'Create roles and choose their module permissions.', 'route' => 'admin.roles.index'],
             'graduates' => ['title' => 'Open master list', 'detail' => 'Search, update, and import graduate records.', 'route' => 'admin.graduates.index'],
+            'employment_reports' => ['title' => 'View employment reports', 'detail' => 'Review cohort employment outcomes and authorized exports.', 'route' => 'admin.reports.employment.index'],
             'announcements' => ['title' => 'Manage announcements', 'detail' => 'Create and publish announcements for alumni.', 'route' => 'admin.announcements.index'],
             'surveys' => ['title' => 'Manage surveys', 'detail' => 'Set audiences, review responses, and close surveys.', 'route' => 'admin.surveys.index'],
             'jobs' => ['title' => 'Manage jobs', 'detail' => 'Publish opportunities and review applications.', 'route' => 'admin.jobs.index'],
         ];
 
-        return array_filter(
+        $workspaces = array_filter(
             $definitions,
             static fn (string $permission): bool => $adminRole->hasPermission($permission),
             ARRAY_FILTER_USE_KEY,
         );
+
+        if ($adminRole->hasPermission('employment_report_details')) {
+            $workspaces['employment_reports'] = $definitions['employment_reports'];
+        }
+
+        return $workspaces;
     }
 
     private function openSurveyCount(): int

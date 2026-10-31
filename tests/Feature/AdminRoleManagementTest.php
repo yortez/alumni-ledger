@@ -196,3 +196,23 @@ it('does not let role managers grant permissions they do not hold', function () 
 
     $this->assertDatabaseMissing('admin_roles', ['type' => 'invalid_permission_role']);
 });
+
+it('allows role managers to assign aggregate and detailed employment report permissions', function () {
+    $superAdmin = User::factory()->create();
+    $superAdmin->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
+
+    $this->actingAs($superAdmin)
+        ->get('/admin/roles/create')
+        ->assertOk()
+        ->assertSee('Aggregate employment outcome reports')
+        ->assertSee('Identifiable employment report exports');
+
+    $this->post('/admin/roles', [
+        'name' => 'Employment reporting',
+        'type' => 'employment_reporting',
+        'permissions' => ['employment_reports', 'employment_report_details'],
+    ])->assertRedirectToRoute('admin.roles.index');
+
+    expect(AdminRole::query()->where('type', 'employment_reporting')->value('permissions'))
+        ->toBe(['employment_reports', 'employment_report_details']);
+});

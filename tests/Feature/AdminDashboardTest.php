@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AdminRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -48,4 +49,21 @@ it('renders a super administrator dashboard with access to every module', functi
         ->assertSee('Administrator access')
         ->assertSee('Open master list')
         ->assertSee('Manage announcements');
+});
+
+it('shows the employment reports workspace to a detail-authorized administrator', function () {
+    $role = AdminRole::query()->create([
+        'name' => 'Employment details',
+        'type' => 'employment_details',
+        'permissions' => ['employment_report_details'],
+    ]);
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true, 'role_id' => $role->id])->save();
+
+    $this->actingAs($admin)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertSee('Employment outcomes')
+        ->assertSee('View employment reports')
+        ->assertSee('Reports');
 });
