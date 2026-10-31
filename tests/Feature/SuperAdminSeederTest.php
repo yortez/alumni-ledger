@@ -44,5 +44,6 @@ it('does not create the bootstrap user outside production', function () {
 
     $this->app->make(DatabaseSeeder::class)->run();
 
-    expect(User::query()->count())->toBe(0);
+    expect(User::query()->where('email', 'admin@example.com')->exists())->toBeFalse()
+        ->and(User::query()->where('is_admin', true)->count())->toBe(0);
 });

@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
     {
         if (app()->isProduction()) {
             $this->call(SuperAdminSeeder::class);
+
+            return;
         }
+
+        $this->call(DemoAlumniSeeder::class);
     }
 }
